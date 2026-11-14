@@ -18,6 +18,10 @@ enum ShareItemSlot: string
     case GLOVES = 'gloves';
     case BELT = 'belt';
     case BAG = 'bag';
+    case RING = 'ring';
+    case EARRING = 'earring';
+    case NECKLACE = 'necklace';
+    case QUIVER = 'quiver';
 
     public function label(): string
     {
@@ -34,6 +38,10 @@ enum ShareItemSlot: string
             self::GLOVES => __('Перчатки'),
             self::BELT => __('Пояс'),
             self::BAG => __('Сумка'),
+            self::RING => __('Кольцо'),
+            self::EARRING => __('Серьга'),
+            self::NECKLACE => __('Ожерелье'),
+            self::QUIVER => __('Колчан'),
         };
     }
 
@@ -50,5 +58,32 @@ enum ShareItemSlot: string
             self::SHOES,
             self::GLOVES,
         ];
+    }
+
+    /**
+     * Колонки player_equipments для ювелирных и аксессуарных слотов (кольца, серьги, ожерелья, колчан) (по порядку заполнения).
+     *
+     * @return list<string>
+     */
+    public function jewelryColumns(): array
+    {
+        return match ($this) {
+            self::RING => ['ring_1', 'ring_2', 'ring_3', 'ring_4', 'ring_5'],
+            self::EARRING => ['earring_1', 'earring_2'],
+            self::NECKLACE => ['necklace_1', 'necklace_2'],
+            self::QUIVER => ['quiver'],
+            default => [],
+        };
+    }
+
+    public function isJewelry(): bool
+    {
+        return $this->jewelryColumns() !== [];
+    }
+
+    /** @return list<self> */
+    public static function jewelrySlots(): array
+    {
+        return [self::RING, self::EARRING, self::NECKLACE, self::QUIVER];
     }
 }

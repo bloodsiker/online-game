@@ -33,6 +33,7 @@ class DropService
         private readonly InstantItemRewardService $instantRewardService,
         private readonly GameSettingsService $gameSettingsService,
         private readonly MonsterLootService $monsterLootService = new MonsterLootService,
+        private readonly ?BattlePhraseBook $phraseBook = null,
     ) {}
 
     public function dropMoney(User $user, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
@@ -51,9 +52,9 @@ class DropService
                 ->value($user->id, PremiumBonus::MONSTER_MONEY);
             $money = max(1, (int) round($money * (1 + $bonusPercent / 100)));
             $user->increment('money', $money);
-            $result->log(sprintf("<p style='margin:2px 0;'><span style='background:#fde8e8; border-left:3px solid #c0392b; padding:2px 6px; display:inline-block;'>⚔️ <b style='color:#7b1a1a;'>%s</b> уничтожен. Найдено <b>%s</b> монет</span></p>", $locationMonster->monster->name, $money));
+            $result->log($this->deathLog($monster, $money));
         } else {
-            $result->log(sprintf("<p style='margin:2px 0;'><span style='background:#fde8e8; border-left:3px solid #c0392b; padding:2px 6px; display:inline-block;'>⚔️ <b style='color:#7b1a1a;'>%s</b> уничтожен</span></p>", $locationMonster->monster->name));
+            $result->log($this->deathLog($monster, null));
         }
 
         $locationMonster->is_drop_money = 1;
@@ -164,5 +165,17 @@ class DropService
             ->where('effect_id', $effectId)
             ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', Carbon::now()))
             ->exists();
+    }
+
+    /** «⚔️ Кабан падает замертво. Найдено 83 монет» — фраза гибели по стилю атаки монстра. */
+    private function deathLog(Monster $monster, ?int $money): string
+    {
+        $phrases = $this->phraseBook ?? app(BattlePhraseBook::class);
+
+        return BattleLogTranslator::format(
+            $phrases->monsterDeath($monster->attack_style, $money !== null),
+            BattleLogTranslator::contentName($monster),
+            $money ?? 0,
+        );
     }
 }

@@ -68,6 +68,8 @@ class MapController extends Controller
             $data = $request->validate([
                 'slug' => ['nullable', 'string', 'max:100'],
                 'folder' => ['nullable', 'string', 'max:100'],
+                'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+                'delete_profile_image' => ['nullable', 'boolean'],
                 'parent_id' => ['nullable', 'integer', 'exists:maps,id'],
                 'resp_location_id' => ['required', 'integer', 'exists:locations,id'],
             ]);
@@ -80,7 +82,7 @@ class MapController extends Controller
                 'parent_id' => $data['parent_id'] ?? null,
                 'resp_location_id' => (int) $data['resp_location_id'],
             ]);
-            $map->save();
+            $this->saveWithProfileImage(request: $request, map: $map);
 
             return redirect()->route('admin.map.info', $map->id)->with('success', 'Карта создана.');
         }
@@ -103,6 +105,8 @@ class MapController extends Controller
             $data = $request->validate([
                 'slug' => ['nullable', 'string', 'max:100'],
                 'folder' => ['nullable', 'string', 'max:100'],
+                'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+                'delete_profile_image' => ['nullable', 'boolean'],
                 'parent_id' => ['nullable', 'integer', 'exists:maps,id'],
                 'resp_location_id' => ['required', 'integer', 'exists:locations,id'],
             ]);
@@ -123,7 +127,7 @@ class MapController extends Controller
                 $map->gathering_field_image = null;
             }
 
-            $map->save();
+            $this->saveWithProfileImage(request: $request, map: $map);
 
             return redirect()->back()->with('success', 'Сохранено.');
         }
@@ -251,6 +255,25 @@ class MapController extends Controller
         $resource->delete();
 
         return redirect()->back()->with('success', 'Ресурс удалён с карты.');
+    }
+
+    private function saveWithProfileImage(Request $request, Map $map): void
+    {
+        $oldImage = $map->getRawOriginal('profile_image');
+        if ($request->hasFile('profile_image')) {
+            $map->profile_image = $this->imageStorage->storeOnPublicDisk(
+                file: $request->file('profile_image'),
+                directory: 'maps/profile-images',
+            );
+        } elseif ($request->boolean('delete_profile_image')) {
+            $map->profile_image = null;
+        }
+
+        $changed = $map->isDirty('profile_image');
+        $map->save();
+        if ($changed) {
+            $this->deleteStorageImage($oldImage);
+        }
     }
 
     private function storeGatheringFieldImage(UploadedFile $file): string

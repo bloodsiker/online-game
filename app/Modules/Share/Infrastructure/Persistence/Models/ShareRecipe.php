@@ -19,6 +19,7 @@ class ShareRecipe extends Model
     protected $casts = [
         'unlock_type' => RecipeUnlockType::class,
         'is_random_result' => 'boolean',
+        'result_count' => 'integer',
     ];
 
     public function isLearnable(): bool

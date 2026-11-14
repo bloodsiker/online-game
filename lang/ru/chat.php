@@ -70,4 +70,6 @@ return [
     'clan_member_online' => 'Игрок :member вошёл в игру.',
     'world_boss_defeated' => ':knight1: Игрок :member одолел босса <b>«:boss»</b>!',
     'boss_defeat_member' => ':clan_icon <a href="#" class="player-link n" data-uid=":user_id" data-name=":name" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;"><b>:name</b></a> [:level] <a href="#" onclick="chatOpenUserInfo(:user_id); return false;" title="Информация о персонаже"><img src=":icon" width="10" height="10" align="absmiddle" alt=""></a>',
+    'gift_received' => 'Игрок [[user_:user_id]] подарил вам «:gift»! Подарок появился в вашей информации.',
+    'gift_received_anonymous' => 'Аноним подарил вам «:gift»! Подарок появился в вашей информации.',
 ];

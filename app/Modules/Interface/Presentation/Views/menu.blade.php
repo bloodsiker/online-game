@@ -128,7 +128,7 @@
         <div class="infoportal-submenu">
             <a class="menu-btn" href="{{ route('forum.index') }}" target="_blank" rel="noopener">{{ __('ui.forum') }}</a>
             <a class="menu-btn" href="{{ route('library.index') }}" target="_blank" rel="noopener">{{ __('ui.library') }}</a>
-            <a class="menu-btn" href="#" onclick="processMenu('m_telegram'); return false;">Telegram</a>
+            <a class="menu-btn" href="{{ config('game.telegram_channel') }}" target="_blank" rel="noopener" onclick="processMenu('m_telegram'); return false;">Telegram</a>
         </div>
     </details>
 </div>
@@ -185,7 +185,10 @@
         m_forum:       function () { window.open(@json(route('forum.index')), '_blank', 'noopener'); },
         m_library:     function () { window.open(@json(route('library.index')), '_blank', 'noopener'); },
         m_telegram:    function () {
-            window.top.systemInfo(@json(__('ui.telegram_missing')), 'Telegram');
+            // Канал игры (config/game.php → telegram_channel); пока ссылка не задана — сообщение, как раньше.
+            var url = @json((string) config('game.telegram_channel'));
+            if (!url) { window.top.systemInfo(@json(__('ui.telegram_missing')), 'Telegram'); return; }
+            window.open(url, '_blank', 'noopener');
         },
         m_settings:    function () { menuGo(false, '{{ route('settings') }}', true); }
     };

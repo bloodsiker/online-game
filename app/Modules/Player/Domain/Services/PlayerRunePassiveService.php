@@ -38,6 +38,7 @@ class PlayerRunePassiveService
         $handSlots = ['left' => $equip->handLeft, 'right' => $equip->handRight];
 
         $otherSlots = [
+            ...$equip->jewelryItems(),
             $equip->helmetSlot, $equip->shoulderSlot, $equip->forearmSlot,
             $equip->armorSlot, $equip->leggingSlot, $equip->chainArmorSlot,
             $equip->cloakSlot, $equip->shoesSlot, $equip->glovesSlot,

@@ -17,6 +17,11 @@ enum ShareItemType: string
     case ARMOR = 'armor';
     case BELT = 'belt';
     case BAG = 'bag';
+    case RING = 'ring';
+    case EARRING = 'earring';
+    case NECKLACE = 'necklace';
+    case QUIVER = 'quiver';
+    case ARROW = 'arrow';
     case KEY = 'key';
     case LOCKPICK = 'lockpick';
     case TRADE_GOODS = 'trade_goods';
@@ -50,6 +55,10 @@ enum ShareItemType: string
             self::ARMOR,
             self::BELT,
             self::BAG,
+            self::RING,
+            self::EARRING,
+            self::NECKLACE,
+            self::QUIVER,
             self::ARTIFACT,
         ], true);
     }
@@ -85,6 +94,11 @@ enum ShareItemType: string
             self::ARMOR => __('Броня'),
             self::BELT => __('Пояс'),
             self::BAG => __('Сумка'),
+            self::RING => __('Кольцо'),
+            self::EARRING => __('Серьга'),
+            self::NECKLACE => __('Ожерелье'),
+            self::QUIVER => __('Колчан'),
+            self::ARROW => __('Стрелы'),
             self::KEY => __('Ключ'),
             self::LOCKPICK => __('Отмычка'),
             self::TRADE_GOODS => __('Торговый товар'),
@@ -118,6 +132,11 @@ enum ShareItemType: string
                 self::ARMOR,
                 self::BELT,
                 self::BAG,
+                self::RING,
+                self::EARRING,
+                self::NECKLACE,
+                self::QUIVER,
+                self::ARROW,
                 self::RESOURCE,
                 self::FISH,
                 self::PRECIOUS_GEM,

@@ -79,7 +79,7 @@ class GetWorkshopPage
                     'recipeItemId' => (int) $recipe->itemInfo->id,
                     'image' => (string) $recipe->itemInfo->image,
                     'resultId' => (int) $recipe->kraftItem->id,
-                    'resultName' => (string) $recipe->kraftItem->name,
+                    'resultName' => (string) $recipe->kraftItem->name.((int) $recipe->result_count > 1 ? ' ×'.(int) $recipe->result_count : ''),
                     'resultImage' => (string) $recipe->kraftItem->image,
                     'professionName' => (string) ($recipe->itemInfo->skill?->name ?? 'Профессия'),
                     'requiredLevel' => $requiredLevel,

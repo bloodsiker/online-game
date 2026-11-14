@@ -64,7 +64,7 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
                 gems: ItemTooltipStatsBuilder::buildGems($item),
                 runes: ItemTooltipStatsBuilder::buildRunes($item),
                 remainingUses: $item->remainingUses(),
-                specialInfo: array_merge(ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo), $item->expiryTooltipInfo()),
+                specialInfo: array_merge(ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo), ItemTooltipStatsBuilder::buildQuiverContents($item), $item->expiryTooltipInfo()),
             ));
         }
     }

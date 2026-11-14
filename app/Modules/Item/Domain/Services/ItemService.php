@@ -601,6 +601,21 @@ class ItemService
             return null;
         }
 
+        if ($slot !== null && $slot->isJewelry()) {
+            foreach ($slot->jewelryColumns() as $column) {
+                if (! $playerEquip->$column) {
+                    $playerEquip->$column = $itemId;
+                    $playerEquip->save();
+                    $backpackItem->equipped = 1;
+                    $backpackItem->save();
+
+                    return null;
+                }
+            }
+
+            return __('Все слоты для «:slot» заняты.', ['slot' => mb_strtolower($slot->label())]);
+        }
+
         return null;
     }
 
@@ -690,6 +705,19 @@ class ItemService
             $playerEquip->save();
             $backpackItem->equipped = 0;
             $backpackItem->save();
+        }
+
+        if ($slot !== null && $slot->isJewelry()) {
+            foreach ($slot->jewelryColumns() as $column) {
+                if ($playerEquip->$column === $itemId) {
+                    $playerEquip->$column = null;
+                    $playerEquip->save();
+                    $backpackItem->equipped = 0;
+                    $backpackItem->save();
+
+                    return;
+                }
+            }
         }
     }
 

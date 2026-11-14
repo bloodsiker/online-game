@@ -171,6 +171,7 @@ class ShareItem extends Model
         'gathering_double_chance_percent' => 'integer',
         'upgrade_gold_cost' => 'integer',
         'drop_direct_to_backpack' => 'boolean',
+        'quiver_capacity' => 'integer',
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];

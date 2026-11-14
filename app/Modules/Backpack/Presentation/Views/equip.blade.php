@@ -250,8 +250,8 @@
             <table class="equip-grid" cellspacing="0" cellpadding="0" border="0">
                 <tbody>
                 <tr>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->earring1Slot, 'emptyImage' => 'img/bg/slots/empty_slot_earring.webp'])
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->necklace1Slot, 'emptyImage' => 'img/bg/slots/empty_slot_necklace.webp'])
                     <td class="item-hero" align="center"
                         @if(!$injuriesBySlot->has('helmet') && $playerEquip->helmet) data-id="{{ $playerEquip->helmetSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($injury = $injuriesBySlot->get('helmet'))
@@ -260,11 +260,11 @@
                             <img src="{{ $playerEquip->helmetSlot->itemInfo->image }}" class="hero-itm" id="i2n1" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->helmetSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_helm.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_helm.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->necklace2Slot, 'emptyImage' => 'img/bg/slots/empty_slot_necklace.webp'])
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->earring2Slot, 'emptyImage' => 'img/bg/slots/empty_slot_earring.webp'])
                 </tr>
                 <tr>
                     <td class="item-hero"
@@ -275,7 +275,7 @@
                             <img src="{{ $playerEquip->shoulderSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->shoulderSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_shoulder.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_shoulder.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                     <td class="profile-avatar-cell" align="center" rowspan="4" colspan="3">
@@ -291,7 +291,7 @@
                             <img src="{{ $playerEquip->forearmSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->forearmSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_forearm.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_forearm.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                 </tr>
@@ -307,7 +307,7 @@
                             {{-- Зеркало дворучного оружия из второй руки --}}
                             <img src="{{ $playerEquip->hand_left_mirror->itemInfo->image }}" class="hero-itm" style="opacity: .6; background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_hand_left.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_hand_left.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                     <td class="item-hero"
@@ -321,7 +321,7 @@
                             {{-- Зеркало дворучного оружия из первой руки --}}
                             <img src="{{ $playerEquip->hand_right_mirror->itemInfo->image }}" class="hero-itm" style="opacity: .6; background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_hand_right.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_hand_right.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                 </tr>
@@ -334,7 +334,7 @@
                             <img src="{{ $playerEquip->armorSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->armorSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_armor.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_armor.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                     <td class="item-hero"
@@ -345,7 +345,7 @@
                             <img src="{{ $playerEquip->leggingSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->leggingSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_legging.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_legging.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                 </tr>
@@ -358,7 +358,7 @@
                             <img src="{{ $playerEquip->chainArmorSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->chainArmorSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_chain_armor.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_chain_armor.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                     <td class="item-hero"
@@ -369,24 +369,19 @@
                             <img src="{{ $playerEquip->shoesSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->shoesSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/slots/empty_slot_shoes.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_shoes.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                 </tr>
                 <tr>
-                    {{-- Резерв под будущие кольца --}}
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
+                    {{-- Кольца --}}
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->ring1Slot, 'emptyImage' => 'img/bg/slots/empty_slot_ring.webp'])
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->ring2Slot, 'emptyImage' => 'img/bg/slots/empty_slot_ring.webp'])
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->ring3Slot, 'emptyImage' => 'img/bg/slots/empty_slot_ring.webp'])
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->ring4Slot, 'emptyImage' => 'img/bg/slots/empty_slot_ring.webp'])
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->ring5Slot, 'emptyImage' => 'img/bg/slots/empty_slot_ring.webp'])
                 </tr>
-                </tbody>
-            </table>
-            <table class="equip-grid" cellspacing="0" cellpadding="0" border="0">
-                <tbody>
                 <tr>
-                    <td align="center" width="30"></td>
 
                     <td class="item-hero" align="center"
                         @if($playerEquip->belt_first) data-id="{{ $playerEquip->beltFirstSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
@@ -394,7 +389,7 @@
                             <img src="{{ $playerEquip->beltFirstSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->beltFirstSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm">
+                            <img src="{{ asset('img/bg/slots/empty_slot_belt.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_belt.webp')) }}" class="hero-itm">
                         @endif
                     </td>
 
@@ -404,7 +399,7 @@
                             <img src="{{ $playerEquip->beltSecondSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->beltSecondSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm">
+                            <img src="{{ asset('img/bg/slots/empty_slot_belt.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_belt.webp')) }}" class="hero-itm">
                         @endif
                     </td>
 
@@ -414,7 +409,7 @@
                             <img src="{{ $playerEquip->bagFirstSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->bagFirstSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm">
+                            <img src="{{ asset('img/bg/slots/empty_slot_bag.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_bag.webp')) }}" class="hero-itm">
                         @endif
                      </td>
 
@@ -424,9 +419,12 @@
                             <img src="{{ $playerEquip->bagSecondSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->bagSecondSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm">
+                            <img src="{{ asset('img/bg/slots/empty_slot_bag.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_bag.webp')) }}" class="hero-itm">
                         @endif
                     </td>
+
+                    {{-- Колчан --}}
+                    @include('backpack::partials.jewelry-slot', ['item' => $playerEquip->quiverSlot, 'emptyImage' => 'img/bg/slots/empty_slot_quiver.webp'])
                 </tr>
                 </tbody>
             </table>

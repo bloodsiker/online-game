@@ -16,7 +16,7 @@
             'locationId' => 1581,
             'class' => 'awest',
             'arrow' => '←',
-            'targetSlug' => 'Fd19lMn67Dsq',
+            'targetSlug' => 'Pd4Kr8Lm2X',
             'targetLocationId' => 1582,
         ],
     ],

@@ -89,6 +89,7 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
+                                                @include('admin.map._profile-image')
                                                 <label class="col-form-label">Картинка поля сбора</label>
                                                 @if($map->gathering_field_image)
                                                     <div class="mb-1">

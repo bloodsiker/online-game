@@ -95,6 +95,28 @@ final class ItemTooltipStatsBuilder
         };
     }
 
+    /**
+     * Содержимое конкретного колчана: тип стрел и заполненность.
+     *
+     * @return list<array{title: string, value: string}>
+     */
+    public static function buildQuiverContents(Item $item): array
+    {
+        if ($item->itemInfo->type !== ShareItemType::QUIVER) {
+            return [];
+        }
+
+        $capacity = (int) ($item->itemInfo->quiver_capacity ?? 0);
+        $arrow = $item->quiver_arrow_count > 0 ? $item->quiverArrow : null;
+
+        return [[
+            'title' => __('В колчане'),
+            'value' => $arrow !== null
+                ? sprintf('%s — %d/%d', $arrow->name, $item->quiver_arrow_count, $capacity)
+                : sprintf(__('пусто (0/%d)'), $capacity),
+        ]];
+    }
+
     /** @return list<array{title: string, value: string}> */
     public static function buildSpecialInfo(ShareItem $item): array
     {
@@ -135,6 +157,10 @@ final class ItemTooltipStatsBuilder
         // Двуручное оружие
         if ($item->is_two_hand) {
             $stats[] = ['title' => __('Тип'), 'value' => __('Двуручное')];
+        }
+
+        if ($item->type === ShareItemType::QUIVER && $item->quiver_capacity !== null) {
+            $stats[] = ['title' => __('Вместимость'), 'value' => sprintf(__('%d стрел'), $item->quiver_capacity)];
         }
 
         // Бонус заточки: +5% за уровень, так же как считает PlayerStatService::fromEquipment()

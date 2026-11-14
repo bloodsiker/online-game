@@ -7,6 +7,7 @@ namespace App\Modules\Battle\Application\Services\Combat;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\BattleLogTranslator;
+use App\Modules\Battle\Application\Services\BattlePhraseBook;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
 use App\Modules\Battle\Application\Services\DropService;
 use App\Modules\Battle\Application\Services\MonsterLootService;
@@ -59,6 +60,7 @@ readonly class AttackService
         private ChatService $chatService,
         private PlayerLevelUpService $levelUpService,
         private MonsterLootService $monsterLootService = new MonsterLootService,
+        private ?BattlePhraseBook $phraseBook = null,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle, float $xpMultiplier = 1.0): AttackResultDTO
@@ -84,10 +86,7 @@ readonly class AttackService
             }
 
             if ($hit->isDodge()) {
-                $result->log(BattleLogTranslator::format(
-                    '<p>Вы атакуете неудачно... %s <b class="color-green">увернулся</b></p>',
-                    BattleLogTranslator::contentName($locMonster->monster)
-                ));
+                $result->log($this->hitLog($hit, $locMonster, miss: true));
 
                 continue;
             }
@@ -170,22 +169,7 @@ readonly class AttackService
 
             $this->playerSkillService->gainExperienceSkill($player, $hit->getSkill(), $hit->getWeapon());
 
-            $result->log($hit->isCritical()
-                ? BattleLogTranslator::format(
-                    '<p>Вы ударили %s оружием %s... <b class="color-red">нанесен критический урон!</b> <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>',
-                    BattleLogTranslator::contentName($locMonster->monster),
-                    $hit->getWeaponName(),
-                    $damage,
-                    $exp
-                )
-                : BattleLogTranslator::format(
-                    '<p>Вы ударили %s оружием %s! <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>',
-                    BattleLogTranslator::contentName($locMonster->monster),
-                    $hit->getWeaponName(),
-                    $damage,
-                    $exp
-                )
-            );
+            $result->log($this->hitLog($hit, $locMonster, damage: $damage, exp: $exp));
 
             if (! $hit->getAppliedEffects()->isEmpty()) {
                 foreach ($hit->getAppliedEffects() as $applied) {
@@ -831,5 +815,34 @@ readonly class AttackService
     {
         $player->exp += $experience;
         $this->clanExperienceService->awardForMonsterExperience($player, $monster, $experience);
+    }
+
+    /**
+     * Строка лога удара игрока: фраза по типу оружия (или заклинанию), случайный вариант.
+     * Имена монстра/оружия/стрелы — в именительном падеже, переводятся для каждого зрителя.
+     */
+    private function hitLog(FightHitDTO $hit, MonsterOnLocation $locMonster, int $damage = 0, int $exp = 0, bool $miss = false): string
+    {
+        $phrases = $this->phraseBook ?? new BattlePhraseBook($this->random);
+        $isMagic = $hit->getMagicSkill() !== null;
+        $key = $phrases->weaponKey($hit->getSkill()?->id, $isMagic);
+
+        $weaponTag = match (true) {
+            $isMagic => BattleLogTranslator::contentName($hit->getMagicSkill()),
+            $hit->getWeapon() !== null => BattleLogTranslator::contentName($hit->getWeapon()),
+            default => $hit->getWeaponName(),
+        };
+        $ammo = $hit->getAmmo() !== null
+            ? BattleLogTranslator::contentName($hit->getAmmo())
+            : BattleLogTranslator::format('Стрела');
+
+        return BattleLogTranslator::format(
+            $miss ? $phrases->playerMiss($key) : $phrases->playerHit($key, $hit->isCritical()),
+            $weaponTag,
+            BattleLogTranslator::contentName($locMonster->monster),
+            $damage,
+            $exp,
+            $ammo,
+        );
     }
 }

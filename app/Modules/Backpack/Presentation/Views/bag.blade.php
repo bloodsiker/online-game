@@ -1335,12 +1335,61 @@
     <div class="ctx-item" id="ctx-equip"   onclick="ctxAction('equip')">{{ __("Надеть") }}</div>
     <div class="ctx-item" id="ctx-unequip" onclick="ctxAction('unequip')">{{ __("Снять") }}</div>
     <div class="ctx-item" id="ctx-use"     onclick="ctxAction('use')">{{ __("Использовать") }}</div>
+    <div class="ctx-item" id="ctx-fill-quiver" onclick="ctxAction('fill-quiver')">{{ __("Пополнить колчан") }}</div>
+    <div class="ctx-item" id="ctx-gift"    onclick="ctxAction('gift')">🎁 {{ __('gift.give') }}</div>
     <div class="ctx-item" id="ctx-treasure" onclick="ctxAction('treasure')">{{ __('treasure.check') }}</div>
     <div class="ctx-item" id="ctx-treasure-assemble" onclick="ctxAction('treasure-assemble')">{{ __('treasure.assemble') }}</div>
     <div class="ctx-item" id="ctx-learn"   onclick="ctxAction('learn')">{{ __("Изучить") }}</div>
     <div class="ctx-item" id="ctx-chat" onclick="ctxAction('chat')">{{ __("Отправить в чат") }}</div>
     <div class="ctx-item ctx-danger" id="ctx-drop" onclick="ctxAction('drop')">{{ __("Выкинуть") }}</div>
 </div>
+<form id="gift-dialog" class="backpack-drop-dialog gift-dialog" role="dialog" aria-modal="true" aria-labelledby="gift-dialog-title"
+      onsubmit="sendGift(event)" autocomplete="off" style="display:none; position:fixed; z-index:9999; top:50%; left:50%; transform:translate(-50%,-50%);">
+    <div class="popup_global_container">
+        <div class="popup-top-left">
+            <div class="popup-top-right">
+                <div class="popup-top-center">
+                    <div class="popup_global_title" id="gift-dialog-title">{{ __('gift.give') }}</div>
+                </div>
+            </div>
+            <div class="popup_global_close_btn" onclick="closeGiftDialog();"></div>
+        </div>
+        <div class="popup-left-center">
+            <div class="popup-right-center">
+                <div class="popup_global_content">
+                    <div class="popup-artifact">
+                        <div class="popup-artifact__dsc">
+                            <span class="popup-artifact__img gift-dialog__img"><img id="gift-dialog-image" src="" alt=""></span>
+                            <div id="gift-dialog-name" class="popup-artifact__title popup-artifact__left gift-dialog__name"></div>
+                        </div>
+                    </div>
+                    <div class="gift-dialog__field">
+                        <label for="gift-recipient"><b>{{ __('gift.recipient') }}</b></label>
+                        <input id="gift-recipient" class="gift-dialog__input" name="recipient" type="text" maxlength="64" required>
+                    </div>
+                    <div class="gift-dialog__field">
+                        <label for="gift-message"><b>{{ __('gift.message') }}</b> <span id="gift-message-count" class="gift-dialog__count">0/150</span></label>
+                        <textarea id="gift-message" class="gift-dialog__input" name="message" maxlength="150" rows="3" placeholder="{{ __('gift.message_placeholder') }}"></textarea>
+                    </div>
+                    <label class="gift-dialog__anonymous">
+                        <input id="gift-anonymous" name="anonymous" type="checkbox" value="1">
+                        <span>{{ __('gift.anonymous') }}<small>{{ __('gift.anonymous_hint') }}</small></span>
+                    </label>
+                    <div id="gift-dialog-error" class="redd gift-dialog__error" role="alert" style="display:none;"></div>
+                    <div class="backpack-drop-dialog__actions">
+                        <b class="butt1 pointer"><b><input id="gift-dialog-submit" value="{{ __('gift.send') }}" type="submit" style="width: 100px;" class="redd"></b></b>
+                        <b class="butt1 pointer"><b><input value="{{ __('gift.cancel') }}" type="button" onclick="closeGiftDialog();" style="width: 100px;" class="redd"></b></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-left-bottom">
+            <div class="popup-right-bottom">
+                <div class="popup-bottom-center"></div>
+            </div>
+        </div>
+    </div>
+</form>
 <div id="debuff-target-dialog" style="display:none; position:fixed; z-index:10000; top:50%; left:50%; transform:translate(-50%,-50%); width:260px; padding:14px; background:#f5e9d0; border:2px solid #9d3829; border-radius:4px; box-shadow:2px 2px 12px rgba(0,0,0,.5); font:12px Tahoma; color:#461c0b;">
     <div style="font-weight:bold;margin-bottom:10px">{{ __("Выберите цель для дебаффа") }}</div>
     <select id="debuff-target-select" style="width:100%;margin-bottom:10px"></select>
@@ -1366,6 +1415,24 @@
     .backpack-drop-dialog__actions { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 12px; clear: both; }
     .backpack-drop-dialog__actions > span { display: inline-flex; width: auto; flex: 0 0 auto; }
     .backpack-drop-dialog__actions > .butt1 { flex: 0 0 auto; }
+    #gift-dialog.gift-dialog { width: 380px; max-width: calc(100vw - 20px); }
+    .gift-dialog .gift-dialog__img { position: static; float: none; display: block; flex: 0 0 60px; width: 60px; height: 60px; margin: 0; }
+    .gift-dialog .gift-dialog__img img { display: block; width: 60px; height: 60px; object-fit: contain; }
+    .gift-dialog .gift-dialog__name { position: static; float: none; width: auto; min-width: 0; margin: 0; padding: 0; font-weight: bold; line-height: 1.5; overflow-wrap: anywhere; text-align: left; }
+    .gift-dialog__field { margin: 0 0 10px; text-align: left; }
+    .gift-dialog__field label { display: block; margin-bottom: 4px; }
+    .gift-dialog__count { float: right; color: #927660; font-weight: normal; }
+    .gift-dialog__input { box-sizing: border-box; display: block; width: 100%; padding: 4px 6px; border: 1px solid #baa276; border-radius: 4px; outline-color: #9c6c3b;
+        color: #6c382c; background: #f9e4ab; box-shadow: inset 0 1px 4px rgba(106, 74, 33, .22); font: 12px Tahoma, Arial, sans-serif; }
+    textarea.gift-dialog__input { resize: vertical; min-height: 54px; }
+    .gift-dialog__anonymous { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 14px; text-align: left; cursor: pointer; }
+    .gift-dialog__anonymous { align-items: center; }
+    .gift-dialog__anonymous input { flex: 0 0 24px; width: 24px; height: 23px; margin: 0; border: 0; appearance: none; -webkit-appearance: none; cursor: pointer;
+        background: url({{ asset('main/images/gui/gui-checkbox.png') }}) no-repeat 0 -23px; }
+    .gift-dialog__anonymous input:checked { background-position: 0 0; }
+    .gift-dialog__anonymous input:focus-visible { outline: 1px solid #9c6c3b; border-radius: 4px; }
+    .gift-dialog__anonymous small { display: block; color: #927660; font-size: 10px; }
+    .gift-dialog__error { margin: 0 0 12px; text-align: center; }
     .ctx-item { padding: 6px 14px; cursor: pointer; color: #461c0b; border-bottom: 1px solid #e0ccb0; }
     .ctx-item:last-child { border-bottom: none; }
     .ctx-item:hover { background: #e8c06a; }
@@ -1393,6 +1460,7 @@
     var _ctxItemCount = 1;
     var _ctxItemName  = '';
     var _ctxItemImage = '';
+    var _ctxBackpackId = null;
     var _ctxItemDroppable = false;
     var _teleportUseKeyItemIds = @json($teleportUseKeyItemIds ?? []);
     var _droppableItemIds = @json($droppableItemIds ?? []);
@@ -1416,6 +1484,7 @@
         _ctxItemCount = parseInt(el.getAttribute('data-count')) || 1;
         _ctxItemName  = el.getAttribute('data-name') || '';
         _ctxItemImage = el.getAttribute('data-image') || '';
+        _ctxBackpackId = (el.closest('li[data-backpack-id]') || {}).getAttribute?.('data-backpack-id') || null;
         _ctxItemDroppable = _droppableItemIds.indexOf(parseInt(_ctxItemId, 10)) !== -1;
         var type     = _ctxItemType;
         var equipped = el.getAttribute('data-equipped') === '1';
@@ -1423,11 +1492,12 @@
         // а не расходуется — в отличие от артефактов-расходников вроде Сферы возрождения.
         var wearable = el.getAttribute('data-wearable') === '1';
 
-        var equippable = ['tool','weapon','shield','armor','belt','bag'].indexOf(type) !== -1
+        var equippable = ['tool','weapon','shield','armor','belt','bag','ring','earring','necklace','quiver'].indexOf(type) !== -1
             || wearable;
         // is_use — фолбэк для предметов с инстант-эффектом, чей тип не входит
         // в этот список (например misc): см. share_items.is_use.
-        var usable     = (['potion','eat','scroll','artifact','chest','gift','quest'].indexOf(type) !== -1
+        // Подарок не «используется», а дарится (пункт «Подарить», модуль Gift).
+        var usable     = (['potion','eat','scroll','artifact','chest','quest'].indexOf(type) !== -1
             || el.getAttribute('data-is-use') === '1')
             && !wearable;
         var isBook     = type === 'book';
@@ -1440,6 +1510,7 @@
         document.getElementById('ctx-equip').style.display   = (equippable && !equipped) ? '' : 'none';
         document.getElementById('ctx-unequip').style.display = equipped ? '' : 'none';
         document.getElementById('ctx-use').style.display     = usable   ? '' : 'none';
+        document.getElementById('ctx-fill-quiver').style.display = type === 'arrow' ? '' : 'none';
         document.getElementById('ctx-use').textContent = type === 'chest'
             ? @json(__('Открыть'))
             : @json(__('Использовать'));
@@ -1447,6 +1518,7 @@
         document.getElementById('ctx-treasure-assemble').style.display = type === 'treasure_map_fragment' ? '' : 'none';
         document.getElementById('ctx-learn').style.display   = (isBook || isLearnableRecipe) ? '' : 'none';
         document.getElementById('ctx-drop').style.display    = _ctxItemDroppable ? '' : 'none';
+        document.getElementById('ctx-gift').style.display    = (type === 'gift' && _ctxBackpackId) ? '' : 'none';
 
         var menu = document.getElementById('item-ctx-menu');
         menu.style.display = 'block';
@@ -1503,8 +1575,14 @@
                     useItemAjax(id);
                 }
                 break;
+            case 'fill-quiver':
+                fillQuiverAjax(id);
+                break;
             case 'learn':
                 learnItemAjax(_ctxItemShareId, id, _ctxItemType);
+                break;
+            case 'gift':
+                openGiftDialog(_ctxBackpackId, _ctxItemName, _ctxItemImage);
                 break;
             case 'drop':
                 if (_ctxItemDroppable) {
@@ -1536,6 +1614,71 @@
         form.submit();
     }
 
+    var _giftBackpackId = null;
+
+    function openGiftDialog(backpackId, name, image) {
+        if (!backpackId) return;
+        _giftBackpackId = backpackId;
+        document.getElementById('gift-dialog-name').textContent = name;
+        document.getElementById('gift-dialog-image').src = image || '';
+        document.getElementById('gift-dialog-image').alt = name;
+        document.getElementById('gift-recipient').value = '';
+        document.getElementById('gift-message').value = '';
+        document.getElementById('gift-message-count').textContent = '0/150';
+        document.getElementById('gift-anonymous').checked = false;
+        document.getElementById('gift-dialog-error').style.display = 'none';
+        frame_content_hider.show();
+        document.getElementById('gift-dialog').style.display = 'block';
+        document.getElementById('gift-recipient').focus();
+    }
+
+    function closeGiftDialog() {
+        _giftBackpackId = null;
+        document.getElementById('gift-dialog').style.display = 'none';
+        frame_content_hider.hide();
+    }
+
+    document.getElementById('gift-message')?.addEventListener('input', function () {
+        document.getElementById('gift-message-count').textContent = this.value.length + '/150';
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && document.getElementById('gift-dialog').style.display === 'block') closeGiftDialog();
+    });
+
+    function sendGift(event) {
+        event.preventDefault();
+        if (!_giftBackpackId) return;
+        var submit = document.getElementById('gift-dialog-submit');
+        var errorBox = document.getElementById('gift-dialog-error');
+        submit.disabled = true;
+        errorBox.style.display = 'none';
+        fetch(@json(route('gifts.send')), {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify({
+                backpack_id: Number(_giftBackpackId),
+                recipient: document.getElementById('gift-recipient').value,
+                message: document.getElementById('gift-message').value,
+                anonymous: document.getElementById('gift-anonymous').checked,
+            }),
+        }).then(async function (response) {
+            var data = {};
+            try { data = await response.json(); } catch (e) {}
+            if (response.ok && data.ok) {
+                closeGiftDialog();
+                try { window.top.showErrorIframe?.(data.message); } catch (e) {}
+                window.location.reload();
+                return;
+            }
+            var firstError = data.errors ? Object.values(data.errors)[0][0] : null;
+            errorBox.textContent = data.message && !data.errors ? data.message : (firstError || @json(__('gift.error')));
+            errorBox.style.display = 'block';
+        }).catch(function () {
+            errorBox.textContent = @json(__('gift.error'));
+            errorBox.style.display = 'block';
+        }).finally(function () { submit.disabled = false; });
+    }
+
     function openDebuffTargetDialog(itemId) {
         if (!_debuffTargets.length) {
             try { window.top.showErrorIframe(gameTranslate("В этой локации нет другого активного игрока.")); } catch(e) {}
@@ -1563,6 +1706,40 @@
         var itemId = _debuffItemId;
         closeDebuffTargetDialog();
         if (itemId && targetId) useItemAjax(itemId, targetId);
+    }
+
+    function fillQuiverAjax(itemId) {
+        fetch(@json(route('items.fill_quiver', ['id' => '__ID__'])).replace('__ID__', itemId), {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+            },
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.ok) {
+                try { window.top.showErrorIframe(data.message || gameTranslate("Ошибка")); } catch(e) { alert(data.message || gameTranslate("Ошибка")); }
+                return;
+            }
+            try { window.top.openGameMessageModal({ title: @json(__('Колчан')), message: data.message }); } catch(e) {}
+            // Тултип надетого колчана живёт во фрейме экипировки (window.itemTooltip) —
+            // подменяем его данные, не перезагружая манекен.
+            try {
+                var equipWindow = window.parent.document.getElementById('equip-frame').contentWindow;
+                if (data.quiver_item_id && data.quiver_tooltip && equipWindow.itemTooltip) {
+                    equipWindow.itemTooltip[data.quiver_item_id] = data.quiver_tooltip;
+                }
+                // Блок тултипа кэширует последний показанный предмет по data-id — сбрасываем.
+                var tooltipBox = window.top.document.getElementById('artifact_alt');
+                if (tooltipBox) tooltipBox.removeAttribute('data-id');
+            } catch(e) {}
+            window.location.reload();
+        })
+        .catch(function() {
+            try { window.top.showErrorIframe(gameTranslate("Ошибка")); } catch(e) {}
+        });
     }
 
     function useItemAjax(itemId, targetPlayerId) {

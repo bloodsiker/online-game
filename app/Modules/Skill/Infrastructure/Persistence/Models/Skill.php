@@ -17,6 +17,9 @@ class Skill extends Model
 
     public const SKILL_HAND_ID = 1;
 
+    /** «Владение луком» — оружие с этим навыком стреляет стрелами из колчана. */
+    public const SKILL_BOW_ID = 17;
+
     /** «Колдовство» — навык, усиливающий силу заклинаний и снижающий их стоимость маны, см. HitCalculator::weaponSkillMultiplier(). */
     public const SKILL_MAGIC_ID = 27;
 

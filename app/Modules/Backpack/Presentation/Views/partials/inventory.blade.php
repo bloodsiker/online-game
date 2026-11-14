@@ -2,7 +2,7 @@
     $sections = [
         'equipment' => ['title' => __('Оружие, щиты и инструменты'), 'types' => ['weapon', 'shield', 'tool']],
         'armor' => ['title' => __('Доспехи'), 'types' => ['armor']],
-        'accessories' => ['title' => __('Аксессуары'), 'types' => ['bag', 'belt']],
+        'accessories' => ['title' => __('Аксессуары'), 'types' => ['bag', 'belt', 'necklace', 'earring', 'ring', 'quiver', 'arrow']],
         'potions' => ['title' => __('Боевые эффекты'), 'types' => ['potion']],
         'food' => ['title' => __('Еда'), 'types' => ['eat']],
         'resources' => ['title' => __('Ресурсы'), 'types' => ['resource']],

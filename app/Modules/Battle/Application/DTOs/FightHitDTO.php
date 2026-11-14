@@ -48,6 +48,9 @@ final class FightHitDTO
 
     protected ?MagicSkill $magicSkill = null;
 
+    /** Боеприпас выстрела (стрела из колчана) — для фраз лога. */
+    protected ?ShareItem $ammo = null;
+
     protected Collection $appliedEffects;
 
     protected Collection $selfAppliedEffects;
@@ -102,6 +105,18 @@ final class FightHitDTO
     public function setDodge(bool $dodge): self
     {
         $this->dodge = $dodge;
+
+        return $this;
+    }
+
+    public function getAmmo(): ?ShareItem
+    {
+        return $this->ammo;
+    }
+
+    public function setAmmo(?ShareItem $ammo): self
+    {
+        $this->ammo = $ammo;
 
         return $this;
     }

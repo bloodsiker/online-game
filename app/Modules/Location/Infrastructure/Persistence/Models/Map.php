@@ -16,7 +16,7 @@ class Map extends Model
 
     public $translatable = ['name'];
 
-    protected $fillable = ['parent_id', 'name', 'folder', 'slug', 'resp_location_id', 'has_gathering_field', 'gathering_field_image'];
+    protected $fillable = ['parent_id', 'name', 'folder', 'slug', 'resp_location_id', 'has_gathering_field', 'gathering_field_image', 'profile_image'];
 
     protected function casts(): array
     {
@@ -26,6 +26,11 @@ class Map extends Model
     }
 
     protected function gatheringFieldImage(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => $value !== null ? resolve_storage_image_url($value) : null);
+    }
+
+    protected function profileImage(): Attribute
     {
         return Attribute::make(get: fn (?string $value) => $value !== null ? resolve_storage_image_url($value) : null);
     }

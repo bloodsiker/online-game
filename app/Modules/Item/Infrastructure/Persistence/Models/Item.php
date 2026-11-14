@@ -27,8 +27,11 @@ use Illuminate\Support\Carbon;
  * @property int $count_use
  * @property bool $is_open
  * @property Carbon|null $expires_at
+ * @property int|null $quiver_arrow_share_item_id
+ * @property int $quiver_arrow_count
  * @property int $count
  * @property-read ShareItem $itemInfo
+ * @property-read ShareItem|null $quiverArrow
  * @property-read Collection|Item[] $itemsInChest
  * @property-read Collection|ItemGem[] $gems
  * @property-read Collection|ItemRune[] $runes
@@ -50,10 +53,13 @@ class Item extends Model
         'additional_attack' => 0,
         'count_use' => 0,
         'is_open' => 0,
+        'quiver_arrow_count' => 0,
     ];
 
     protected $casts = [
         'expires_at' => 'datetime',
+        'quiver_arrow_share_item_id' => 'integer',
+        'quiver_arrow_count' => 'integer',
     ];
 
     public function getName(): string
@@ -106,6 +112,12 @@ class Item extends Model
             'title' => __('Исчезнет'),
             'value' => $this->expires_at->format('d.m.Y H:i'),
         ]];
+    }
+
+    /** Тип стрел, лежащих в этом экземпляре колчана. */
+    public function quiverArrow(): BelongsTo
+    {
+        return $this->belongsTo(ShareItem::class, 'quiver_arrow_share_item_id');
     }
 
     public function itemInfo(): BelongsTo

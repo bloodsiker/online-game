@@ -261,6 +261,7 @@ class PlayerStatService
 
         // All slots for armor/misc effects
         $allSlots = array_filter([
+            ...$equip->jewelryItems(),
             $equip->handLeft, $equip->handRight,
             $equip->helmetSlot, $equip->shoulderSlot, $equip->forearmSlot,
             $equip->armorSlot, $equip->leggingSlot, $equip->chainArmorSlot,

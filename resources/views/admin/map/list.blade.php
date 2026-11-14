@@ -66,6 +66,7 @@
                             <thead>
                             <tr>
                                 <th width="50">ID</th>
+                                <th width="140">Картинка профиля</th>
                                 <th>Название</th>
                                 <th>Slug</th>
                                 <th>Папка</th>
@@ -77,6 +78,15 @@
                             @forelse($listMaps as $map)
                                 <tr style="vertical-align: middle">
                                     <td>{{ $map->id }}</td>
+                                    <td class="text-center">
+                                        @if($map->profile_image)
+                                            <a href="{{ route('admin.map.info', $map->id) }}" title="{{ $map->name }}">
+                                                <img src="{{ $map->profile_image }}" alt="{{ $map->name }}" width="125" height="50" loading="lazy" style="display:block;object-fit:cover;border:1px solid #b68b62;">
+                                            </a>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
                                     <td><a href="{{ route('admin.map.info', $map->id) }}">{{ $map->name }}</a></td>
                                     <td><code>{{ $map->slug }}</code></td>
                                     <td>{{ $map->folder }}</td>
@@ -86,7 +96,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="text-center text-muted">Нет карт</td></tr>
+                                <tr><td colspan="7" class="text-center text-muted">Нет карт</td></tr>
                             @endforelse
                             </tbody>
                         </table>

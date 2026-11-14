@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\Services\Combat\Strategies\AttackStrategyInterface;
+use App\Modules\Battle\Application\Services\Combat\Strategies\BowAttackStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\DualWieldStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\FistAttackStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\MagicAttackStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\MagicBuffStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\OneHandWeaponStrategy;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
+use App\Modules\Item\Domain\Services\QuiverService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
 use App\Modules\MagicSkill\Application\Services\PlayerMagicSkillService;
@@ -32,6 +34,7 @@ readonly class AttackStrategyResolver
         private PlayerMagicSkillService $playerMagicSkillService,
         private PlayerStatService $statService,
         private MagicCastGuard $castGuard,
+        private QuiverService $quiverService,
     ) {}
 
     public function resolve(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle): AttackStrategyInterface
@@ -85,6 +88,25 @@ readonly class AttackStrategyResolver
                 player: $sheet,
                 monster: $monster,
                 weaponSkillLevel: $this->skillLevelFrom($skillLevels, Skill::SKILL_HAND_ID),
+            );
+        }
+
+        // Лук: каждый выстрел расходует стрелу из колчана, без стрел ход пропускается.
+        $bowInLeftHand = $leftIsWeapon && $left->itemInfo->skill_id === Skill::SKILL_BOW_ID;
+        if ($bowInLeftHand || ($rightIsWeapon && $right->itemInfo->skill_id === Skill::SKILL_BOW_ID)) {
+            $bow = $bowInLeftHand ? $left : $right;
+            $skillLevels = $this->playerSkillLevels($player, [Skill::SKILL_BOW_ID]);
+            $consumed = $this->quiverService->consumeArrow($player);
+
+            return new BowAttackStrategy(
+                hitCalc: $this->hitCalc,
+                player: $sheet,
+                monster: $monster,
+                bow: $bow,
+                bowInLeftHand: $bowInLeftHand,
+                arrowStatus: $consumed['status'],
+                arrow: $consumed['arrow'],
+                weaponSkillLevel: $this->skillLevelFrom($skillLevels, Skill::SKILL_BOW_ID),
             );
         }
 

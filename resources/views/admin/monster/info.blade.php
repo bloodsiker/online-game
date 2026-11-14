@@ -147,6 +147,14 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Стиль атаки (фразы в логе боя)</label>
+                                                <select class="form-control" name="attack_style">
+                                                    @foreach (\App\Modules\Monster\Domain\Enums\MonsterAttackStyle::cases() as $attackStyle)
+                                                        <option value="{{ $attackStyle->value }}" @selected($monster->attack_style === $attackStyle)>{{ $attackStyle->label() }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Магическая атака</label>
                                                 <input type="number" min="0" class="form-control" name="magic_attack" value="{{ $monster->magic_attack }}">
                                             </div>

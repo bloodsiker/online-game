@@ -10,6 +10,7 @@ use App\Modules\Effect\EffectServiceProvider;
 use App\Modules\Event\EventServiceProvider;
 use App\Modules\Forum\ForumServiceProvider;
 use App\Modules\Friend\FriendServiceProvider;
+use App\Modules\Gift\GiftServiceProvider;
 use App\Modules\Influence\InfluenceServiceProvider;
 use App\Modules\Interface\InterfaceServiceProvider;
 use App\Modules\Item\ItemServiceProvider;
@@ -49,6 +50,7 @@ return [
     DungeonServiceProvider::class,
     EffectServiceProvider::class,
     FriendServiceProvider::class,
+    GiftServiceProvider::class,
     ForumServiceProvider::class,
     InterfaceServiceProvider::class,
     InfluenceServiceProvider::class,

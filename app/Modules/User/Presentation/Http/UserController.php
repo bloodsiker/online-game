@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Presentation\Http;
 
+use App\Modules\Gift\Application\ItemTooltip\GiftTooltipStrategy;
+use App\Modules\Gift\Application\UseCases\GetPlayerGiftsBlock;
 use App\Modules\Influence\Infrastructure\Persistence\Models\PlayerInfluenceMedal;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ItemModelTooltipStrategy;
@@ -28,6 +30,7 @@ final class UserController
         private readonly PlayerInjuryService $injuryService,
         private readonly ItemTooltipCollector $tooltipCollector,
         private readonly ReputationService $reputationService,
+        private readonly GetPlayerGiftsBlock $giftsBlock,
     ) {}
 
     public function info(int $id): Response
@@ -53,6 +56,11 @@ final class UserController
             ]))
             ->collectFrom(new PlayerInjuryTooltipStrategy($injuriesBySlot));
 
+        $giftsBlock = $this->giftsBlock->execute((int) $user->id);
+        if ($giftsBlock !== null) {
+            $this->tooltipCollector->collectFrom(new GiftTooltipStrategy($giftsBlock->gifts));
+        }
+
         $isOnline = $user->last_online_at !== null
             && Carbon::parse($user->last_online_at)->gt(Carbon::now()->subMinutes((int) config('game.online_timeout_minutes', 30)));
 
@@ -65,6 +73,7 @@ final class UserController
             'isOnline' => $isOnline,
             'locationPath' => $this->buildLocationPath($user),
             'itemTooltipScript' => $this->tooltipCollector->renderScript(),
+            'giftsBlock' => $giftsBlock,
             'reputationMedals' => collect([
                 ...$this->reputationMedals($user->player),
                 ...$this->influenceMedals($user),
@@ -189,6 +198,7 @@ final class UserController
         }
 
         return array_values(array_filter([
+            ...$equip->jewelryItems(),
             $equip->helmetSlot,
             $equip->shoulderSlot,
             $equip->forearmSlot,

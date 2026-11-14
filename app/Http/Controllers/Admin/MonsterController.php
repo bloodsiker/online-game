@@ -9,6 +9,7 @@ use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Domain\Enums\MonsterAttackStyle;
 use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
@@ -393,6 +394,8 @@ class MonsterController extends Controller
         $monster->max_dmg = (float) $request->input('max_dmg', 0);
         $monster->attack_type = MonsterAttackType::tryFrom((string) $request->input('attack_type'))
             ?? MonsterAttackType::PHYSICAL;
+        $monster->attack_style = MonsterAttackStyle::tryFrom((string) $request->input('attack_style'))
+            ?? MonsterAttackStyle::STRIKE;
         $monster->magic_attack = max(0, (int) $request->input('magic_attack', 0));
         $monster->magic_power_coefficient = max(0, (float) $request->input('magic_power_coefficient', 0));
         $monster->magic_resistance = max(0, (int) $request->input('magic_resistance', $monster->lvl));

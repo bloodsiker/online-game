@@ -10,6 +10,13 @@
             'color' => 'rgba(210, 240, 185, 0.6)',
         ],
     ];
+    $mapPassages = $mapPassages ?? [[
+        'from' => $mapPassageFromId,
+        'direction' => $mapPassageDirection,
+        'slug' => $mapPassageTargetSlug,
+        'location' => $mapPassageTargetLocationId,
+        'label' => $mapPassageTargetLabel,
+    ]];
 @endphp
 
 <html>
@@ -388,17 +395,19 @@
                                                                                     style="padding: 6px 4px; text-align: justify;">
                                                                                     <table class="coll w100 p10h p2v brd2-all">
                                                                                         <tbody>
-                                                                                        <tr class="bg_l">
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                    <span class="line-align" onclick="mark_l({{ $mapPassageFromId }},2)"
-                                                                                          onmouseover="mark_l({{ $mapPassageFromId }},1)"
-                                                                                          onmouseout="mark_l({{ $mapPassageFromId }},0)"><span
-                                                                                            class="listloc">{{ $mapPassageFromId }}</span> <span
-                                                                                            style="font-size:18px;">{{ $mapPassageDirection }}</span> <a
-                                                                                            href="{{ map_transition_url($mapPassageTargetSlug, $mapPassageTargetLocationId) }}">{{ $mapPassageTargetLabel }}</a> <span
-                                                                                            class="listloc">{{ $mapPassageTargetLocationId }}</span></span>
-                                                                                            </td>
-                                                                                        </tr>
+                                                                                        @foreach($mapPassages as $mapPassage)
+<tr class="bg_l">
+    <td class="brd2-top brd2-bt b">
+<span class="line-align" onclick="mark_l({{ $mapPassage['from'] }},2)"
+      onmouseover="mark_l({{ $mapPassage['from'] }},1)"
+      onmouseout="mark_l({{ $mapPassage['from'] }},0)"><span
+        class="listloc">{{ $mapPassage['from'] }}</span> <span
+        style="font-size:18px;">{{ $mapPassage['direction'] }}</span> <a
+        href="{{ map_transition_url($mapPassage['slug'], $mapPassage['location']) }}">{{ $mapPassage['label'] }}</a> <span
+        class="listloc">{{ $mapPassage['location'] }}</span></span>
+    </td>
+</tr>
+@endforeach
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </td>

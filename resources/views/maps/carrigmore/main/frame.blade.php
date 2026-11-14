@@ -1,17 +1,17 @@
 @include('maps.base.frame', [
     'mapDataFile' => 'carrigmore.php',
     'mapRows' => 12,
-    'mapFirstRow' => -1,
-    'mapColumns' => 17,
+    'mapFirstRow' => 0,
+    'mapColumns' => 10,
     'mapFirstColumn' => -1,
-    'mapAreaId' => 1582,
+    'mapAreaId' => 1593,
     'mapEntryLinks' => [
         [
-            'locationId' => 1582,
+            'locationId' => 1593,
             'class' => 'aeast',
             'arrow' => '→',
-            'targetSlug' => 'j87Gtf4JU2',
-            'targetLocationId' => 1581,
+            'targetSlug' => 'Pd4Kr8Lm2X',
+            'targetLocationId' => 1592,
         ],
     ],
 ])

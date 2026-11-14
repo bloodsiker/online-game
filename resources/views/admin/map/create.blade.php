@@ -10,8 +10,9 @@
         <div class="col-md-5">
             <section class="card">
                 <div class="card-body">
-                    <form action="{{ route('admin.map.create') }}" method="post">
+                    <form action="{{ route('admin.map.create') }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
+                        @include('admin.map._profile-image', ['map' => null])
                         @include('admin.partials.content-translations', ['prefix' => 'map-new', 'content' => null, 'fields' => ['name' => ['label' => 'Название']]])
                         <div class="form-group">
                             <label class="col-form-label">Slug</label>

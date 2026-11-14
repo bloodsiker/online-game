@@ -2,6 +2,7 @@
 
 use App\Modules\Item\Presentation\Http\ItemController;
 use App\Modules\Item\Presentation\Http\LockpickingController;
+use App\Modules\Item\Presentation\Http\QuiverController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/item/info/{id}', [ItemController::class, 'info'])->name('items.info');
@@ -18,6 +19,7 @@ Route::middleware(['auth', 'prison.context'])->group(function (): void {
     Route::get('/items/hand-over/{id}', [ItemController::class, 'handOver'])->name('items.hand_over');
     Route::post('/items/hand-over-to-user/{id}', [ItemController::class, 'handOverToUser'])->name('items.hand_over_to_user');
     Route::post('/items/drop/{id}', [ItemController::class, 'dropItem'])->name('items.drop');
+    Route::post('/items/fill-quiver/{id}', [QuiverController::class, 'fill'])->name('items.fill_quiver');
     Route::get('/items/lockpick/{id}', [LockpickingController::class, 'show'])->name('items.lockpick.show');
     Route::post('/items/lockpick/{id}/start', [LockpickingController::class, 'start'])->name('items.lockpick.start');
     Route::post('/items/lockpick/{id}/complete', [LockpickingController::class, 'complete'])->name('items.lockpick.complete');

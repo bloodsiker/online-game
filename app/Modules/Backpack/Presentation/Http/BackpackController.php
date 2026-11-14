@@ -38,6 +38,7 @@ class BackpackController extends Controller
         $user = Auth::user();
         $playerEquip = $user->player->playerEquip;
         $equippedItems = collect([
+            ...$playerEquip->jewelryItems(),
             $playerEquip->helmetSlot,
             $playerEquip->shoulderSlot,
             $playerEquip->forearmSlot,

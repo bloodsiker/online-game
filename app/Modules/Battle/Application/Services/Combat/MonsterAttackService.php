@@ -5,6 +5,7 @@ namespace App\Modules\Battle\Application\Services\Combat;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\BattleLogTranslator;
+use App\Modules\Battle\Application\Services\BattlePhraseBook;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Application\Services\MonsterLootService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
@@ -35,6 +36,7 @@ readonly class MonsterAttackService
         private RandomizerInterface $random,
         private PlayerSkillService $playerSkillService,
         private MonsterLootService $monsterLootService = new MonsterLootService,
+        private ?BattlePhraseBook $phraseBook = null,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
@@ -46,7 +48,10 @@ readonly class MonsterAttackService
         $hit = $this->resolveHit($monster, $sheet, $monster->min_dmg, $monster->max_dmg, $isMagic);
 
         if (! $isMagic && $hit->isDodge()) {
-            $result->log(BattleLogTranslator::format('<p>%s атакует неудачно... Вы <b class="color-green">увернулись</b></p>', BattleLogTranslator::contentName($monster)));
+            $result->log(BattleLogTranslator::format(
+                $this->phrases()->monsterMiss($monster->attack_style),
+                BattleLogTranslator::contentName($monster),
+            ));
 
             return;
         }
@@ -59,9 +64,12 @@ readonly class MonsterAttackService
 
         $msg = $isMagic
             ? BattleLogTranslator::format('<p>%s использует магическую атаку! <br>Повреждения: <b class="color-magic">%s</b></p>', BattleLogTranslator::contentName($monster), $hit->getDamage())
-            : ($hit->isCritical()
-            ? BattleLogTranslator::format('<p>%s прыгнул на вас. <b class="color-red">нанесен критический удар!</b> <br>Повреждения: <b>%s</b></p>', BattleLogTranslator::contentName($locationMonster->monster), $hit->getDamage())
-            : BattleLogTranslator::format('<p>%s прыгнул на вас. <br>Повреждения: <b>%s</b></p>', BattleLogTranslator::contentName($locationMonster->monster), $hit->getDamage()));
+            : BattleLogTranslator::format(
+                $this->phrases()->monsterHit($monster->attack_style, $hit->isCritical()),
+                BattleLogTranslator::contentName($monster),
+                $hit->getDamage(),
+                '',
+            );
 
         $result->log($msg);
 
@@ -321,8 +329,8 @@ readonly class MonsterAttackService
 
         if (! $isMagic && $hit->isDodge()) {
             $result->log(BattleLogTranslator::format(
-                '<p><b class="color-boss">%s</b> атакует неудачно... Вы <b class="color-green">увернулись</b></p>',
-                BattleLogTranslator::contentName($monster)
+                $this->phrases()->monsterMiss($monster->attack_style),
+                '<b class="color-boss">'.BattleLogTranslator::contentName($monster).'</b>',
             ));
 
             return;
@@ -345,19 +353,12 @@ readonly class MonsterAttackService
                 $modifierText,
                 $hit->getDamage(),
             )
-            : ($hit->isCritical()
-            ? BattleLogTranslator::format(
-                '<p><b class="color-boss">%s</b> набрасывается на вас%s. <b class="color-red">⚡ Критический удар!</b> <br>Повреждения: <b class="color-damage">%s</b></p>',
-                BattleLogTranslator::contentName($monster),
-                $modifierText,
-                $hit->getDamage()
-            )
             : BattleLogTranslator::format(
-                '<p><b class="color-boss">%s</b> атакует вас%s! <br>Повреждения: <b>%s</b></p>',
-                BattleLogTranslator::contentName($monster),
+                $this->phrases()->monsterHit($monster->attack_style, $hit->isCritical()),
+                '<b class="color-boss">'.BattleLogTranslator::contentName($monster).'</b>',
+                $hit->getDamage(),
                 $modifierText,
-                $hit->getDamage()
-            ));
+            );
 
         $result->log($msg);
 
@@ -543,5 +544,10 @@ readonly class MonsterAttackService
                 $result
             );
         }
+    }
+
+    private function phrases(): BattlePhraseBook
+    {
+        return $this->phraseBook ?? new BattlePhraseBook($this->random);
     }
 }

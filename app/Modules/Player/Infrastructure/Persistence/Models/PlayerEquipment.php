@@ -30,6 +30,30 @@ class PlayerEquipment extends Model
         'beltSecondSlot' => 'belt_second',
         'bagFirstSlot' => 'bag_first',
         'bagSecondSlot' => 'bag_second',
+        'ring1Slot' => 'ring_1',
+        'ring2Slot' => 'ring_2',
+        'ring3Slot' => 'ring_3',
+        'ring4Slot' => 'ring_4',
+        'ring5Slot' => 'ring_5',
+        'earring1Slot' => 'earring_1',
+        'earring2Slot' => 'earring_2',
+        'necklace1Slot' => 'necklace_1',
+        'necklace2Slot' => 'necklace_2',
+        'quiverSlot' => 'quiver',
+    ];
+
+    /** @var list<string> реляции ювелирных слотов (кольца, серьги, ожерелья) */
+    public const JEWELRY_RELATIONS = [
+        'ring1Slot',
+        'ring2Slot',
+        'ring3Slot',
+        'ring4Slot',
+        'ring5Slot',
+        'earring1Slot',
+        'earring2Slot',
+        'necklace1Slot',
+        'necklace2Slot',
+        'quiverSlot',
     ];
 
     protected $table = 'player_equipments';
@@ -112,6 +136,74 @@ class PlayerEquipment extends Model
     public function bagSecondSlot(): BelongsTo
     {
         return $this->belongsTo(Item::class, 'bag_second')->with(['itemInfo']);
+    }
+
+    public function ring1Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'ring_1')->with(['itemInfo']);
+    }
+
+    public function ring2Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'ring_2')->with(['itemInfo']);
+    }
+
+    public function ring3Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'ring_3')->with(['itemInfo']);
+    }
+
+    public function ring4Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'ring_4')->with(['itemInfo']);
+    }
+
+    public function ring5Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'ring_5')->with(['itemInfo']);
+    }
+
+    public function earring1Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'earring_1')->with(['itemInfo']);
+    }
+
+    public function earring2Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'earring_2')->with(['itemInfo']);
+    }
+
+    public function necklace1Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'necklace_1')->with(['itemInfo']);
+    }
+
+    public function necklace2Slot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'necklace_2')->with(['itemInfo']);
+    }
+
+    public function quiverSlot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'quiver')->with(['itemInfo']);
+    }
+
+    /**
+     * Надетые кольца, серьги, ожерелья и колчан.
+     *
+     * @return list<Item>
+     */
+    public function jewelryItems(): array
+    {
+        $items = [];
+        foreach (self::JEWELRY_RELATIONS as $relation) {
+            $item = $this->$relation;
+            if ($item instanceof Item) {
+                $items[] = $item;
+            }
+        }
+
+        return $items;
     }
 
     /**

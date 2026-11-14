@@ -111,13 +111,15 @@ class CraftProfessionItem
                 ));
             }
 
-            $this->backpackService->addItemByShareItem($user, $recipe->kraftItem, 1);
+            $resultCount = max(1, (int) $recipe->result_count);
+            $this->backpackService->giveItemsByShareItem($user, $recipe->kraftItem, $resultCount);
             $experience = max(1, (int) $recipe->itemInfo->skill_exp);
             $this->professionExperienceService->award($player, $recipe->itemInfo->skill, $experience);
 
             return new WorkshopResultDTO(true, sprintf(
-                'Создано: «%s» ×1 (шанс успеха был %d%%). %s: опыт +%d.',
+                'Создано: «%s» ×%d (шанс успеха был %d%%). %s: опыт +%d.',
                 $recipe->kraftItem->name,
+                $resultCount,
                 $chance,
                 $recipe->itemInfo->skill->name,
                 $experience,

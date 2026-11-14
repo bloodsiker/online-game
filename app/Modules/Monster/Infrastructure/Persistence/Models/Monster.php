@@ -8,6 +8,7 @@ use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Domain\Enums\MonsterAttackStyle;
 use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
@@ -28,7 +29,7 @@ class Monster extends Model implements FightHitInterface
 
     protected $fillable = [
         'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression',
-        'passive_type', 'passive_value', 'exp', 'min_money', 'max_money', 'attack_type', 'magic_attack',
+        'passive_type', 'passive_value', 'exp', 'min_money', 'max_money', 'attack_type', 'attack_style', 'magic_attack',
         'magic_power_coefficient', 'magic_resistance', 'is_boss', 'does_not_regenerate_hp', 'respawn_min_minutes', 'respawn_max_minutes',
     ];
 
@@ -40,6 +41,7 @@ class Monster extends Model implements FightHitInterface
         'is_boss' => 'boolean',
         'does_not_regenerate_hp' => 'boolean',
         'attack_type' => MonsterAttackType::class,
+        'attack_style' => MonsterAttackStyle::class,
         'passive_type' => CombatPassiveType::class,
         'respawn_at' => 'datetime',
     ];
