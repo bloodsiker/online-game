@@ -74,7 +74,7 @@ class ShopBuyPageViewMapper
                     requiredLevel: $item->item->requirements
                         ->first(static fn ($requirement): bool => $requirement->type === ShareItemRequirementType::LEVEL)
                         ?->min_value,
-                    price: (int) $item->price,
+                    price: $cart->unitPrice((int) $item->price),
                     diamond: (int) $item->diamond,
                     requirements: $item->requirements
                         ->filter(fn ($requirement): bool => $requirement->item !== null)
@@ -93,6 +93,7 @@ class ShopBuyPageViewMapper
                     purchaseAvailability: $this->purchaseLimits->availability($user, $item),
                     minReputationPoints: (int) $item->min_reputation_points,
                     rarity: $item->item->rarity?->value ?? 'common',
+                    basePrice: (int) $item->price,
                 )
             )->all(),
             categories: $categories->map(

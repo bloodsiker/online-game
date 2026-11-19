@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class ShopCartService
 {
+    public function __construct(
+        private readonly CityShopDiscountService $discounts = new CityShopDiscountService,
+    ) {}
+
     public function addItem(User $user, int $shopItemId, int $quantity = 1, ?int $structureId = null): ShopCart
     {
         ShopItem::query()
@@ -94,7 +98,10 @@ class ShopCartService
             ->select('shop_carts.*')
             ->get();
 
-        $totalPrice = $cartItems->sum(fn ($item) => $item->quantity * $item->shopItem->price);
+        $discountPercent = $this->discounts->percentFor($user, $structureId);
+        $totalPrice = $cartItems->sum(
+            fn ($item) => $item->quantity * CityShopDiscountService::apply((int) $item->shopItem->price, $discountPercent),
+        );
         $totalDiamond = $cartItems->sum(fn ($item) => $item->quantity * $item->shopItem->diamond);
 
         $requirementTotals = $cartItems
@@ -116,6 +123,7 @@ class ShopCartService
             totalDiamond: $totalDiamond,
             totalPrice: $totalPrice,
             requirementTotals: $requirementTotals,
+            discountPercent: $discountPercent,
         );
     }
 

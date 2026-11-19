@@ -278,7 +278,7 @@
                                                             <img src="{{ $slotImage($equip?->shoulderSlot, 'shoulder') }}" class="hero-itm @if($equip?->shoulderSlot) equipped @endif" id="i4n1">
                                                         @endif
                                                     </td>
-                                                    <td class="profile-avatar-cell" align="center" rowspan="4" colspan="3">
+                                                    <td class="profile-avatar-cell" align="center" rowspan="5" colspan="3">
                                                         <div class="profile-avatar-frame">
                                                             <img class="profile-avatar-frame__image" src="{{ public_media_url($user->profile?->avatar, fallback: 'img/avatar/dark_elf.jpg') }}" alt="{{ $user->name }}">
                                                         </div>
@@ -338,6 +338,10 @@
                                                             <img src="{{ $slotImage($equip?->shoesSlot, 'shoes') }}" class="hero-itm @if($equip?->shoesSlot) equipped @endif" id="i4n1">
                                                         @endif
                                                     </td>
+                                                </tr>
+                                                <tr>
+                                                    <td {!! $slotAttrs($equip?->cloakSlot) !!}><img src="{{ $slotImage($equip?->cloakSlot, 'cloak') }}" class="hero-itm @if($equip?->cloakSlot) equipped @endif"></td>
+                                                    <td></td>
                                                 </tr>
                                                 <tr>
                                                     {{-- Кольца --}}

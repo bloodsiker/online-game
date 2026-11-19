@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     @include('partials.google-tag')
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('Информация о клане') }}: {{ $clan->name }}</title>
+    <title>{{ __('Информация о клане') }}: {{ $clan->name }}{{ $mode === 'members' ? ' — '.__('Состав') : '' }}</title>
+    {{-- Вкладка «Информация» открывается и без mode, и по ?mode=news — канонический адрес без параметра. --}}
+    <link rel="canonical" href="{{ route('clan.public', ['clan' => $clan->id]).($mode === 'information' ? '' : '?mode='.$mode) }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         * { font-family: Tahoma, sans-serif; font-size: 11px; }
@@ -128,8 +130,7 @@
                                         @php
                                             $active = $mode === $tabMode;
                                             $suffix = $active ? '2' : '1';
-                                            $queryMode = $tabMode === 'information' ? 'news' : $tabMode;
-                                            $tabUrl = $publicUrl.'?mode='.$queryMode;
+                                            $tabUrl = $tabMode === 'information' ? $publicUrl : $publicUrl.'?mode='.$tabMode;
                                         @endphp
                                         <td width="19" valign="top"><img src="{{ asset('main/images/btn-left'.$suffix.'.png') }}" width="19" height="21" alt=""></td>
                                         <td align="center" style="background: url('{{ asset('main/images/btn-cent'.$suffix.'.png') }}') repeat-x top; padding: 0 4px 3px;"><a href="{{ $tabUrl }}" class="btn_{{ $suffix }}">{{ $tabLabel }}</a></td>

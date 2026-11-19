@@ -278,7 +278,7 @@
                             <img src="{{ asset('img/bg/slots/empty_slot_shoulder.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_shoulder.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
-                    <td class="profile-avatar-cell" align="center" rowspan="4" colspan="3">
+                    <td class="profile-avatar-cell" align="center" rowspan="5" colspan="3">
                         <div class="profile-avatar-frame">
                             <img class="profile-avatar-frame__image" src="{{ public_media_url(auth()->user()?->profile?->avatar, fallback: 'img/avatar/dark_elf.jpg') }}" alt="{{ auth()->user()?->name }}">
                         </div>
@@ -372,6 +372,19 @@
                             <img src="{{ asset('img/bg/slots/empty_slot_shoes.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_shoes.webp')) }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
+                </tr>
+                <tr>
+                    {{-- Плащ (гербовые плащи Городской стражи и т.п.) --}}
+                    <td class="item-hero"
+                        @if($playerEquip->cloak) data-id="{{ $playerEquip->cloakSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($playerEquip->cloak)
+                            <img src="{{ $playerEquip->cloakSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->cloakSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
+                        @else
+                            <img src="{{ asset('img/bg/slots/empty_slot_cloak.webp').'?v='.@filemtime(public_path('img/bg/slots/empty_slot_cloak.webp')) }}" class="hero-itm" title="{{ __('Плащ') }}">
+                        @endif
+                    </td>
+                    <td></td>
                 </tr>
                 <tr>
                     {{-- Кольца --}}

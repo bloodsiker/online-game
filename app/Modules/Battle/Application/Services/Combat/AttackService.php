@@ -35,6 +35,7 @@ use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Reputation\Domain\Enums\DivineFavorType;
+use App\Modules\Reputation\Domain\Services\CityGuardPerksService;
 use App\Modules\Reputation\Domain\Services\DivineFavorService;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
@@ -62,6 +63,7 @@ readonly class AttackService
         private PlayerLevelUpService $levelUpService,
         private MonsterLootService $monsterLootService = new MonsterLootService,
         private ?BattlePhraseBook $phraseBook = null,
+        private CityGuardPerksService $guardPerks = new CityGuardPerksService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle, float $xpMultiplier = 1.0): AttackResultDTO
@@ -116,6 +118,8 @@ readonly class AttackService
             }
 
             $damage = $this->applyRageBonus($player, $hit->getDamage(), $runePassives, $effectiveHpMax);
+            // «Благословение стражи»: +% урона по монстрам от ранга репутации «Городская стража».
+            $damage = $this->guardPerks->boostOutgoingDamage((int) $player->id, $damage);
 
             if ($isBoss && $battle) {
 

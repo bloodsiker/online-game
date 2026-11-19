@@ -444,7 +444,7 @@ class QuestProgressService
                 continue;
             }
 
-            if ((int) $qo->target_id !== (int) $locationMonster->monster_id) {
+            if (! $qo->matchesMonster((int) $locationMonster->monster_id)) {
                 continue;
             }
 

@@ -29,6 +29,8 @@ enum ItemEffectType: string
     case PRODUCE_ITEM = 'produce_item';
     // GRANT_REPUTATION — value очков репутации reputation_id за 1 шт. (можно использовать пачкой).
     case GRANT_REPUTATION = 'grant_reputation';
+    // TELEPORT_LOCATION — переносит игрока на локацию value; предмет многоразовый (частоту задаёт лимит использования).
+    case TELEPORT_LOCATION = 'teleport_location';
 
     public function label(): string
     {
@@ -50,6 +52,7 @@ enum ItemEffectType: string
             self::CURE_PARALYSIS => __('Снятие паралича'),
             self::PRODUCE_ITEM => __('Даёт за использование'),
             self::GRANT_REPUTATION => __('Репутация'),
+            self::TELEPORT_LOCATION => __('Телепорт'),
         };
     }
 
@@ -85,7 +88,7 @@ enum ItemEffectType: string
     public function requiresInventoryUse(): bool
     {
         return match ($this) {
-            self::GRANT_DIAMONDS, self::PRODUCE_ITEM, self::GRANT_REPUTATION => true,
+            self::GRANT_DIAMONDS, self::PRODUCE_ITEM, self::GRANT_REPUTATION, self::TELEPORT_LOCATION => true,
             default => false,
         };
     }

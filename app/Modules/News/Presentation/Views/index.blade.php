@@ -14,6 +14,14 @@
         'title' => __('homepage.license').' — '.__('homepage.game_name').' (Eternum)',
         'description' => __('homepage.eula_description'),
     ])
+    @elseif($selectedNews)
+    {{-- Отдельная новость (/?n=ID) — своя страница со своим canonical. --}}
+    @include('partials.seo', [
+        'url' => rtrim(url('/'), '/').'/?n='.$selectedNews->id,
+        'title' => $selectedNews->title.' — '.__('homepage.game_name').' (Eternum)',
+        'description' => \Illuminate\Support\Str::squish(html_entity_decode(strip_tags(preg_replace('/\[\[.*?\]\]/s', ' ', (string) $selectedNews->description) ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')) ?: __('homepage.seo_description'),
+        'type' => 'article',
+    ])
     @else
     @include('partials.seo', [
         'url' => $archiveListing ? route('news.index', $archivePage > 1 ? ['page' => $archivePage] : []) : url('/'),

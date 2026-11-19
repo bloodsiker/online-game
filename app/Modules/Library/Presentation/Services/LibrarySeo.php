@@ -8,6 +8,7 @@ use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use App\Modules\Library\Presentation\DTOs\LibrarySeoData;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -58,6 +59,8 @@ final readonly class LibrarySeo
                 $filtered = true;
             }
         }
+        // Бестиарий одной карты (только map_id) — отдельная индексируемая страница «Бестиарий: <карта>».
+        $bestiaryMap = $this->bestiaryMap($category, $parameters);
         $paginated = $request->filled('q') || $category?->content_type === LibraryCategoryContentType::MONSTERS;
         $page = $paginated ? filter_var($request->query('page'), FILTER_VALIDATE_INT) : false;
         if ($page !== false && $page > 1) {
@@ -65,6 +68,9 @@ final readonly class LibrarySeo
         }
 
         $heading = $request->filled('q') ? __('library.search') : ($category?->name ?? __('library.name'));
+        if ($bestiaryMap !== null) {
+            $heading .= ': '.$bestiaryMap->name;
+        }
         $title = $heading.' — '.($category || $request->filled('q') ? __('library.name').' — ' : '').__('library.seo_brand');
         if ($page !== false && $page > 1) {
             $title .= ' — '.__('library.page', ['number' => $page]);
@@ -77,14 +83,32 @@ final readonly class LibrarySeo
         return new LibrarySeoData(
             heading: $heading,
             title: $title,
-            description: $this->withGame($this->plainText($category?->description ?? '') ?: ($category
+            description: $bestiaryMap !== null
+                ? $this->withGame(__('library.bestiary_map_description', ['map' => $bestiaryMap->name]))
+                : $this->withGame($this->plainText($category?->description ?? '') ?: ($category
                 ? __('library.category_description', ['category' => $category->name])
                 : __('library.description'))),
             canonical: $this->urls->index(parameters: $parameters),
             alternates: $alternates,
             image: asset($category?->image ?: 'data/canvas/ui/library.webp'),
-            robots: $filtered ? 'noindex, follow' : 'index, follow',
+            robots: $filtered && $bestiaryMap === null ? 'noindex, follow' : 'index, follow',
         );
+    }
+
+    /**
+     * Карта, если это бестиарий, отфильтрованный только по карте (без поиска, уровней, локации, боссов).
+     *
+     * @param  array<string, string|int>  $parameters
+     */
+    private function bestiaryMap(?LibraryCategory $category, array $parameters): ?Map
+    {
+        if ($category?->content_type !== LibraryCategoryContentType::MONSTERS
+            || array_keys($parameters) !== ['category', 'map_id']
+            || ! ctype_digit($parameters['map_id'])) {
+            return null;
+        }
+
+        return Map::query()->whereHas('locations.monsters')->find((int) $parameters['map_id']);
     }
 
     /**

@@ -19,6 +19,7 @@ use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerSkillService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Reputation\Domain\Services\CityGuardPerksService;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
@@ -37,6 +38,7 @@ readonly class MonsterAttackService
         private PlayerSkillService $playerSkillService,
         private MonsterLootService $monsterLootService = new MonsterLootService,
         private ?BattlePhraseBook $phraseBook = null,
+        private CityGuardPerksService $guardPerks = new CityGuardPerksService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
@@ -60,6 +62,7 @@ readonly class MonsterAttackService
             $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
         }
 
+        $this->applyGuardBlessing($player, $hit);
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $msg = $isMagic
@@ -340,6 +343,7 @@ readonly class MonsterAttackService
             $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
         }
 
+        $this->applyGuardBlessing($player, $hit);
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $modifierText = $totalModifier > 0
@@ -427,6 +431,7 @@ readonly class MonsterAttackService
             $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
         }
 
+        $this->applyGuardBlessing($player, $hit);
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $skillEmoji = $this->getSkillEmoji($randomSkill);
@@ -471,6 +476,12 @@ readonly class MonsterAttackService
         if (isset($skill->parameters['effects'])) {
             $this->applySkillEffects($player, $battle, $skill->parameters['effects'], BattleLogTranslator::contentName($monster), $result);
         }
+    }
+
+    /** «Благословение стражи»: −% входящего урона от монстров по рангу репутации «Городская стража». */
+    private function applyGuardBlessing(Player $player, FightHitDTO $hit): void
+    {
+        $hit->setDamage($this->guardPerks->reduceIncomingDamage((int) $player->id, $hit->getDamage()));
     }
 
     /**

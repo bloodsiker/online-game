@@ -4,6 +4,7 @@ return [
     'shop_requires_npc' => 'Магазин доступен только рядом с NPC.',
     'reputation_required' => 'Для покупки «:item» нужно :points очков репутации.',
     'reputation_requirement' => 'Требование: :points реп',
+    'city_guard_discount' => 'Скидка Городской стражи: :percent% на товары за монеты.',
     'purchase_limit' => 'Лимит: :quantity шт. Период: :period. Доступно: :remaining шт.',
     'purchase_limit_once' => 'Лимит: :quantity шт. на персонажа. Доступно: :remaining шт.',
     'purchase_blocked' => 'Превышен лимит покупки «:item».',

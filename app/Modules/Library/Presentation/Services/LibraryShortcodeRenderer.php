@@ -8,6 +8,8 @@ use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
 use App\Modules\Item\Presentation\Services\ItemShortcodeRenderer;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
@@ -37,7 +39,10 @@ final class LibraryShortcodeRenderer
 
     private array $magicTooltips = [];
 
-    public function __construct(private readonly ItemShortcodeRenderer $itemRenderer) {}
+    public function __construct(
+        private readonly ItemShortcodeRenderer $itemRenderer,
+        private readonly LibraryUrls $urls,
+    ) {}
 
     public function render(?string $html): string
     {
@@ -95,6 +100,29 @@ final class LibraryShortcodeRenderer
     {
         return $this->itemRenderer->tooltipScript()
             .'<script>Object.assign(window.itemTooltip, '.json_encode((object) $this->magicTooltips, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT).');</script>';
+    }
+
+    /**
+     * Публичная статья о репутации (раздел «Репутации», заголовок начинается с её названия).
+     * Игровая страница /reputation/{id} закрыта авторизацией — поисковик получает там 401.
+     */
+    private function reputationUrl(Model $reputation): string
+    {
+        $category = LibraryCategory::query()->where('is_active', true)->where('slug', 'reputatsii')->first();
+        if ($category === null) {
+            return $this->urls->index();
+        }
+
+        $name = (string) $reputation->getTranslation('name', 'ru', false);
+        $article = $name === '' ? null : LibraryArticle::query()->published()
+            ->where('category_id', $category->id)
+            ->where('title->ru', 'like', str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $name).'%')
+            ->orderBy('sort_order')->orderBy('id')
+            ->first(['id', 'slug', 'category_id']);
+
+        return $article !== null
+            ? $this->urls->article(slug: $article->slug, categorySlug: $category->slug)
+            : $this->urls->category($category);
     }
 
     private function pattern(): string
@@ -159,7 +187,7 @@ final class LibraryShortcodeRenderer
                 $entity->name,
                 resolve_storage_image_url($entity->icon),
                 Str::limit(strip_tags((string) $entity->description), 90),
-                route('reputation.index', ['id' => $entity->id]),
+                $this->reputationUrl($entity),
             ],
             'map' => [
                 __('contentcards.map'),

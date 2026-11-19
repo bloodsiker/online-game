@@ -7,7 +7,9 @@ namespace App\Modules\Reputation\Application\UseCases;
 use App\Modules\Reputation\Application\DTOs\ReputationPageDTO;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Domain\Contracts\ReputationReadRepository;
+use App\Modules\Reputation\Domain\Services\CityGuardPerksService;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputationMedal;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GetReputationPage
@@ -15,6 +17,7 @@ class GetReputationPage
     public function __construct(
         private readonly ReputationReadRepository $readRepository,
         private readonly ReputationService $reputationService,
+        private readonly CityGuardPerksService $guardPerks = new CityGuardPerksService,
     ) {}
 
     public function execute(User $user, int $id): ReputationPageDTO
@@ -60,6 +63,31 @@ class GetReputationPage
             messageType: session()->has('rep_success') ? 'success' : 'error',
             player: $player,
             group: 'reputation',
+            rankPerks: $this->rankPerks($reputation, (int) $pr->points, $currentTier?->id),
         );
+    }
+
+    /** @return list<array{name: string, minPoints: int, discount: int, blessing: int, current: bool}> */
+    private function rankPerks(Reputation $reputation, int $points, ?int $currentTierId): array
+    {
+        if ((int) $reputation->id !== CityGuardPerksService::REPUTATION_ID) {
+            return [];
+        }
+
+        return $reputation->tiers
+            ->filter(fn ($tier): bool => (int) $tier->min_points > 0)
+            ->map(function ($tier) use ($currentTierId): array {
+                [$discount, $blessing] = $this->guardPerks->perksForPoints((int) $tier->min_points);
+
+                return [
+                    'name' => (string) ($tier->medal_name ?? ''),
+                    'minPoints' => (int) $tier->min_points,
+                    'discount' => $discount,
+                    'blessing' => $blessing,
+                    'current' => (int) $tier->id === $currentTierId,
+                ];
+            })
+            ->values()
+            ->all();
     }
 }

@@ -22,6 +22,7 @@ use App\Modules\Item\Application\UseCases\GetPickupItemsPage;
 use App\Modules\Item\Application\UseCases\HandOverToUser;
 use App\Modules\Item\Application\UseCases\OpenChest;
 use App\Modules\Item\Application\UseCases\PickUpInChest;
+use App\Modules\Item\Application\UseCases\TeleportByItem;
 use App\Modules\Item\Application\UseCases\UnequipItem;
 use App\Modules\Item\Domain\Exceptions\ItemUseBlockedException;
 use App\Modules\Item\Domain\Services\ItemUsagePolicyService;
@@ -65,6 +66,7 @@ class ItemController extends Controller
         private readonly LockpickingService $lockpickingService,
         private readonly QuestProgressService $questProgressService,
         private readonly DetentionService $detentionService,
+        private readonly TeleportByItem $teleportByItem,
         private readonly ?MapInfluenceRequirementService $influenceRequirements = null,
     ) {}
 
@@ -304,6 +306,20 @@ class ItemController extends Controller
                 'teleport_url' => route('location'),
                 'message' => $questUse['messages'][0] ?? null,
                 'quest_messages' => $questUse['messages'],
+            ]);
+        }
+
+        $teleportEffect = $backpack->item->itemInfo->effects->first(
+            fn ($e) => $e->effect_type === ItemEffectType::TELEPORT_LOCATION
+        );
+        if ($teleportEffect !== null) {
+            $this->teleportByItem->execute($user, $player, $backpack->item->itemInfo, (int) $teleportEffect->value);
+
+            return response()->json([
+                'status' => 'success',
+                'removed' => false,
+                'count' => (int) $backpack->count,
+                'teleport_url' => route('location'),
             ]);
         }
 

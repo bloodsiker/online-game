@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Item\Application\ItemTooltip;
 
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
@@ -236,6 +237,14 @@ final class ItemTooltipStatsBuilder
             // Механизм: какой предмет и сколько даёт за использование.
             if ($effect->effect_type === ItemEffectType::PRODUCE_ITEM) {
                 $stats[] = ['title' => $effect->effect_type->label(), 'value' => $effect->targetItem?->name.' × '.(int) $effect->value];
+
+                continue;
+            }
+
+            // Телепорт: куда переносит.
+            if ($effect->effect_type === ItemEffectType::TELEPORT_LOCATION) {
+                $locationName = Location::query()->whereKey((int) $effect->value)->first()?->name;
+                $stats[] = ['title' => $effect->effect_type->label(), 'value' => (string) ($locationName ?? '—')];
 
                 continue;
             }

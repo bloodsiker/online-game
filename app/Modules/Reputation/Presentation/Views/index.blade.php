@@ -139,6 +139,10 @@
         .reputation-medal.is-earned .reputation-medal__state { color: #387629; }
         .reputation-medal.is-locked .reputation-medal__state { color: #9a5a22; }
         .medal-rating { color: #9a2517; font-size: 10px; }
+        .rep-perks { margin: 4px 0; font-size: 11px; border-collapse: collapse; }
+        .rep-perks th { color: #6b2a12; font-weight: bold; padding: 2px 4px; border-bottom: 1px solid #c9b18f; }
+        .rep-perks td { padding: 2px 4px; border-bottom: 1px dotted #d8c6a8; }
+        .rep-perks tr.is-current td { background: #f3e2c2; font-weight: bold; color: #461C0B; }
         #artifact_alt .aa-table {
             border-radius: 30px 30px 0 0;
             box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, .2);
@@ -244,6 +248,30 @@
                                     </div>
                                 </td>
                             </tr>
+
+                            {{-- Бонусы рангов (Городская стража) --}}
+                            @if($page->rankPerks !== [])
+                                <tr class="bg_l">
+                                    <td class="brd2-top brd2-bt" colspan="3" style="padding: 6px 10px;">
+                                        <div class="reputation-medals__heading">Бонусы рангов</div>
+                                        <table class="rep-perks" cellspacing="0" cellpadding="0" width="100%">
+                                            <tr>
+                                                <th align="left">Ранг</th>
+                                                <th>Скидка у торговцев Нейрина</th>
+                                                <th>Благословение стражи</th>
+                                            </tr>
+                                            @foreach($page->rankPerks as $perk)
+                                                <tr class="{{ $perk['current'] ? 'is-current' : '' }}">
+                                                    <td>{{ $perk['name'] }} <small>({{ $perk['minPoints'] }})</small></td>
+                                                    <td align="center">−{{ $perk['discount'] }}%</td>
+                                                    <td align="center">+{{ $perk['blessing'] }}% урона, −{{ $perk['blessing'] }}% входящего урона</td>
+                                                </tr>
+                                            @endforeach
+                                        </table>
+                                        <small style="color:#555;">Благословение действует в боях с монстрами. Скидка — на товары за монеты в обычных лавках Нейрина.</small>
+                                    </td>
+                                </tr>
+                            @endif
 
                             {{-- Medals --}}
                             @php $tiersWithMedals = $page->reputation->tiers->filter(fn($t) => $t->medal_name || $t->feat_medal_name); @endphp

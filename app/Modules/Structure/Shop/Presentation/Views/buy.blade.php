@@ -379,6 +379,9 @@
                                                                 <span title="Монеты" @unless($isBarterShop) style="display: block;" @endunless>
                                                                     <img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle">
                                                                     &nbsp;{{ format_money($item->price) }}
+                                                                    @if($item->basePrice > $item->price)
+                                                                        <s style="color: #8a7a6a; font-weight: normal;" title="Цена без скидки Городской стражи">{{ format_money($item->basePrice) }}</s>
+                                                                    @endif
                                                                 </span>
                                                             @endif
                                                             @if($item->diamond)
@@ -506,7 +509,7 @@
                                                             @if($cartItem->shopItem->price)
                                                                 <span title="Монет">
                                                                     <img src="{{ asset('img/icon/m_game.gif') }}" alt="money" border="0" width="11" height="11" align="absmiddle">
-                                                                </span>&nbsp;{{ format_money($cartItem->shopItem->price * $cartItem->quantity) }}
+                                                                </span>&nbsp;{{ format_money($page->cart->unitPrice((int) $cartItem->shopItem->price) * $cartItem->quantity) }}
                                                                 <br>
                                                             @endif
                                                             @foreach($cartItem->shopItem->requirements as $requirement)
@@ -601,6 +604,12 @@
                                         @endif
                                     </form>
 
+                                    @if($page->cart->getDiscountPercent() > 0)
+                                        <br>
+                                        <div class="p10h p2v brd2-all bg_l" align="left">
+                                            {{ __('commerce.city_guard_discount', ['percent' => $page->cart->getDiscountPercent()]) }}
+                                        </div>
+                                    @endif
                                     @if($page->shopDescription !== null)
                                         <br>
                                         <div class="p10h p2v brd2-all bg_l" align="left">

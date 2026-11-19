@@ -27,5 +27,7 @@ final readonly class ReputationPageDTO
         public string $messageType,
         public Player $player,
         public string $group,
+        /** Бонусы рангов (Городская стража): list<array{name: string, minPoints: int, discount: int, blessing: int, current: bool}> */
+        public array $rankPerks = [],
     ) {}
 }

@@ -11,6 +11,8 @@
         'title' => __(':name — предмет игры :game', ['name' => $page->name, 'game' => __('homepage.game_name')]),
         'description' => mb_strlen($seoText) >= 70 ? $seoText : __(':name — предмет браузерной фэнтезийной MMORPG :game: характеристики, требования, где получить и для чего используется.', ['name' => $page->name, 'game' => __('homepage.game_name')]),
         'type' => 'website',
+        // Экземпляр (/item/info/{id}) и шаблон (/item/info/s/{id}) показывают один предмет — канонический адрес у шаблона.
+        'url' => route('items.info.share', ['id' => $page->shareItemId]),
     ])
     <style>
         html, body { height: 100%; margin: 0; }

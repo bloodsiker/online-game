@@ -7,6 +7,7 @@ namespace App\Modules\Library\Presentation\Services;
 use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 
 final readonly class LibrarySitemap
 {
@@ -26,6 +27,15 @@ final readonly class LibrarySitemap
             ->orderBy('id')->get() as $category) {
             foreach (['ru', 'uk'] as $locale) {
                 $entries[] = ['url' => $this->urls->index(parameters: ['category' => $category->slug], locale: $locale), 'lastmod' => null];
+            }
+
+            // Бестиарий по картам — отдельные индексируемые страницы.
+            if ($category->content_type === LibraryCategoryContentType::MONSTERS) {
+                foreach (Map::query()->whereHas('locations.monsters')->orderBy('id')->pluck('id') as $mapId) {
+                    foreach (['ru', 'uk'] as $locale) {
+                        $entries[] = ['url' => $this->urls->index(parameters: ['category' => $category->slug, 'map_id' => (int) $mapId], locale: $locale), 'lastmod' => null];
+                    }
+                }
             }
         }
 

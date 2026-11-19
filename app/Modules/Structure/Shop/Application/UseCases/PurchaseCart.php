@@ -167,7 +167,7 @@ class PurchaseCart
                 $this->purchaseLogger->record(
                     user: $lockedUser,
                     sourceType: $sourceType,
-                    lines: $cart->getItems()->map(static function ($cartItem): array {
+                    lines: $cart->getItems()->map(static function ($cartItem) use ($cart): array {
                         $requirements = $cartItem->shopItem->relationLoaded('requirements')
                             ? $cartItem->shopItem->requirements->map(static fn ($requirement): array => [
                                 'share_item_id' => (int) $requirement->share_item_id,
@@ -179,7 +179,7 @@ class PurchaseCart
                         return [
                             'item' => $cartItem->shopItem->item,
                             'quantity' => (int) $cartItem->quantity,
-                            'unit_price' => (int) $cartItem->shopItem->price,
+                            'unit_price' => $cart->unitPrice((int) $cartItem->shopItem->price),
                             'unit_diamond' => (int) $cartItem->shopItem->diamond,
                             'requirements' => $requirements,
                         ];
