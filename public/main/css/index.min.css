@@ -762,7 +762,7 @@
     width: 26px;
     height: 18px;
     background-repeat: no-repeat;
-    background: url(https://dwar.ltd/new_design/img/btn-pass.png);
+    background: none;
     cursor: pointer
 }
 
@@ -1368,7 +1368,7 @@
     bottom: -25px;
     width: 50px;
     height: 110px;
-    background: url(https://dwar.ltd/new_design/img/angle.png) no-repeat
+    background: none no-repeat
 }
 
 .pop-block .pop-block:before {
@@ -1446,7 +1446,7 @@
     display: inline-block;
     margin-top: 5px;
     text-align: right;
-    background: url(https://dwar.ltd/new_design/img/gi-id.png) no-repeat
+    background: none no-repeat
 }
 
 .pop-block fieldset.lt .form-label-id {
@@ -1712,7 +1712,7 @@
     display: inline-block;
     width: 30px;
     height: 25px;
-    background: url(https://dwar.ltd/new_design/img/btn-lang.png) no-repeat
+    background: none no-repeat
 }
 
 .pop-block .lang.en {
@@ -1724,7 +1724,7 @@
 }
 
 .pop-block .land-block .head-bg-mp {
-    background-image: url(https://dwar.ltd/new_design/img/mp-head-bg-b64.png);
+    background-image: none;
     position: relative;
     margin: 8px auto 5px;
     width: 90%;
@@ -1735,7 +1735,7 @@
 }
 
 .pop-block .land-block .head-bg-mp:after,.pop-block .land-block .head-bg-mp:before {
-    background-image: url(https://dwar.ltd/new_design/img/mp-head-angle.png);
+    background-image: none;
     position: absolute;
     top: -10px;
     width: 40px;
@@ -1758,7 +1758,7 @@
     display: block;
     width: 45px;
     height: 100px;
-    background: url(https://dwar.ltd/new_design/img/mp-title-sub-angle.png)
+    background: none
 }
 
 .pop-block .land-block .head-bg-l {
@@ -1776,7 +1776,7 @@
     display: block;
     margin: 0 auto;
     height: 27px;
-    background-image: url(https://dwar.ltd/static/images/new/heading/head-bg-b64.png);
+    background-image: none;
     box-shadow: 0 0 5px 1px #000;
     text-align: center;
     line-height: 25px
@@ -1787,7 +1787,7 @@
     top: -13px;
     width: 40px;
     height: 45px;
-    background-image: url(https://dwar.ltd/static/images/new/angles/head-angle.png);
+    background-image: none;
     background-repeat: no-repeat;
     content: ""
 }
@@ -1803,11 +1803,11 @@
 }
 
 .pop-block .cr-common-tlr:after,.pop-block .cr-common-tlr:before {
-    background-image: url(https://dwar.ltd/static/images/new/angles/mp-title-big-angle.png)
+    background-image: none
 }
 
 .pop-block .cr-common-blr:after,.pop-block .cr-common-blr:before {
-    background-image: url(https://dwar.ltd/static/images/new/angles/bottom-angle.png)
+    background-image: none
 }
 
 .pop-block .pop-close {
@@ -1815,7 +1815,7 @@
     margin-top: 8px;
     width: 26px;
     height: 26px;
-    background: url(https://dwar.ltd/new_design/img/close.png);
+    background: none;
     cursor: pointer
 }
 
@@ -1830,7 +1830,7 @@
 }
 
 .pop-block .big-arrow,.pop-block .big-arrow.bottom {
-    background: url(https://dwar.ltd/new_design/img/big-arrow.png)
+    background: none
 }
 
 .pop-block .big-arrow {
@@ -2052,7 +2052,7 @@
     bottom: -25px;
     width: 50px;
     height: 110px;
-    background: url(https://dwar.ltd/new_design/img/angle.png) no-repeat;
+    background: none no-repeat;
     content: ""
 }
 
@@ -2071,7 +2071,7 @@
     left: 88px;
     width: 180px;
     height: 42px;
-    background: url(https://dwar.ltd/new_design/img/download-btn.png);
+    background: none;
     cursor: pointer
 }
 
@@ -2106,7 +2106,7 @@
     margin: 1px auto;
     width: 328px;
     height: 45px;
-    background: url(https://dwar.ltd/new_design/img/demo-block-ribbon.png);
+    background: none;
     text-align: center;
     font-size: 23px;
     line-height: 40px
@@ -2138,7 +2138,7 @@
     top: 55px;
     width: 12px;
     height: 15px;
-    background: url(https://dwar.ltd/new_design/img/arrow.png);
+    background: none;
     content: ""
 }
 
@@ -2325,7 +2325,7 @@
 }
 
 .pop-block .jspDragBottom,.pop-block .jspDragTop {
-    background: url(https://dwar.ltd/new_design/img/scroll-arrow.png);
+    background: none;
     width: 16px;
     height: 10px;
     position: absolute;

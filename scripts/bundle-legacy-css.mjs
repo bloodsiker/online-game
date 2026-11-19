@@ -2,6 +2,7 @@
 // Относительные url(../img/x.png) переписываются в абсолютные (/main/img/x.png): картинки остаются в public/.
 // Запуск: npm run build (после vite build). Результат: public/build/legacy/<имя>-<hash>.css + legacy-manifest.json.
 import { createHash } from 'node:crypto';
+import { transformSync } from 'esbuild';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 
@@ -24,9 +25,11 @@ mkdirSync(outDir, { recursive: true });
 const manifest = {};
 
 for (const [name, files] of Object.entries(bundles)) {
-    const css = files
+    const source = files
         .map((file) => `/* ${file} */\n` + rebase(readFileSync(join(publicDir, file), 'utf8'), file))
         .join('\n');
+    // Минификация: файл блокирует отрисовку, поэтому каждый килобайт на счету. Порядок правил не меняется.
+    const css = transformSync(source, { loader: 'css', minify: true, legalComments: 'none', logLevel: 'error' }).code;
     const hash = createHash('md5').update(css).digest('hex').slice(0, 10);
     const target = `build/legacy/${name}-${hash}.css`;
     writeFileSync(join(publicDir, target), css);

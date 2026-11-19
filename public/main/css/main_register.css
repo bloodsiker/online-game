@@ -141,7 +141,7 @@ a {
 
 	.b-footer__center {
 		padding: 0 50px;
-		background: url('https://dwar.ltd/images/bg-footer-center.png') 0 0 repeat-y;
+		background: none 0 0 repeat-y;
 	}
 
 	.b-footer__bottom {
@@ -1383,7 +1383,7 @@ html[xmlns] .clearfix {
 	height: 15px;
 	margin: 5px 0 0;
 	font-size: 0;
-	background: url('../images/bg-divider-4.png') repeat-x;
+	background: none repeat-x;
 }
 
 .b-divider-4_invert {
@@ -1407,7 +1407,7 @@ html[xmlns] .clearfix {
 	.b-divider-5__r-inner,
 	.b-divider-5__c {
 		font-size: 0;
-		background: url('../images/bg-divider-5.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-divider-5__l {
@@ -1882,7 +1882,7 @@ html[xmlns] .clearfix {
 		top: 18px;
 		width: 114px;
 		height: 54px;
-		background: url('https://dwar.ltd/images/frames/user-tl-tr.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__tl {
@@ -1902,7 +1902,7 @@ html[xmlns] .clearfix {
 		left: 116px;
 		right: 116px;
 		height: 22px;
-		background: url('https://dwar.ltd/images/frames/user-tc.png') repeat-x;
+		background: none repeat-x;
 	}
 
 	.b-user-frame__tc-2 {
@@ -1913,7 +1913,7 @@ html[xmlns] .clearfix {
 		width: 126px;
 		height: 69px;
 		margin: 0 0 0 -63px;
-		background: url('https://dwar.ltd/images/frames/user-tc-2.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__bl,
@@ -1923,7 +1923,7 @@ html[xmlns] .clearfix {
 		bottom: 0;
 		width: 69px;
 		height: 31px;
-		background: url('https://dwar.ltd/images/frames/user-bl-br.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__bl {
@@ -1947,14 +1947,14 @@ html[xmlns] .clearfix {
 	.b-user-frame__br-2_human {
 		width: 101px;
 		height: 135px;
-		background: url('https://dwar.ltd/images/frames/user-bl-br-human.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__bl-2_magmar,
 	.b-user-frame__br-2_magmar {
 		width: 101px;
 		height: 147px;
-		background: url('https://dwar.ltd/images/frames/user-bl-br-magmar.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__bl-2 {
@@ -1974,7 +1974,7 @@ html[xmlns] .clearfix {
 		left: 72px;
 		right: 72px;
 		height: 11px;
-		background: url('https://dwar.ltd/images/frames/user-bc.png') repeat-x;
+		background: none repeat-x;
 	}
 
 	.b-user-frame__bc-2 {
@@ -1985,7 +1985,7 @@ html[xmlns] .clearfix {
 		width: 178px;
 		height: 26px;
 		margin: 0 0 0 -89px;
-		background: url('https://dwar.ltd/images/frames/user-bc-2.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__bc-3 {
@@ -1995,7 +1995,7 @@ html[xmlns] .clearfix {
 		left: 27px;
 		right: 27px;
 		height: 56px;
-		background: url('https://dwar.ltd/images/frames/user-bc-3.png') repeat-x;
+		background: none repeat-x;
 	}
 
 	.b-user-frame__bc-4 {
@@ -2008,7 +2008,7 @@ html[xmlns] .clearfix {
 		margin: 0 0 0 -84px;
 		padding: 23px 0 0;
 		text-align: center;
-		background: url('https://dwar.ltd/images/frames/user-bc-4.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__l,
@@ -2018,7 +2018,7 @@ html[xmlns] .clearfix {
 		top: 69px;
 		bottom: 20px;
 		width: 27px;
-		background: url('https://dwar.ltd/images/frames/user-lr.png') repeat-y;
+		background: none repeat-y;
 	}
 
 	.b-user-frame__l {
@@ -2040,11 +2040,11 @@ html[xmlns] .clearfix {
 	}
 
 	.b-user-frame__emblem_human {
-		background: url('https://dwar.ltd/images/frames/user-emblem-human.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__emblem_magmar {
-		background: url('https://dwar.ltd/images/frames/user-emblem-magmar.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-user-frame__button {
@@ -2082,7 +2082,7 @@ html[xmlns] .clearfix {
 	.b-form-hint__bl,
 	.b-form-hint__br {
 		position: absolute;
-		background: url('https://dwar.ltd/images/frames/hint-1-corners.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-form-hint__tl {
@@ -2122,7 +2122,7 @@ html[xmlns] .clearfix {
 		position: absolute;
 		left: 3px;
 		right: 3px;
-		background: url('https://dwar.ltd/images/frames/hint-1-tb.png') repeat-x;
+		background: none repeat-x;
 	}
 
 	.b-form-hint__t {
@@ -2143,7 +2143,7 @@ html[xmlns] .clearfix {
 		top: 2px;
 		bottom: 4px;
 		width: 3px;
-		background: url('https://dwar.ltd/images/frames/hint-1-lr.png') repeat-y;
+		background: none repeat-y;
 	}
 
 	.b-form-hint__l {
@@ -2164,7 +2164,7 @@ html[xmlns] .clearfix {
 		width: 9px;
 		height: 9px;
 		margin: -5px 0 0;
-		background: url('https://dwar.ltd/images/frames/hint-1-arr-left.png') no-repeat;
+		background: none no-repeat;
 	}
 
 	.b-form-hint__cont {
@@ -2236,7 +2236,7 @@ html[xmlns] .clearfix {
 	line-height: 16px;
 	text-align: center;
 	border: #4c3725 1px solid;
-	background: #fbf096 url('https://dwar.ltd/images/bg-alt-title.png') repeat-x;
+	background: #fbf096 none repeat-x;
 }
 
 .b-common-alt__body {

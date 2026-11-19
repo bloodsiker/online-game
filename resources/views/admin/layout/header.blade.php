@@ -1,7 +1,7 @@
 <header class="header">
     <div class="logo-container">
         <a href="{{ route('admin.dashboard') }}" class="logo" title="Вечность — админка">
-            <img src="{{ asset('img/logo/Logoo500.webp') }}" width="120" height="40" alt="Вечность" style="object-fit: contain;" />
+            <img src="{{ asset('img/logo/Logoo330.webp') }}" width="120" height="40" alt="Вечность" style="object-fit: contain;" />
         </a>
 
         <div class="d-md-none toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">

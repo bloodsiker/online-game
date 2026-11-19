@@ -1,12 +1,12 @@
 * {font-family:tahoma;font-size: 12px;}
 body {font-family: tahoma;font-size: 12px;color: #633113;font-weight: normal;}
 a {color:#AC0000;font-family: tahoma;font-size: 12px;font-weight: normal;}
-.login {width:145px;height:17px;background-color: #B48D5E;border-width:1px;border-color:#957445;background-image: url(https://dwar.ltd/info/library/images/login_bg2.gif);font-size:10px;padding:0px;padding-left:2px}
-.menuitem {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:13px;background:url(https://dwar.ltd/info/library/images/menuitem.gif) no-repeat bottom left;}
-.menuitemsel {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:13px;background:url(https://dwar.ltd/info/library/images/menuitemsel.gif) no-repeat bottom left;}
-.menuitemseladv {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:16px;background:url(https://dwar.ltd/info/library/images/menuitemseladv.gif) no-repeat bottom left;}
-.menusubitem {color:#3a6178;font:normal 11px tahoma;padding:1 0 1 42;height:13px;background:url(https://dwar.ltd/info/library/images/menusubitem.gif) no-repeat bottom left;}
-.menusubitemsel {color:#3a6178;font:normal 11px tahoma;padding:1 0 1 42;height:13px;background:url(https://dwar.ltd/info/library/images/menusubitemsel.gif) no-repeat bottom left;}
+.login {width:145px;height:17px;background-color: #B48D5E;border-width:1px;border-color:#957445;background-image: none;font-size:10px;padding:0px;padding-left:2px}
+.menuitem {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:13px;background:none no-repeat bottom left;}
+.menuitemsel {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:13px;background:none no-repeat bottom left;}
+.menuitemseladv {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:16px;background:none no-repeat bottom left;}
+.menusubitem {color:#3a6178;font:normal 11px tahoma;padding:1 0 1 42;height:13px;background:none no-repeat bottom left;}
+.menusubitemsel {color:#3a6178;font:normal 11px tahoma;padding:1 0 1 42;height:13px;background:none no-repeat bottom left;}
 .menuitem a,.menuitemsel a,.menuitemseladv a {color:#A00000;font:bold 11px tahoma;text-decoration:none}
 .menusubitem a {color:#B20000;font:normal 11px tahoma;text-decoration:none}
 .menusubitemsel a {color:#B20000;font:bold 11px tahoma;text-decoration:none;}
@@ -29,7 +29,7 @@ a {color:#AC0000;font-family: tahoma;font-size: 12px;font-weight: normal;}
 .calendar .cur a {font-size:12px;color:#AC0000}
 .calendar .cur1 {font-size:12px;color:#AE4022}
 .calendar .cur1 a {font-size:12px;color:#AC0000}
-.calendar .sel {font-size:12px;background:url(https://dwar.ltd/info/library/images/calendsel.gif) no-repeat top center;color:white;font-weight:bold}
+.calendar .sel {font-size:12px;background:none no-repeat top center;color:white;font-weight:bold}
 P,UL,LI {margin: 0px;}
 
 strong.butt1 {
@@ -170,25 +170,25 @@ strong.butt2 input, strong.butt2 button {
 	width: 20px;
 }
 .tbl-usi_bottom {
-	background-image: url('https://dwar.ltd/v2/images/tbl-usi_bottom.gif');
+	background-image: none;
 	background-repeat: repeat-x;
 	height: 40px;
 }
 .tbl-usi_top {
-	background-image: url('https://dwar.ltd/v2/images/tbl-usi_top.gif');
+	background-image: none;
 	background-repeat: repeat-x;
 	height: 36px;
 }
 .tbl-usi_bg {
-	background-image: url('https://dwar.ltd/v2/images/tbl-usi_bg.gif');
+	background-image: url('../images/tbl-usi_bg.gif');
 	background-repeat: repeat;
 }
 .tbl-usi_bg-light {
-	background-image: url('https://dwar.ltd/v2/images/tbl-usi_bg-light.gif');
+	background-image: url('../images/tbl-usi_bg-light.gif');
 	background-repeat: repeat;
 }
 .curly_label_c {
-	background: url('https://dwar.ltd/v2/images/tbl-aft_label-center.gif') repeat-x;
+	background: url('../images/tbl-aft_label-center.gif') repeat-x;
 	height:18px;
 }
 .backpack_overflow {

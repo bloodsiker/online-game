@@ -286,7 +286,7 @@
 
     <div class="homepage-logo">
         <a href="{{ route('index') }}" title="{{ __('homepage.game_name') }}">
-            <img src="{{ asset('img/logo/Logoo500.webp') }}" width="330" height="110" alt="{{ __('homepage.game_name') }}" decoding="async" fetchpriority="high">
+            <img src="{{ asset('img/logo/Logoo330.webp') }}" srcset="{{ asset('img/logo/Logoo330.webp') }} 1x, {{ asset('img/logo/Logoo660.webp') }} 2x" width="330" height="110" alt="{{ __('homepage.game_name') }}" decoding="async" fetchpriority="high">
         </a>
     </div>
 </div>
@@ -630,9 +630,9 @@
                     <div>
                         <span style="position: relative;left: 33px;top: 3px;">
                             <a href="#" class="b-aside__support-link">{{ __('homepage.payments_description') }}<br>Portmone / VISA / Mastercard</a>
-                            <img src="{{ asset('main/images/payment/apple.png') }}" width="80" alt="apple">
-                            <img src="{{ asset('main/images/payment/google.png') }}" width="80" alt="google"><br>
-                            <img src="{{ asset('main/images/payment/visa.png') }}" width="80" alt="visa">
+                            <img src="{{ asset('main/images/payment/apple-160.webp') }}" width="80" height="80" loading="lazy" decoding="async" alt="apple">
+                            <img src="{{ asset('main/images/payment/google-160.webp') }}" width="80" height="43" loading="lazy" decoding="async" alt="google"><br>
+                            <img src="{{ asset('main/images/payment/visa-160.webp') }}" width="80" height="72" loading="lazy" decoding="async" alt="visa">
 						</span>
                     </div>
                 </div>

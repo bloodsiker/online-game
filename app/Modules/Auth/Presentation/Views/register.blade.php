@@ -1,29 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8"/>
     @include('partials.google-tag')
     <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-    <title>New Online game</title>
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="DWAR Легенда: Спадок драконів">
-    <meta name="twitter:description" content="Офіційний український сервер Двар Легенда: Спадок драконів">
-    <meta name="twitter:image" content="/new_design/img/logo_tshare.png">
-    <meta name="twitter:domain" content="dwar.ltd">
-
-    <meta name="description"
-          content="Легенда: Спадок драконів, офіційний, український, двар, легенда, український сервер, Бесплатна онлайн гра Двар, Український офіційний сервер легенди, прайм, мінор"/>
-    <meta name="keywords"
-          content="dwar, маріуполь, АЗОВСТАЛЬ, mariupol, azovstal, український, двар, офіційний, онлайн ігри, ігри онлайн, грати ігри, група, ментори, дракони вічності, браузерна гра, mmorpg, дракони, магмари, арена, apeha, online, двар, прайм, мінор"/>
+    @include('partials.seo', [
+        'title' => __('homepage.registration').' — '.__('homepage.game_name').' (Eternum)',
+        'description' => __('homepage.register_description'),
+        'url' => route('register'),
+    ])
     @vite('resources/js/app.js')
-    <meta property="og:title" content="Гра Легенда спадок драконів Український сервер"/>
-    <meta property="og:image" content="/new_design/img/logo_tshare.png"/>
-    <meta property="og:type" content="article"/>
-    <meta property="og:url" content="https://dwar.ltd/"/>
-    <meta property="og:site_name" content="Онлайн гра двар легенда спадок драконів"/>
-    <meta property="fb:admins" content="1"/>
-    <meta property="og:description" content="Український сервер Двар Легенда: Спадок драконів "/>
 
     <link rel="stylesheet" href="{{ asset('main/css/main_register.css') }}"/>
     <link rel="stylesheet" href="{{ asset('main/css/register.css') }}"/>
@@ -636,7 +622,6 @@
 
                                                 <div class="b-common-wrapper clearfix">
 {{--                                                    <p class="float-left">--}}
-{{--                                                        <a href="https://dwar.ltd/register.php?" class="b-button-red-5">--}}
 {{--														<span class="b-button-red-5__inner">--}}
 {{--															Предыдущий шаг--}}
 {{--                                                        </span>--}}
@@ -678,7 +663,7 @@
                 <span class="b-footer__copyright-block">
 						<tr>
 	<td class="tbl-mn_menu-bg">
-				<img src="images/d.gif" width=6 height=1>
+				<img src="{{ asset('main/images/d.gif') }}" width="6" height="1" alt="">
 
 	</td>
 </tr>

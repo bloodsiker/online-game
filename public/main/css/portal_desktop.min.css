@@ -798,7 +798,7 @@ html {
     display: block;
     width: 11px;
     height: 12px;
-    background: url(https://dwar.ltd/static/images/sprite26.png?v1)
+    background: none
 }
 
 .gold span {
@@ -877,11 +877,11 @@ html {
 }
 
 .nav-tabs_item {
-    background-image: url(https://dwar.ltd/static/images/new/heading/nav-tabs-bg-b64.png)
+    background-image: none
 }
 
 .nav-tabs_item:before,.nav-tabs_item:after {
-    background-image: url(https://dwar.ltd/static/images/new/angles/tab-lr-b64.png)
+    background-image: none
 }
 
 .nav-tabs_item:before,.nav-tabs_item:after {
@@ -1950,7 +1950,7 @@ td>.obj {
 
 .inpLab span {
     position: absolute;
-    background: url(https://dwar.ltd/static/images/sprite1.png?v13)
+    background: none
 }
 
 .inpLab .ch {
@@ -2042,7 +2042,7 @@ td>.obj {
     background-repeat: no-repeat;
     display: block;
     margin: 0 auto;
-    background-image: url(https://dwar.ltd/static/images/new/icons/icon-rating.png)
+    background-image: none
 }
 
 .icon-ratings.pvp {
@@ -2495,7 +2495,7 @@ td>.obj {
     width: 142px;
     height: 42px;
     margin-top: 4px;
-    background-image: url(https://dwar.ltd/new_design/img/66c1849ef121cd6b.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -2505,7 +2505,7 @@ td>.obj {
 }
 
 .lang-de .b-portal-logo__picture {
-    background-image: url(https://dwar.ltd/new_design/img/5de453ebeeafb227.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -2623,7 +2623,7 @@ td>.obj {
     width: 55px;
     height: 55px;
     margin-right: -5px;
-    background-image: url(https://dwar.ltd/new_design/img/cb8b22646d391300.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -2642,7 +2642,7 @@ td>.obj {
     font-size: 10px;
     font-weight: 700;
     line-height: 32px;
-    background-image: url(https://dwar.ltd/new_design/img/df9842ea8805743b.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -2654,7 +2654,7 @@ td>.obj {
     height: 32px;
     text-align: center;
     line-height: 32px;
-    background-image: url(https://dwar.ltd/new_design/img/96b3e93613b995ca.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -2694,7 +2694,7 @@ td>.obj {
 
 .b-auth-card--valor {
     color: #2b6699;
-    background-image: url(https://dwar.ltd/new_design/img/0820eb2fc26f474f.png);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: 22px 3px
 }
@@ -2706,7 +2706,7 @@ td>.obj {
 
 .b-auth-card--sadar {
     color: #b11616;
-    background-image: url(https://dwar.ltd/new_design/img/3fe6939a24caf5ab.png);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: 22px 3px
 }
@@ -2727,462 +2727,462 @@ td>.obj {
 }
 
 .b-icon--arrow-1 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -228px -240px;
     width: 10px;
     height: 14px
 }
 
 .b-icon--go-back {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -206px -210px;
     width: 24px;
     height: 24px
 }
 
 .b-icon--action-close {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -158px -188px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--action-delete {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -140px -188px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--action-edit {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -180px -240px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--action-move {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -126px -240px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--action-open {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -194px -188px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--action-ques {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -122px -188px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--action-quote {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -162px -240px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--action-settings {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -144px -240px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--action-warn {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -176px -188px;
     width: 16px;
     height: 16px
 }
 
 .b-icon--arrow-1 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -228px -240px;
     width: 10px;
     height: 14px
 }
 
 .b-icon--arrow-nav-next {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -240px -240px;
     width: 8px;
     height: 12px
 }
 
 .b-icon--arrow-nav-prev {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -250px -240px;
     width: 8px;
     height: 12px
 }
 
 .b-icon--btn-delete {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -84px -240px;
     width: 19px;
     height: 19px
 }
 
 .b-icon--btn-delete-avatar {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -105px -240px;
     width: 19px;
     height: 19px
 }
 
 .b-icon--btn-delete-avatar-hover {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -42px -240px;
     width: 19px;
     height: 19px
 }
 
 .b-icon--btn-make-avatar {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -21px -240px;
     width: 19px;
     height: 19px
 }
 
 .b-icon--btn-make-avatar-hover {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: 0 -240px;
     width: 19px;
     height: 19px
 }
 
 .b-icon--delete {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -187px -165px;
     width: 11px;
     height: 11px
 }
 
 .b-icon--gi-id {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: 0 -188px;
     width: 93px;
     height: 20px
 }
 
 .b-icon--lang-de {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -46px;
     width: 27px;
     height: 21px
 }
 
 .b-icon--lang-en {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -23px;
     width: 27px;
     height: 21px
 }
 
 .b-icon--lang-ja {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -92px;
     width: 27px;
     height: 21px
 }
 
 .b-icon--lang-ko {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -69px;
     width: 27px;
     height: 21px
 }
 
 .b-icon--lang-ru {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px 0;
     width: 27px;
     height: 21px
 }
 
 .b-icon--league-1-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -212px -94px;
     width: 30px;
     height: 28px
 }
 
 .b-icon--league-2-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -212px -124px;
     width: 30px;
     height: 28px
 }
 
 .b-icon--league-3-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -212px -154px;
     width: 30px;
     height: 28px
 }
 
 .b-icon--league-4-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: 0 -210px;
     width: 30px;
     height: 28px
 }
 
 .b-icon--league-5-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -32px -210px;
     width: 30px;
     height: 28px
 }
 
 .b-icon--league-6-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -64px -210px;
     width: 30px;
     height: 28px
 }
 
 .b-icon--mouse-click {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -232px -210px;
     width: 11px;
     height: 15px
 }
 
 .b-icon--mouse-click-hover {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -215px -240px;
     width: 11px;
     height: 15px
 }
 
 .b-icon--quant {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -95px -188px;
     width: 25px;
     height: 18px
 }
 
 .b-icon--rate-achievements {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -212px -34px;
     width: 31px;
     height: 28px
 }
 
 .b-icon--rate-confrontation {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -212px -64px;
     width: 31px;
     height: 28px
 }
 
 .b-icon--rate-merit {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -96px -210px;
     width: 28px;
     height: 28px
 }
 
 .b-icon--rss {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -126px -210px;
     width: 26px;
     height: 26px
 }
 
 .b-icon--rss-target {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -198px -240px;
     width: 15px;
     height: 15px
 }
 
 .b-icon--search-type-1 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -102px -144px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-1-active {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: 0 -56px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-2 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -161px 0;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-2-active {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -51px -144px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-3 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: 0 -144px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-3-active {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -161px -88px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-4 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -161px -44px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-4-active {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -59px 0;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-5 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -102px -100px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-5-active {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -51px -100px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-6 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: 0 -100px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-6-active {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -110px -44px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-7 {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -110px 0;
     width: 49px;
     height: 42px
 }
 
 .b-icon--search-type-7-active {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -51px -56px;
     width: 49px;
     height: 42px
 }
 
 .b-icon--show {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -190px;
     width: 27px;
     height: 18px
 }
 
 .b-icon--show-active {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -210px;
     width: 27px;
     height: 18px
 }
 
 .b-icon--social-fb-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -140px;
     width: 23px;
     height: 23px
 }
 
 .b-icon--social-mail-md {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -212px 0;
     width: 32px;
     height: 32px
 }
 
 .b-icon--social-ok-md {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -153px -144px;
     width: 32px;
     height: 32px
 }
 
 .b-icon--social-tw-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -165px;
     width: 23px;
     height: 23px
 }
 
 .b-icon--social-vk-sm {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -246px -115px;
     width: 23px;
     height: 23px
 }
 
 .b-icon--sort-down {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -173px -132px;
     width: 10px;
     height: 9px
 }
 
 .b-icon--sort-up {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -161px -132px;
     width: 10px;
     height: 9px
 }
 
 .b-icon--view {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -63px -240px;
     width: 19px;
     height: 19px
 }
 
 .b-icon--view-hover {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -187px -144px;
     width: 19px;
     height: 19px
 }
 
 .b-icon--video {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: 0 0;
     width: 57px;
     height: 54px
@@ -3267,7 +3267,7 @@ td>.obj {
 
 .b-icon--page-prev {
     font-size: 0;
-    background-image: url(https://dwar.ltd/new_design/img/18d4ec50365110c4.png);
+    background-image: none;
     background-position: 0 0;
     width: 13px;
     height: 14px
@@ -3276,7 +3276,7 @@ td>.obj {
 .b-icon--page-next {
     font-size: 0;
     margin-left: 1px;
-    background-image: url(https://dwar.ltd/new_design/img/18d4ec50365110c4.png);
+    background-image: none;
     background-position: -15px 0;
     width: 13px;
     height: 14px
@@ -3285,7 +3285,7 @@ td>.obj {
 .b-icon--user-info {
     width: 10px;
     height: 10px;
-    background-image: url(https://dwar.ltd/new_design/img/23ffa621e9476f6c.png);
+    background-image: url(../images/player_info.gif);
     background-repeat: no-repeat
 }
 
@@ -3317,7 +3317,7 @@ td>.obj {
 }
 
 .b-icon--rss {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -126px -210px;
     width: 26px;
     height: 26px
@@ -3325,7 +3325,7 @@ td>.obj {
 
 .b-icon--rss-forum {
     position: relative;
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -126px -210px;
     width: 26px;
     height: 26px
@@ -3336,7 +3336,7 @@ td>.obj {
     position: absolute;
     top: 13px;
     left: 13px;
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -198px -240px;
     width: 15px;
     height: 15px
@@ -3344,7 +3344,7 @@ td>.obj {
 
 .b-icon--pager-prev {
     margin-top: -4px;
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -250px -240px;
     width: 8px;
     height: 12px
@@ -3352,7 +3352,7 @@ td>.obj {
 
 .b-icon--pager-next {
     margin-top: -4px;
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -240px -240px;
     width: 8px;
     height: 12px
@@ -3382,7 +3382,7 @@ td>.obj {
     content: '';
     display: inline-block;
     vertical-align: middle;
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -180px -210px;
     width: 24px;
     height: 24px
@@ -3392,7 +3392,7 @@ td>.obj {
     content: '';
     display: inline-block;
     vertical-align: middle;
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -154px -210px;
     width: 24px;
     height: 24px
@@ -3402,21 +3402,21 @@ td>.obj {
     content: '';
     display: inline-block;
     vertical-align: middle;
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -212px -184px;
     width: 24px;
     height: 24px
 }
 
 .b-icon--btn-delete-avatar:hover {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: -42px -240px;
     width: 19px;
     height: 19px
 }
 
 .b-icon--btn-make-avatar:hover {
-    background-image: url(../img/99fcdb23702e5c03.png);
+    background-image: url(../img/99fcdb23702e5c03.webp);
     background-position: 0 -240px;
     width: 19px;
     height: 19px
@@ -3453,7 +3453,7 @@ td>.obj {
     position: absolute;
     left: 12px;
     bottom: 2px;
-    background-image: url(https://dwar.ltd/new_design/img/86302ea0fb36267f.png);
+    background-image: none;
     background-position: 0 0;
     width: 12px;
     height: 10px
@@ -3461,7 +3461,7 @@ td>.obj {
 
 .open .b-lang__container:before {
     bottom: 3px;
-    background-image: url(https://dwar.ltd/new_design/img/86302ea0fb36267f.png);
+    background-image: none;
     background-position: -14px 0;
     width: 12px;
     height: 9px
@@ -3744,7 +3744,7 @@ td>.obj {
 }
 
 .b-nav-lvl-1__menu-item:hover {
-    background-image: url(https://dwar.ltd/new_design/img/10fb5dfcb0d4874d.png);
+    background-image: none;
     background-repeat: repeat-x;
     background-image: -webkit-gradient(linear,left top,left bottom,from(#3a322f),color-stop(2%,#423836),color-stop(5%,#4e433f),color-stop(7%,#544945),color-stop(9%,#554a46),color-stop(20%,#554a46),color-stop(52%,#4b413f),color-stop(55%,#423836),to(#403835));
     background-image: -webkit-linear-gradient(top,#3a322f 0%,#423836 2%,#4e433f 5%,#544945 7%,#554a46 9%,#554a46 20%,#4b413f 52%,#423836 55%,#403835 100%);
@@ -3764,7 +3764,7 @@ td>.obj {
 }
 
 .b-nav-lvl-1__menu-item.is-active {
-    background-image: url(https://dwar.ltd/new_design/img/d1000ced9d88042d.png);
+    background-image: none;
     background-repeat: repeat-x;
     background-image: -webkit-gradient(linear,left top,left bottom,from(#5b0000),color-stop(2%,#5b0000),color-stop(9%,#690000),color-stop(14%,#690000),color-stop(50%,#5e0000),color-stop(55%,#530000),to(#530000));
     background-image: -webkit-linear-gradient(top,#5b0000 0%,#5b0000 2%,#690000 9%,#690000 14%,#5e0000 50%,#530000 55%,#530000 100%);
@@ -3889,7 +3889,7 @@ td>.obj {
 }
 
 .b-nav-lvl-2__menu-item:hover {
-    background-image: url(https://dwar.ltd/new_design/img/10fb5dfcb0d4874d.png);
+    background-image: none;
     background-repeat: repeat-x;
     background-image: -webkit-gradient(linear,left top,left bottom,from(#3a322f),color-stop(2%,#423836),color-stop(5%,#4e433f),color-stop(7%,#544945),color-stop(9%,#554a46),color-stop(20%,#554a46),color-stop(52%,#4b413f),color-stop(55%,#423836),to(#403835));
     background-image: -webkit-linear-gradient(top,#3a322f 0%,#423836 2%,#4e433f 5%,#544945 7%,#554a46 9%,#554a46 20%,#4b413f 52%,#423836 55%,#403835 100%);
@@ -3909,7 +3909,7 @@ td>.obj {
 }
 
 .b-nav-lvl-2__menu-item.is-active {
-    background-image: url(https://dwar.ltd/new_design/img/d1000ced9d88042d.png);
+    background-image: none;
     background-repeat: repeat-x;
     background-image: -webkit-gradient(linear,left top,left bottom,from(#5b0000),color-stop(2%,#5b0000),color-stop(9%,#690000),color-stop(14%,#690000),color-stop(50%,#5e0000),color-stop(55%,#530000),to(#530000));
     background-image: -webkit-linear-gradient(top,#5b0000 0%,#5b0000 2%,#690000 9%,#690000 14%,#5e0000 50%,#530000 55%,#530000 100%);
@@ -3967,7 +3967,7 @@ td>.obj {
     margin: 0 1px 12px;
     font-size: 21px;
     height: 45px;
-    background-image: url(https://dwar.ltd/new_design/img/86a57763016c8df1.png);
+    background-image: none;
     background-repeat: repeat-x;
     border-top: 1px solid #4d432f;
     border-radius: 20px 20px 0 0;
@@ -4016,7 +4016,7 @@ td>.obj {
     position: relative;
     color: inherit!important;
     white-space: nowrap;
-    background-image: url(https://dwar.ltd/new_design/img/32f86c9628e71fbb.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -4029,7 +4029,7 @@ td>.obj {
     max-height: 100%;
     width: 34px;
     height: 44px;
-    background-image: url(https://dwar.ltd/new_design/img/2d4d3736aa63a4dc.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -4042,7 +4042,7 @@ td>.obj {
     max-height: 100%;
     width: 34px;
     height: 44px;
-    background-image: url(https://dwar.ltd/new_design/img/d61820ba1b51b5ed.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -4080,20 +4080,20 @@ td>.obj {
 }
 
 .b-nav-lvl-3__menu-item:hover .b-nav-lvl-3__menu-link {
-    background-image: url(https://dwar.ltd/new_design/img/adffdcafa67c6d50.png)
+    background-image: none
 }
 
 .b-nav-lvl-3__menu-item:hover .b-nav-lvl-3__menu-link:before {
     width: 34px;
     height: 44px;
-    background-image: url(https://dwar.ltd/new_design/img/8c4671efe14ba6ab.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-nav-lvl-3__menu-item:hover .b-nav-lvl-3__menu-link:after {
     width: 34px;
     height: 44px;
-    background-image: url(https://dwar.ltd/new_design/img/d6ef8475a5c09016.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -4104,20 +4104,20 @@ td>.obj {
 }
 
 .b-nav-lvl-3__menu-item.is-active .b-nav-lvl-3__menu-link {
-    background-image: url(https://dwar.ltd/new_design/img/adffdcafa67c6d50.png)
+    background-image: none
 }
 
 .b-nav-lvl-3__menu-item.is-active .b-nav-lvl-3__menu-link:before {
     width: 34px;
     height: 44px;
-    background-image: url(https://dwar.ltd/new_design/img/8c4671efe14ba6ab.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-nav-lvl-3__menu-item.is-active .b-nav-lvl-3__menu-link:after {
     width: 34px;
     height: 44px;
-    background-image: url(https://dwar.ltd/new_design/img/d6ef8475a5c09016.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -5342,7 +5342,7 @@ td>.obj {
     left: 4px;
     width: 22px;
     height: 22px;
-    background-image: url(https://dwar.ltd/new_design/img/92f1557eca8e6e1d.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -5360,7 +5360,7 @@ td>.obj {
     left: 4px;
     width: 22px;
     height: 22px;
-    background-image: url(https://dwar.ltd/new_design/img/a5f6c55f44895c1e.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -5827,7 +5827,7 @@ td>.obj {
     margin-top: -8px;
     width: 9px;
     height: 16px;
-    background-image: url(https://dwar.ltd/new_design/img/83d55316c26ffd60.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -5903,7 +5903,7 @@ td>.obj {
     margin-top: -2px;
     width: 16px;
     height: 17px;
-    background-image: url(https://dwar.ltd/new_design/img/2fefa19d2aeeb270.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -5914,7 +5914,7 @@ td>.obj {
 .b-carma--dislike .b-carma__icon {
     width: 16px;
     height: 17px;
-    background-image: url(https://dwar.ltd/new_design/img/042bc29f545fc8a2.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6180,14 +6180,14 @@ td>.obj {
     vertical-align: middle;
     width: 28px;
     height: 28px;
-    background-image: url(https://dwar.ltd/new_design/img/8704445f247eb331.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-post.is-unread .b-post__icon {
     width: 28px;
     height: 28px;
-    background-image: url(https://dwar.ltd/new_design/img/1044f9e9d4e3642b.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6202,7 +6202,7 @@ td>.obj {
     right: 0;
     width: 13px;
     height: 14px;
-    background-image: url(https://dwar.ltd/new_design/img/550ce0358d4ae8e4.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6217,7 +6217,7 @@ td>.obj {
     right: 0;
     width: 14px;
     height: 13px;
-    background-image: url(https://dwar.ltd/new_design/img/ea3b9c42e7229c7b.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6232,7 +6232,7 @@ td>.obj {
     right: 0;
     width: 12px;
     height: 13px;
-    background-image: url(https://dwar.ltd/new_design/img/a6e06ee76726469b.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6629,7 +6629,7 @@ td>.obj {
     width: 16px;
     height: 26px;
     margin-left: 5px;
-    background-image: url(https://dwar.ltd/new_design/img/dae784115938e787.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6753,11 +6753,11 @@ td>.obj {
 }
 
 .b-page--theme-default {
-    background-image: url(https://dwar.ltd/new_design/img/b6357f8a2c86ede6.jpg)
+    background-image: none
 }
 
 .b-page--theme-default-winter {
-    background-image: url(https://dwar.ltd/new_design/img/4f10ff293e1efe5d.jpg)
+    background-image: none
 }
 
 .b-page--theme-home {
@@ -6768,7 +6768,7 @@ td>.obj {
 }
 
 .b-page--theme-home-winter {
-    background-image: url(https://dwar.ltd/new_design/img/03cefbb396b0d167.jpg)
+    background-image: none
 }
 
 .b-page--home {
@@ -6866,7 +6866,7 @@ td>.obj {
     left: -17px;
     width: 66px;
     height: 100px;
-    background-image: url(https://dwar.ltd/new_design/img/4feacf8314783caf.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6877,7 +6877,7 @@ td>.obj {
     right: -17px;
     width: 66px;
     height: 100px;
-    background-image: url(https://dwar.ltd/new_design/img/9f806c351b5615dc.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6893,7 +6893,7 @@ td>.obj {
     z-index: 2;
     width: 43px;
     height: 43px;
-    background-image: url(https://dwar.ltd/new_design/img/679a594fec858b2d.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6905,7 +6905,7 @@ td>.obj {
     z-index: 2;
     width: 42px;
     height: 43px;
-    background-image: url(https://dwar.ltd/new_design/img/b94743135bbf1586.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6920,7 +6920,7 @@ td>.obj {
     left: -18px;
     width: 45px;
     height: 97px;
-    background-image: url(https://dwar.ltd/new_design/img/158082858f330745.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6931,7 +6931,7 @@ td>.obj {
     right: -18px;
     width: 45px;
     height: 97px;
-    background-image: url(https://dwar.ltd/new_design/img/6b4dbf89149ecb26.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -6949,7 +6949,7 @@ td>.obj {
 
 .b-content__container {
     background-color: #ffde9f;
-    background-image: url(https://dwar.ltd/new_design/img/4ace791da72dc736.png);
+    background-image: none;
     background-repeat: repeat;
     min-height: 200px;
     padding-bottom: 30px;
@@ -7041,7 +7041,7 @@ td>.obj {
     line-height: 40px;
     font-size: inherit;
     font-weight: inherit;
-    background-image: url(https://dwar.ltd/new_design/img/28f194939beba9b8.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -7418,7 +7418,7 @@ hr {
     overflow: hidden;
     display: none;
     z-index: 8010;
-    background-image: url(https://dwar.ltd/new_design/img/b3a4ee645ba494f5.png);
+    background-image: none;
     background-repeat: repeat
 }
 
@@ -7603,7 +7603,7 @@ hr {
     top: -2px;
     width: 15px;
     height: 22px;
-    background-image: url(https://dwar.ltd/new_design/img/78a4df9d16368995.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -7614,7 +7614,7 @@ hr {
     top: -2px;
     width: 15px;
     height: 22px;
-    background-image: url(https://dwar.ltd/new_design/img/9c91b25f2366c0a2.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -7696,7 +7696,7 @@ hr {
     line-height: 24px;
     margin-left: 12px;
     margin-right: 12px;
-    background-image: url(https://dwar.ltd/new_design/img/018082d2d0174292.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -7707,7 +7707,7 @@ hr {
     left: -24px;
     width: 42px;
     height: 47px;
-    background-image: url(https://dwar.ltd/new_design/img/474e8914d797f111.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -7718,7 +7718,7 @@ hr {
     right: -24px;
     width: 42px;
     height: 47px;
-    background-image: url(https://dwar.ltd/new_design/img/d1a17f6993012b10.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -7901,7 +7901,7 @@ hr {
     position: relative;
     padding: 17px 0;
     height: 118px;
-    background-image: url(https://dwar.ltd/new_design/img/1745aea01270089a.png);
+    background-image: none;
     background-repeat: repeat
 }
 
@@ -7919,7 +7919,7 @@ hr {
     left: -13px;
     width: 23px;
     height: 118px;
-    background-image: url(https://dwar.ltd/new_design/img/2fa8f3a174594f62.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -7932,13 +7932,13 @@ hr {
     bottom: 0;
     width: 21px;
     height: 78px;
-    background-image: url(https://dwar.ltd/new_design/img/eab52395e80d7d12.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-slider--cinema .b-slider__thumbs .b-slider__nav--next {
     right: -13px;
-    background-image: url(https://dwar.ltd/new_design/img/7241e9ed2b0f46b4.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -7951,7 +7951,7 @@ hr {
     bottom: 0;
     width: 22px;
     height: 78px;
-    background-image: url(https://dwar.ltd/new_design/img/cf879cead4a47c91.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -7986,7 +7986,7 @@ hr {
     bottom: 0;
     left: 0;
     background-size: 100% 100%;
-    background-image: url(https://dwar.ltd/new_design/img/640afb1187add7be.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -8051,14 +8051,14 @@ hr {
 
 .b-carousel__nav--prev {
     left: -26px;
-    background-image: url(https://dwar.ltd/new_design/img/cc1eaac08bffc54c.png);
+    background-image: none;
     background-position: 0 0;
     width: 49px;
     height: 61px
 }
 
 .b-carousel__nav--prev:hover {
-    background-image: url(https://dwar.ltd/new_design/img/cc1eaac08bffc54c.png);
+    background-image: none;
     background-position: -51px 0;
     width: 49px;
     height: 61px
@@ -8066,14 +8066,14 @@ hr {
 
 .b-carousel__nav--next {
     right: -26px;
-    background-image: url(https://dwar.ltd/new_design/img/cc1eaac08bffc54c.png);
+    background-image: none;
     background-position: -102px 0;
     width: 49px;
     height: 61px
 }
 
 .b-carousel__nav--next:hover {
-    background-image: url(https://dwar.ltd/new_design/img/cc1eaac08bffc54c.png);
+    background-image: none;
     background-position: 0 -63px;
     width: 49px;
     height: 61px
@@ -8451,7 +8451,7 @@ hr {
     -webkit-box-shadow: 0 0 5px #000;
     box-shadow: 0 0 5px #000;
     position: relative;
-    background-image: url(https://dwar.ltd/new_design/img/2df6388ae65bcc3c.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -8467,12 +8467,12 @@ hr {
     left: 4px;
     width: 21px;
     height: 16px;
-    background-image: url(https://dwar.ltd/new_design/img/2283b6dbe55407c5.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-calendar__nav--prev:hover {
-    background-image: url(https://dwar.ltd/new_design/img/bd0ec145494a1529.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -8480,12 +8480,12 @@ hr {
     right: 4px;
     width: 21px;
     height: 16px;
-    background-image: url(https://dwar.ltd/new_design/img/d40992a6c0a938fd.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-calendar__nav--next:hover {
-    background-image: url(https://dwar.ltd/new_design/img/010bea03a7456609.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -8507,7 +8507,7 @@ hr {
     text-align: center;
     font-weight: 700;
     background-color: #38322c;
-    background-image: url(https://dwar.ltd/new_design/img/208c18ed7be08ebf.png);
+    background-image: none;
     background-repeat: repeat-x;
     background-repeat: repeat-x;
     background-position: top left
@@ -8562,7 +8562,7 @@ hr {
     left: -2px;
     width: 35px;
     height: 30px;
-    background-image: url(https://dwar.ltd/new_design/img/493a12a8ffdf3a25.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -8604,7 +8604,7 @@ hr {
     border-radius: 3px;
     margin: -2px 10px 0;
     border: 1px solid #100c0a;
-    background-image: url(https://dwar.ltd/new_design/img/2df6388ae65bcc3c.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -8645,7 +8645,7 @@ hr {
     border-radius: 2px 2px 0 0;
     border: 1px solid #0d0a09;
     background-color: #241c17;
-    background-image: url(https://dwar.ltd/new_design/img/ee6408ef9fea5dc6.gif);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -8702,7 +8702,7 @@ hr {
     border-radius: 0 0 2px 2px;
     border: 1px solid #0d0a09;
     background-color: #241c17;
-    background-image: url(https://dwar.ltd/new_design/img/ee6408ef9fea5dc6.gif);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -8713,7 +8713,7 @@ hr {
     margin-right: 4px;
     width: 11px;
     height: 15px;
-    background-image: url(https://dwar.ltd/new_design/img/109c2befc2be4758.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -8810,7 +8810,7 @@ hr {
     line-height: 1.5;
     min-height: 64px;
     background-color: #ecb376;
-    background-image: url(https://dwar.ltd/new_design/img/12f942250970aa5d.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -8860,12 +8860,12 @@ hr {
     height: 64px;
     border: 1px solid #413834;
     border-radius: 5px;
-    background-image: url(https://dwar.ltd/new_design/img/22572e787dc70aab.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-dl-client:hover .b-dl-client__pelena {
-    background-image: url(https://dwar.ltd/new_design/img/50b0bbb2b7707683.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -8875,7 +8875,7 @@ hr {
     left: 8px;
     width: 77px;
     height: 71px;
-    background-image: url(https://dwar.ltd/new_design/img/5073531b04991ef9.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -8885,17 +8885,17 @@ hr {
     right: 2px;
     width: 120px;
     height: 60px;
-    background-image: url(https://dwar.ltd/new_design/img/01674ca354230bd8.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .lang-ru .b-dl-client__text {
-    background-image: url(https://dwar.ltd/new_design/img/9737d12ec2f24bd7.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .lang-de .b-dl-client__text {
-    background-image: url(https://dwar.ltd/new_design/img/2e30c68e5a970b4f.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -8950,14 +8950,14 @@ hr {
     display: inline-block;
     width: 36px;
     height: 34px;
-    background-image: url(https://dwar.ltd/new_design/img/f8aae9c28f7e7ca7.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-rate__tabs--bottom .b-rate__tab--active {
     width: 36px;
     height: 34px;
-    background-image: url(https://dwar.ltd/new_design/img/6840cd45588f6a5a.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -9201,22 +9201,22 @@ hr {
 }
 
 .lang-en .b-index__game-items {
-    background-image: url(https://dwar.ltd/new_design/img/9231df010241d73c.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .lang-de .b-index__game-items {
-    background-image: url(https://dwar.ltd/new_design/img/5369be8bb7d2ecae.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .lang-ja .b-index__game-items {
-    background-image: url(https://dwar.ltd/new_design/img/867b7a78c03314e2.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .lang-ko .b-index__game-items {
-    background-image: url(https://dwar.ltd/new_design/img/038390c193268f27.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -9828,7 +9828,7 @@ hr {
     max-height: 100%;
     width: 30px;
     height: 42px;
-    background-image: url(https://dwar.ltd/new_design/img/71b7295a7e6580ec.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -9841,7 +9841,7 @@ hr {
     max-height: 100%;
     width: 30px;
     height: 42px;
-    background-image: url(https://dwar.ltd/new_design/img/dde3aec0ff8381e2.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -9859,7 +9859,7 @@ hr {
     bottom: -2px;
     min-width: 70px;
     padding: 0 2px;
-    background-image: url(https://dwar.ltd/new_design/img/4f9d66f432cbf86e.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -10002,7 +10002,7 @@ hr {
     right: 5px;
     width: 11px;
     height: 11px;
-    background: url(https://dwar.ltd/static/images/sprite1.png) -48px 0;
+    background: none -48px 0;
     z-index: 5
 }
 
@@ -10054,7 +10054,7 @@ hr {
     margin-right: 12px;
     width: 8px;
     height: 12px;
-    background-image: url(https://dwar.ltd/new_design/img/e7048565c92fc1da.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -10071,7 +10071,7 @@ hr {
     margin-right: -5px;
     width: 8px;
     height: 12px;
-    background-image: url(https://dwar.ltd/new_design/img/88435f7007764332.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -10091,7 +10091,7 @@ hr {
     top: 0;
     left: 12px;
     right: 11px;
-    background-image: url(https://dwar.ltd/new_design/img/1745aea01270089a.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -10102,7 +10102,7 @@ hr {
     left: 12px;
     right: 18px;
     bottom: 0;
-    background-image: url(https://dwar.ltd/new_design/img/1745aea01270089a.png);
+    background-image: none;
     background-repeat: repeat-x
 }
 
@@ -10137,31 +10137,31 @@ hr {
 
 .b-gallery__slider .slick-prev {
     left: -21px;
-    background-image: url(https://dwar.ltd/new_design/img/1ce99eb33097c30e.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-gallery__slider .slick-prev:hover:before {
     right: 0;
-    background-image: url(https://dwar.ltd/new_design/img/5746e793c2a95192.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-gallery__slider .slick-next {
     right: -21px;
-    background-image: url(https://dwar.ltd/new_design/img/6fa673aaab54c813.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-gallery__slider .slick-next:hover:before {
     left: 0;
-    background-image: url(https://dwar.ltd/new_design/img/41af971a94fe2baf.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
 .b-gallery__slider .slick-current {
     position: relative;
-    background-image: url(https://dwar.ltd/new_design/img/640afb1187add7be.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -10180,7 +10180,7 @@ hr {
     font-size: 0;
     color: transparent;
     left: -21px;
-    background-image: url(https://dwar.ltd/new_design/img/1ce99eb33097c30e.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -10193,7 +10193,7 @@ hr {
     font-size: 0;
     color: transparent;
     right: -21px;
-    background-image: url(https://dwar.ltd/new_design/img/6fa673aaab54c813.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -10381,7 +10381,7 @@ hr {
     margin-right: auto;
     width: 12px;
     height: 8px;
-    background-image: url(https://dwar.ltd/new_design/img/963ac39657d92cc7.png);
+    background-image: none;
     background-repeat: no-repeat
 }
 
@@ -10902,7 +10902,7 @@ hr {
 
     .b-portal-logo__picture {
         background-size: 142px 42px;
-        background-image: url(https://dwar.ltd/new_design/img/0a2aa1156b285697.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
@@ -10914,7 +10914,7 @@ hr {
 
     .lang-de .b-portal-logo__picture {
         background-size: 142px 42px;
-        background-image: url(https://dwar.ltd/new_design/img/019aa110bd939a72.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
@@ -11007,7 +11007,7 @@ hr {
     }
 
     .b-icon--page-prev {
-        background-image: url(https://dwar.ltd/new_design/img/2fd1b9be0004606b.png);
+        background-image: none;
         background-position: 0 0;
         background-size: 28px 14px;
         width: 13px;
@@ -11015,7 +11015,7 @@ hr {
     }
 
     .b-icon--page-next {
-        background-image: url(https://dwar.ltd/new_design/img/2fd1b9be0004606b.png);
+        background-image: none;
         background-position: -15px 0;
         background-size: 28px 14px;
         width: 13px;
@@ -11024,95 +11024,95 @@ hr {
 
     .b-icon--user-info {
         background-size: 10px 10px;
-        background-image: url(https://dwar.ltd/new_design/img/0644a2e036987ca2.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-nav-lvl-3__menu-link {
         background-size: 10px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/c101850887401265.png);
+        background-image: none;
         background-repeat: repeat-x
     }
 
     .b-nav-lvl-3__menu-link:before {
         background-size: 34px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/d9aec7144d7bb7bf.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-nav-lvl-3__menu-link:after {
         background-size: 34px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/f93bb538bdf1f076.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-nav-lvl-3__menu-item:hover .b-nav-lvl-3__menu-link {
         background-size: 10px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/4d208417601da5e6.png)
+        background-image: none
     }
 
     .b-nav-lvl-3__menu-item:hover .b-nav-lvl-3__menu-link:before {
         background-size: 34px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/71c522daeb127f79.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-nav-lvl-3__menu-item:hover .b-nav-lvl-3__menu-link:after {
         background-size: 34px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/e99d8c0b464ce2f2.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-nav-lvl-3__menu-item.is-active .b-nav-lvl-3__menu-link {
         background-size: 10px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/4d208417601da5e6.png)
+        background-image: none
     }
 
     .b-nav-lvl-3__menu-item.is-active .b-nav-lvl-3__menu-link:before {
         background-size: 34px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/71c522daeb127f79.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-nav-lvl-3__menu-item.is-active .b-nav-lvl-3__menu-link:after {
         background-size: 34px 44px;
-        background-image: url(https://dwar.ltd/new_design/img/e99d8c0b464ce2f2.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-carma--like .b-carma__icon {
         background-size: 16px 17px;
-        background-image: url(https://dwar.ltd/new_design/img/fc76c11be8923d80.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-carma--dislike .b-carma__icon {
         background-size: 16px 17px;
-        background-image: url(https://dwar.ltd/new_design/img/2d9361faa641fd7f.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-post__icon {
         background-size: 28px 28px;
-        background-image: url(https://dwar.ltd/new_design/img/c6eb525c34e10bdd.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-post.is-unread .b-post__icon {
         background-size: 28px 28px;
-        background-image: url(https://dwar.ltd/new_design/img/8865e8b174966a79.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .is-active .b-table__arrow:before {
         background-size: 16px 26px;
-        background-image: url(https://dwar.ltd/new_design/img/4ee05c9501def950.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 
     .b-gallery__photo-likes:before {
         background-size: 12px 8px;
-        background-image: url(https://dwar.ltd/new_design/img/2b6c7c22e4465f6e.png);
+        background-image: none;
         background-repeat: no-repeat
     }
 }
