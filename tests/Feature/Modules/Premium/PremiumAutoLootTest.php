@@ -103,6 +103,13 @@ final class PremiumAutoLootTest extends TestCase
             $table->integer('equipped')->default(0);
             $table->timestamps();
         });
+        Schema::create('player_active_effects', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('effect_id')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->timestamps();
+        });
         Schema::create('item_on_locations', function (Blueprint $table): void {
             $table->unsignedBigInteger('loot_owner_id')->nullable();
             $table->timestamp('loot_reserved_until')->nullable();

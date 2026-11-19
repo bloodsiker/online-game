@@ -80,6 +80,15 @@ class GetBackpack
             ->map(static fn (mixed $id): int => (int) $id)
             ->values()
             ->all();
+        // Предметы, которые можно использовать сразу несколько штук (Eternum).
+        $bulkUseItemIds = $data->getBackpack()
+            ->filter(fn ($backpack): bool => $backpack->item->itemInfo->relationLoaded('effects')
+                && $backpack->item->itemInfo->effects->isNotEmpty()
+                && $backpack->item->itemInfo->effects->every(fn ($e) => $e->effect_type->supportsBulkUse()))
+            ->pluck('item_id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
         $learnableRecipeItemIds = $data->getBackpack()
             ->filter(static function ($backpack): bool {
                 $shareItem = $backpack->item->itemInfo;
@@ -111,6 +120,6 @@ class GetBackpack
         $this->collector->collectFrom(new BackpackItemTooltipStrategy($data->getBackpack()));
         $itemTooltipScript = $this->collector->renderScript();
 
-        return compact('data', 'user', 'playerEquip', 'itemTooltipScript', 'teleportUseKeyItemIds', 'droppableItemIds', 'debuffTargetItemIds', 'debuffTargets', 'renameItemIds', 'changeRaceItemIds', 'changeAvatarItemIds', 'learnableRecipeItemIds', 'lockedChestItemIds');
+        return compact('data', 'user', 'playerEquip', 'itemTooltipScript', 'teleportUseKeyItemIds', 'droppableItemIds', 'debuffTargetItemIds', 'debuffTargets', 'renameItemIds', 'changeRaceItemIds', 'changeAvatarItemIds', 'bulkUseItemIds', 'learnableRecipeItemIds', 'lockedChestItemIds');
     }
 }

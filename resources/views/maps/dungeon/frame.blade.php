@@ -267,9 +267,9 @@ if ($dungeon && $dungeon->first_location_id) {
                 <em>{{ $locId }}</em>
                 <cite>
                     {{ $l->name ?? '' }}
-                    @if($hasEastGate || $hasSouthGate || $hasNorthGate || $hasWestGate) [Ворота] @endif
-                    @if($isExit) [Выход] @endif
-                    @if($isBoss) [Босс] @endif
+                    @if($hasEastGate || $hasSouthGate || $hasNorthGate || $hasWestGate) [{{ __('Ворота') }}] @endif
+                    @if($isExit) [{{ __('Выход') }}] @endif
+                    @if($isBoss) [{{ __('Босс') }}] @endif
                 </cite>
                 @if($l && $l->north)<a href="#{{ $l->north }}" class="anorth">↑</a>@endif
                 @if($l && $l->south)<a href="#{{ $l->south }}" class="asouth">↓</a>@endif
@@ -289,7 +289,7 @@ if ($dungeon && $dungeon->first_location_id) {
 </table>
 
 @else
-<p style="color:#706258; text-align:center; padding:20px;">Вы не в подземелье</p>
+<p style="color:#706258; text-align:center; padding:20px;">{{ __('Вы не в подземелье') }}</p>
 @endif
 
 <script>

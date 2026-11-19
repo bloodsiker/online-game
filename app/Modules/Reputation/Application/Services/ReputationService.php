@@ -241,7 +241,7 @@ class ReputationService
     }
 
     /**
-     * Подношения (обмен ресурса с риском) можно сдавать раз в 2 дня —
+     * Подношения (обмен ресурса с риском) можно сдавать раз в сутки —
      * отдельный от квестового кулдауна таймер, чтобы сдача подношения
      * не блокировала взятие репутационных квестов и наоборот.
      */
@@ -255,7 +255,7 @@ class ReputationService
             return true;
         }
 
-        return $pr->last_offering_at->addDays(2)->isPast();
+        return $pr->last_offering_at->addDay()->isPast();
     }
 
     public function getOfferingCooldownDiff(Player $player, Reputation $reputation): ?string
@@ -268,7 +268,7 @@ class ReputationService
             return null;
         }
 
-        $availableAt = $pr->last_offering_at->addDays(2);
+        $availableAt = $pr->last_offering_at->addDay();
         if ($availableAt->isPast()) {
             return null;
         }

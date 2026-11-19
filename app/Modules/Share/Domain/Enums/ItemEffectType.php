@@ -25,6 +25,10 @@ enum ItemEffectType: string
     case CURE_BLEED = 'cure_bleed';
     case CURE_BURN = 'cure_burn';
     case CURE_PARALYSIS = 'cure_paralysis';
+    // PRODUCE_ITEM — выдаёт value шт. target_share_item_id, сам предмет остаётся (механизм).
+    case PRODUCE_ITEM = 'produce_item';
+    // GRANT_REPUTATION — value очков репутации reputation_id за 1 шт. (можно использовать пачкой).
+    case GRANT_REPUTATION = 'grant_reputation';
 
     public function label(): string
     {
@@ -44,6 +48,8 @@ enum ItemEffectType: string
             self::CURE_BLEED => __('Снятие кровотечения'),
             self::CURE_BURN => __('Снятие горения'),
             self::CURE_PARALYSIS => __('Снятие паралича'),
+            self::PRODUCE_ITEM => __('Даёт за использование'),
+            self::GRANT_REPUTATION => __('Репутация'),
         };
     }
 
@@ -51,7 +57,8 @@ enum ItemEffectType: string
     {
         return match ($this) {
             self::HEAL_HP, self::HEAL_MP, self::DAMAGE_HP, self::RESTORE_LOST_EXP, self::RESPEC_STATS, self::GRANT_DIAMONDS,
-            self::CURE_POISON, self::CURE_BLEED, self::CURE_BURN, self::CURE_PARALYSIS => true,
+            self::CURE_POISON, self::CURE_BLEED, self::CURE_BURN, self::CURE_PARALYSIS,
+            self::PRODUCE_ITEM, self::GRANT_REPUTATION => true,
             default => false,
         };
     }
@@ -66,6 +73,27 @@ enum ItemEffectType: string
             self::CURE_PARALYSIS => ActiveEffectType::PARALYSIS,
             default => null,
         };
+    }
+
+    /** Предмет с таким эффектом не расходуется при использовании. */
+    public function keepsItem(): bool
+    {
+        return $this === self::PRODUCE_ITEM;
+    }
+
+    /** Эффект, который можно применить только из рюкзака (транзакционный путь), не из хотбара. */
+    public function requiresInventoryUse(): bool
+    {
+        return match ($this) {
+            self::GRANT_DIAMONDS, self::PRODUCE_ITEM, self::GRANT_REPUTATION => true,
+            default => false,
+        };
+    }
+
+    /** Можно использовать сразу несколько штук из стопки. */
+    public function supportsBulkUse(): bool
+    {
+        return $this === self::GRANT_REPUTATION;
     }
 
     public function isTimed(): bool

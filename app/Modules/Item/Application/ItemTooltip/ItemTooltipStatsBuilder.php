@@ -233,6 +233,20 @@ final class ItemTooltipStatsBuilder
                 continue;
             }
 
+            // Механизм: какой предмет и сколько даёт за использование.
+            if ($effect->effect_type === ItemEffectType::PRODUCE_ITEM) {
+                $stats[] = ['title' => $effect->effect_type->label(), 'value' => $effect->targetItem?->name.' × '.(int) $effect->value];
+
+                continue;
+            }
+
+            // Eternum: сколько очков какой репутации даёт 1 шт.
+            if ($effect->effect_type === ItemEffectType::GRANT_REPUTATION) {
+                $stats[] = ['title' => __('Репутация «:name»', ['name' => (string) $effect->reputation?->name]), 'value' => '+'.(int) $effect->value.' '.__('за 1 шт.')];
+
+                continue;
+            }
+
             // Нулевое значение эффекта — либо ничего не даёт, либо техническая
             // заглушка (сумма считается динамически в самой стратегии эффекта,
             // см. RestoreLostExpStrategy/RespecStatsStrategy) — строку не показываем.

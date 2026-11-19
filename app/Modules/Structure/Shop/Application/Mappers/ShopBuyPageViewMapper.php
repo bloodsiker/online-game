@@ -92,6 +92,7 @@ class ShopBuyPageViewMapper
                     infoUrl: route('items.info.share', ['id' => $item->item->id]),
                     purchaseAvailability: $this->purchaseLimits->availability($user, $item),
                     minReputationPoints: (int) $item->min_reputation_points,
+                    rarity: $item->item->rarity?->value ?? 'common',
                 )
             )->all(),
             categories: $categories->map(

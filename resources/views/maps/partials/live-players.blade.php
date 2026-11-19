@@ -116,7 +116,7 @@
         const enemies = new Set(relations.enemies);
         const viewerClanId = relations.clan_id;
         const GROUPS = ['enemy', 'clan', 'friend', 'other'];   // по убыванию важности
-        const LABELS = { enemy: 'враг', clan: 'соклан', friend: 'друг', other: '' };
+        const LABELS = { enemy: @js(__('враг')), clan: @js(__('соклан')), friend: @js(__('друг')), other: '' };
         if (viewerId <= 0 || window.top === window) return;
 
         const origin = window.location.origin;
@@ -168,7 +168,7 @@
             byLocation.forEach((list, loc) => {
                 const z = document.getElementById('z' + loc);
                 if (!z) return;
-                list.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+                list.sort((a, b) => a.name.localeCompare(b.name, @js(app()->getLocale())));
                 z.textContent = String(Math.min(list.length, 99999));
                 z.title = list.map((p) => p.name + ' [' + p.lvl + ']' + (LABELS[group(p)] ? ' — ' + LABELS[group(p)] : '')).join('\n');
                 setGroupClass(z, GROUPS.find((g) => list.some((p) => group(p) === g)));

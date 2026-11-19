@@ -235,7 +235,7 @@
 
     <tr style=" @if(request()->has('hide')) display: none;  @endif">
         <th colspan="30" class="t0" align="left" style="padding:5px;font-size:14px;">
-            <span style="position:absolute;">Высота/Глубина: <b id="mapz0">текущая</b></span>&nbsp;
+            <span style="position:absolute;">{{ __('Высота/Глубина:') }} <b id="mapz0">{{ __('текущая') }}</b></span>&nbsp;
         </th>
     </tr>
     <tr>
@@ -3448,7 +3448,7 @@
         for (i = zbmin; i <= zbmax; i++) {
             n = i - zcurrent;
             document.getElementById('m' + (i - zbmin)).style.display = (n == 0 ? '' : 'none');
-            document.getElementById('mapz' + (i - zbmin)).innerHTML = (n == 0 ? 'текущая' : (n > 0 ? '+' : '') + n);
+            document.getElementById('mapz' + (i - zbmin)).innerHTML = (n == 0 ? @js(__('текущая')) : (n > 0 ? '+' : '') + n);
         }
     }
 

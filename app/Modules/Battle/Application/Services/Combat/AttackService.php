@@ -20,6 +20,7 @@ use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Clan\Domain\Services\ClanExperienceService;
 use App\Modules\Dungeon\Application\Services\DungeonStageService;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Domain\Services\EffectBonusService;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Event\Domain\Services\EventActivityProgressService;
 use App\Modules\Event\Domain\Services\WorldEventKillService;
@@ -806,7 +807,9 @@ readonly class AttackService
         $levelDifference = $player->lvl - $monster->lvl;
         $levelMultiplier = min(2.0, max(0.01, 1 - 0.05 * $levelDifference));
 
-        $baseExperience = (int) round(max(1, $takeExp * $levelMultiplier * $xpMultiplier));
+        // «Охотничий эликсир»: +% опыта только с монстров.
+        $hunterBonus = app(EffectBonusService::class)->percent((int) $player->id, EffectBonusService::MONSTER_EXPERIENCE);
+        $baseExperience = (int) round(max(1, $takeExp * $levelMultiplier * $xpMultiplier * (1 + $hunterBonus / 100)));
 
         return $this->experienceService->calculateGain($player, $baseExperience);
     }

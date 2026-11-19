@@ -709,7 +709,7 @@ class ItemService
 
         if ($slot !== null && $slot->isJewelry()) {
             foreach ($slot->jewelryColumns() as $column) {
-                if ($playerEquip->$column === $itemId) {
+                if ($itemId === $playerEquip->$column) {
                     $playerEquip->$column = null;
                     $playerEquip->save();
                     $backpackItem->equipped = 0;

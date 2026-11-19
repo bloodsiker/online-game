@@ -157,7 +157,7 @@
                                                 @if($tier->feat_quest_id)
                                                     <p class="mb-2 small">
                                                         <span class="badge badge-warning">⚔ Подвиг</span>
-                                                        <a href="{{ route('admin.quest.info', $tier->feat_quest_id) }}">[{{ $tier->feat_quest_id }}] {{ $tier->featQuest?->title ?? '—' }}</a>
+                                                        <a href="{{ route('admin.quest.info', $tier->feat_quest_id) }}" target="_blank" rel="noopener">[{{ $tier->feat_quest_id }}] {{ $tier->featQuest?->title ?? '—' }}</a>
                                                         @if($tier->feat_description)
                                                             <br><span class="text-muted">{{ $tier->feat_description }}</span>
                                                         @endif
@@ -180,7 +180,7 @@
                                                     @forelse($tier->quests as $tierQuest)
                                                         <tr>
                                                             <td>{{ $tierQuest->quest?->id }}</td>
-                                                            <td>{{ $tierQuest->quest?->title ?? '—' }}</td>
+                                                            <td>@if($tierQuest->quest)<a href="{{ route('admin.quest.info', $tierQuest->quest->id) }}" target="_blank" rel="noopener">{{ $tierQuest->quest->title }}</a>@else — @endif</td>
                                                             <td>
                                                                 <a href="{{ route('admin.reputation.tier.quest.delete', [$reputation->id, $tier->id, $tierQuest->id]) }}"
                                                                    class="btn btn-xs btn-danger"
@@ -289,7 +289,8 @@
                                 <div class="pt-3">
                                     @if($structureShop)
                                         <a class="btn btn-primary" href="{{ route('admin.structure.info', $structureShop->id) }}">Управление магазином: {{ $structureShop->name }}</a>
-                                        <p class="text-muted mt-2">Товары, цены и персональные лимиты настраиваются в структуре.</p>
+                                        <p class="text-muted mt-2">Товары, категории, цены и персональные лимиты настраиваются в структуре.</p>
+                                        @include('admin.reputation._structure-shop-items')
                                     @else
 
                                     <div class="mb-3">

@@ -28,7 +28,6 @@
         :backpack-url="$page->backpackUrl"
         empty-message="{{ __('На земле больше ничего нет.') }}"
     />
-    @include('event::location-widget')
     <script>
         try {
             window.top.sendToFrame('character-frame', { money: @json($page->money) }, window.location.origin);

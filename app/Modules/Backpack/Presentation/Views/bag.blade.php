@@ -1467,6 +1467,7 @@
     var _debuffTargetItemIds = @json($debuffTargetItemIds ?? []);
     var _renameItemIds = @json($renameItemIds ?? []);
     var _changeRaceItemIds = @json($changeRaceItemIds ?? []);
+    var _bulkUseItemIds = @json($bulkUseItemIds ?? []);
     var _changeAvatarItemIds = @json($changeAvatarItemIds ?? []);
     var _learnableRecipeItemIds = @json($learnableRecipeItemIds ?? []);
     var _lockedChestItemIds = @json($lockedChestItemIds ?? []);
@@ -1496,8 +1497,9 @@
             || wearable;
         // is_use — фолбэк для предметов с инстант-эффектом, чей тип не входит
         // в этот список (например misc): см. share_items.is_use.
+        // Квестовые — только с is_use (цель квеста «использовать предмет»).
         // Подарок не «используется», а дарится (пункт «Подарить», модуль Gift).
-        var usable     = (['potion','eat','scroll','artifact','chest','quest'].indexOf(type) !== -1
+        var usable     = (['potion','eat','scroll','artifact','chest'].indexOf(type) !== -1
             || el.getAttribute('data-is-use') === '1')
             && !wearable;
         var isBook     = type === 'book';
@@ -1571,6 +1573,8 @@
                     window.top.openRaceChangeModal?.(id);
                 } else if (_changeAvatarItemIds.indexOf(parseInt(id, 10)) !== -1) {
                     window.top.openAvatarChangeModal?.(id);
+                } else if (_bulkUseItemIds.indexOf(parseInt(id, 10)) !== -1) {
+                    showBulkUseDialog(id);
                 } else {
                     useItemAjax(id);
                 }
@@ -1742,7 +1746,50 @@
         });
     }
 
-    function useItemAjax(itemId, targetPlayerId) {
+    // Использование нескольких штук сразу (Eternum): то же окно количества, что и выброс.
+    function showBulkUseDialog(itemId) {
+        var td = document.querySelector('td[data-id="' + itemId + '"]');
+        var count = td ? (parseInt(td.getAttribute('data-count'), 10) || 1) : 1;
+        if (count <= 1) {
+            useItemAjax(itemId, null, 1);
+            return;
+        }
+
+        gebi('action_title_amount').innerHTML = gameTranslate("Использование предмета");
+        gebi('ask_amount_title').innerHTML    = gameTranslate("Сколько штук использовать?");
+        gebi('art_amount').innerHTML          = _ctxItemImage ? '<img src="' + _ctxItemImage + '" style="width:60px;height:60px;">' : '';
+        gebi('ask_confirm_title_amount').innerHTML = _ctxItemName;
+
+        gebi('drop-qty-row').style.display = '';
+        var input = gebi('cart_amount');
+        input.value = 1;
+        input.setAttribute('data-min-value', 1);
+        input.setAttribute('data-max-value', count);
+        input.parentNode.querySelector('.arrow.left').classList.add('left-disabled');
+        input.parentNode.querySelector('.arrow.right').classList.remove('right-disabled');
+        gebi('cart_amount_cnt').textContent = count;
+        gebi('cart_amount_all').onclick = function () {
+            gebi('cart_amount').value = count;
+            counter_controller.change(gebi('cart_amount'));
+        };
+        gebi('ask_confirm_ok_container').innerHTML =
+            '<b class="butt1 pointer"><b><input value="' + gameTranslate("Использовать") + '" type="button" onclick="doBulkUse(' + itemId + ', ' + count + ')" style="width: 100px;" class="grnn"></b></b>';
+
+        var div = gebi('cart_amount_div');
+        div.style.display = 'block';
+        div.style.top  = Math.max(0, (window.innerHeight - div.offsetHeight) / 2) + 'px';
+        div.style.left = Math.max(0, (window.innerWidth  - div.offsetWidth)  / 2) + 'px';
+        frame_content_hider.show();
+    }
+
+    function doBulkUse(itemId, max) {
+        var qty = Math.max(1, Math.min(max, parseInt(gebi('cart_amount').value, 10) || 1));
+        gebi('cart_amount_div').style.display = 'none';
+        frame_content_hider.hide();
+        useItemAjax(itemId, null, qty);
+    }
+
+    function useItemAjax(itemId, targetPlayerId, quantity) {
         fetch('{{ route('items.use', ['id' => '__ID__']) }}'.replace('__ID__', itemId), {
             method: 'POST',
             headers: {
@@ -1750,7 +1797,9 @@
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: targetPlayerId ? JSON.stringify({ target_player_id: targetPlayerId }) : null,
+            body: (targetPlayerId || quantity)
+                ? JSON.stringify(Object.assign({}, targetPlayerId ? { target_player_id: targetPlayerId } : {}, quantity ? { quantity: quantity } : {}))
+                : null,
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -1787,6 +1836,12 @@
 
             if (data.teleport_url) {
                 try { window.top.toLocation(data.teleport_url); } catch(e) { window.top.location.href = data.teleport_url; }
+                return;
+            }
+
+            // Механизм / свиток улучшения выдали новые предметы — перерисовываем рюкзак.
+            if (data.reload_backpack) {
+                window.location.reload();
                 return;
             }
 
@@ -1873,6 +1928,7 @@
             gebi('cart_amount_cnt').textContent = count;
             gebi('cart_amount_all').onclick = function () {
                 gebi('cart_amount').value = count;
+                counter_controller.change(gebi('cart_amount'));
             };
             gebi('ask_confirm_ok_container').innerHTML =
                 '<b class="butt1 pointer"><b><input value="' + gameTranslate("Выбросить") + '" type="button" onclick="doDropItem(' + itemId + ', \'' + base + '\')" style="width: 100px;" class="redd"></b></b>';

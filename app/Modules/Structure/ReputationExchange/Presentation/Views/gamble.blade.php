@@ -154,7 +154,7 @@
     .reputation-top-tabs > tbody > tr > td.reputation-top-tabs__spacer { flex: 1 1 auto; }
     .reputation-top-tabs img { display: block; }
     .reputation-top-tabs > tbody > tr > td:has(> a) { box-sizing: border-box; height: 21px; padding: 3px 2px 4px !important; line-height: 14px; }
-    .reputation-top-tabs > tbody > tr > td > a { display: block; line-height: 14px; }
+    .reputation-top-tabs > tbody > tr > td > a { display: block; line-height: 14px; text-decoration: none; }
     .reputation-top-tabs br { display: none; }
 </style>
 <table class="reputation-top-tabs" border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">

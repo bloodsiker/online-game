@@ -26,7 +26,7 @@ class QuestObjective extends Model
 
     protected $fillable = [
         'quest_id', 'stage_id', 'type', 'target_type', 'target_id', 'target_ids',
-        'share_item_id', 'consume_item', 'map_id', 'required_amount', 'drop_chance', 'description',
+        'share_item_id', 'consume_item', 'map_id', 'required_amount', 'drop_chance', 'required_active_effect_id', 'description',
     ];
 
     /**

@@ -1,6 +1,6 @@
-<html>
+<html lang="{{ app()->getLocale() }}">
 <head>
-    <title>Map</title>
+    <title>{{ __('Карта') }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script type="text/javascript">
         var art_alt = new Array();
@@ -177,7 +177,7 @@
             <div class="bg-t">
                 <div class="common-header common-header__small">
                     <div class="h-inner">
-                        <div class="h-txt">Тёмное Подземелье</div>
+                        <div class="h-txt">{{ __('Тёмное Подземелье') }}</div>
                     </div>
                 </div>
             </div>

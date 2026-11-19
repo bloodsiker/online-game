@@ -65,7 +65,10 @@ class ReputationController extends Controller
             : null;
         $favorTypes = DivineFavorType::cases();
         $effects = Effect::orderBy('name->ru')->get(['id', 'name']);
-        $structureShop = Structure::where('reputation_id', $reputation->id)->first();
+        $structureShop = Structure::where('reputation_id', $reputation->id)
+            ->where('type', Structure::TYPE_SHOP)
+            ->with(['shopItems' => fn ($query) => $query->orderByDesc('sort_order')->orderBy('id'), 'shopItems.item', 'shopItems.category', 'shopItems.requirements.item'])
+            ->first();
 
         return view('admin.reputation.info', compact('reputation', 'exchangeStructure', 'favorTypes', 'effects', 'structureShop'));
     }

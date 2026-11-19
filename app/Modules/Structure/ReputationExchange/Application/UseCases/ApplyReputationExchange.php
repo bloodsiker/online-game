@@ -30,6 +30,6 @@ class ApplyReputationExchange
             return new ReputationExchangeResultDTO(false, $e->getMessage());
         }
 
-        return new ReputationExchangeResultDTO(true, 'Реликт принят, репутация повышена!');
+        return new ReputationExchangeResultDTO(true, 'Обмен принят, репутация повышена!');
     }
 }

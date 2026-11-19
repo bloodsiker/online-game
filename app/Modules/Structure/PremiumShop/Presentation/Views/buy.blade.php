@@ -269,7 +269,7 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="b" title="Цена" style="padding-top: 13px;" valign="top">
+                                                        <td class="b" title="Цена" style="padding-top: 19px;" valign="top">
                                                             @if($item->price)
                                                                 <div title="Бриллиант">
                                                                     <img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle">
@@ -297,7 +297,7 @@
                                                                 </span>
                                                             </div>
                                                         </td>
-                                                        <td align="center" valign="top" style="padding-top: 16px; width: 80px;">
+                                                        <td align="center" valign="top" style="padding-top: 15px; width: 80px;">
                                                             <b class="butt2 pointer "><b>
                                                                     <input value="В корзину" type="submit" onclick="if(document._submit)return false;document._submit=true;" style="width:63px">
                                                                 </b>

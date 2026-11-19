@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Domain\Services;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Effect\Domain\Services\EffectBonusService;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\Quest\Domain\DTOs\QuestItemGateState;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Domain\Events\QuestItemDropped;
@@ -64,6 +66,7 @@ class QuestProgressService
     public function progressKillAndCollect(Player $player, MonsterOnLocation $locationMonster): array
     {
         $messages = [];
+        $activeEffectCache = [];
 
         // Карта локации нужна для целей с фильтром по map_id —
         // грузим связь один раз вместо ленивой загрузки на каждую цель.
@@ -97,9 +100,19 @@ class QuestProgressService
                     continue;
                 }
 
+                if ($qo->required_active_effect_id !== null
+                    && ! $this->hasActiveEffect($player, (int) $qo->required_active_effect_id, $activeEffectCache)) {
+                    continue;
+                }
+
                 if ($qo->type === 'collect' && $qo->drop_chance !== null) {
+                    $chance = (float) $qo->drop_chance;
+                    // «Эликсир удачи охотника» не ускоряет предметы, которые падают только под особым эффектом.
+                    if ($qo->required_active_effect_id === null) {
+                        $chance *= 1 + app(EffectBonusService::class)->percent((int) $player->id, EffectBonusService::DROP_CHANCE) / 100;
+                    }
                     $roll = mt_rand(0, 10000) / 100;
-                    if ($roll > $qo->drop_chance) {
+                    if ($roll > $chance) {
                         continue;
                     }
                 }
@@ -513,6 +526,16 @@ class QuestProgressService
             ->all();
 
         return [$questPlayers, $progressByQuestPlayer, $objectivesMap];
+    }
+
+    /** @param  array<int, bool>  $cache */
+    private function hasActiveEffect(Player $player, int $effectId, array &$cache): bool
+    {
+        return $cache[$effectId] ??= PlayerActiveEffect::query()
+            ->where('player_id', $player->id)
+            ->where('effect_id', $effectId)
+            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
     }
 
     /**

@@ -159,7 +159,7 @@
                                                         <div class="recipe-result">
                                                             <span>{{ __('Результат:') }}</span>
                                                             <img src="{{ asset($recipe['resultImage']) }}" alt="">
-                                                            <a href="{{ route('items.info.share', ['id' => $recipe['resultShareItemId']]) }}" target="_blank">{{ $recipe['resultName'] }}</a>
+                                                            <a href="{{ route('items.info.share', ['id' => $recipe['resultShareItemId']]) }}" target="_blank">{{ $recipe['resultName'] }}</a> <b>×{{ $recipe['resultCount'] ?? 1 }}</b>
                                                         </div>
                                                     </div>
                                                 </article>

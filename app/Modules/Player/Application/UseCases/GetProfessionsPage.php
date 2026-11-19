@@ -94,6 +94,7 @@ class GetProfessionsPage
                     'resultShareItemId' => (int) $recipe->kraftItem->id,
                     'resultName' => (string) $recipe->kraftItem->name,
                     'resultImage' => (string) $recipe->kraftItem->image,
+                    'resultCount' => max(1, (int) $recipe->result_count),
                     'learnedAt' => $recipe->pivot?->created_at?->format('d.m.Y'),
                 ])
                 ->values()

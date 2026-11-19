@@ -19,9 +19,9 @@
     ]];
 @endphp
 
-<html>
+<html lang="{{ app()->getLocale() }}">
 <head>
-    <title>Map</title>
+    <title>{{ __('Карта') }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="Description" content=""/>
     <script type="text/javascript">
@@ -314,7 +314,7 @@
                                 <div class="common-header common-header__small">
                                     <div class="h-inner">
                                         <div class="h-txt">
-                                            {{ $mapTitle }}
+                                            {{ __($mapTitle) }}
                                         </div>
                                     </div>
                                 </div>
@@ -378,7 +378,7 @@
                                                                                         <tr height="22">
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
                                                                                             <td class="tbl-usi_label-center">
-                                                                                                Проходы в другие области
+                                                                                                {{ __('Проходы в другие области') }}
                                                                                             </td>
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
                                                                                         </tr>
@@ -403,7 +403,7 @@
       onmouseout="mark_l({{ $mapPassage['from'] }},0)"><span
         class="listloc">{{ $mapPassage['from'] }}</span> <span
         style="font-size:18px;">{{ $mapPassage['direction'] }}</span> <a
-        href="{{ map_transition_url($mapPassage['slug'], $mapPassage['location']) }}">{{ $mapPassage['label'] }}</a> <span
+        href="{{ map_transition_url($mapPassage['slug'], $mapPassage['location']) }}">{{ __($mapPassage['label']) }}</a> <span
         class="listloc">{{ $mapPassage['location'] }}</span></span>
     </td>
 </tr>
@@ -440,7 +440,7 @@
                                                                                         <tr height="22">
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
                                                                                             <td class="tbl-usi_label-center">
-                                                                                                Условные обозначения
+                                                                                                {{ __('Условные обозначения') }}
                                                                                             </td>
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
                                                                                         </tr>
@@ -465,18 +465,18 @@
                                                                                                     onclick="area_click(@js((string) $areaId))"
                                                                                                     onmouseover="area_show(@js((string) $areaId),1)"
                                                                                                     onmouseout="area_show(@js((string) $areaId),0)"><span
-                                                                                                        class="a{{ $areaId }} listloc">&nbsp;</span> - {{ $area['label'] }}</span>
+                                                                                                        class="a{{ $areaId }} listloc">&nbsp;</span> - {{ __($area['label']) }}</span>
                                                                                             </td>
                                                                                         </tr>
                                                                                         @endforeach
                                                                                         @auth
                                                                                         <tr class="bg_l">
                                                                                             <td class="brd2-top brd2-bt b">
-                                                                                                @if($currentMapUrl ?? null)<a href="{{ $currentMapUrl }}" title="Открыть карту текущей локации">@endif<span class="line-align"><span
+                                                                                                @if($currentMapUrl ?? null)<a href="{{ $currentMapUrl }}" title="{{ __('Открыть карту текущей локации') }}">@endif<span class="line-align"><span
                                                                                                         style="margin-top:6px;display:inline-block;"><span
                                                                                                             class="ulocation"><span
                                                                                                                 class="listloc"
-                                                                                                                id="lid">{{ auth()->user()->location_id }}</span></span> - Вы здесь</span></span>@if($currentMapUrl ?? null)</a>@endif
+                                                                                                                id="lid">{{ auth()->user()->location_id }}</span></span> - {{ __('Вы здесь') }}</span></span>@if($currentMapUrl ?? null)</a>@endif
                                                                                             </td>
                                                                                         </tr>
                                                                                         @endauth
@@ -523,10 +523,10 @@
                                                                     <td class="tbl-usi_bg" valign="top"
                                                                         style="padding: 6px 4px; text-align: justify;">
                                                                         <p>
-                                                                            <sup>1</sup>  Кликните на цифру в прямоугольнике, чтобы подсветить локацию.
+                                                                            <sup>1</sup>  {{ __('Кликните на цифру в прямоугольнике, чтобы подсветить локацию.') }}
                                                                         </p>
                                                                         <p>
-                                                                            <sup>2</sup>  Кликните на закрашенный прямоугольник, чтобы выделить местность.
+                                                                            <sup>2</sup>  {{ __('Кликните на закрашенный прямоугольник, чтобы выделить местность.') }}
                                                                         </p>
                                                                     </td>
                                                                     <td class="tbl-usi_right">&nbsp;</td>

@@ -124,7 +124,7 @@ class MonsterOnLocation extends Model
     {
         $clanId = $user?->clanMembership?->clan_id;
 
-        return $query->where(function (Builder $query) use ($clanId): void {
+        return $query->revealedTo($user)->where(function (Builder $query) use ($clanId): void {
             $query->whereNull('clan_boss_stage_state_id');
 
             if ($clanId === null) {
@@ -143,6 +143,36 @@ class MonsterOnLocation extends Model
                                 $expiryQuery->whereNull('expires_at')->orWhere('expires_at', '>=', now());
                             });
                     });
+            });
+        });
+    }
+
+    /**
+     * Скрытые монстры (monsters.required_active_effect_id) видны и атакуемы
+     * только игроку под действием нужного эффекта (например, эликсира).
+     */
+    public function scopeRevealedTo(Builder $query, ?User $user): Builder
+    {
+        $playerId = $user?->player?->id;
+
+        return $query->whereHas('monster', function (Builder $monsterQuery) use ($playerId): void {
+            $monsterQuery->where(function (Builder $gate) use ($playerId): void {
+                $gate->whereNull('required_active_effect_id');
+
+                if ($playerId === null) {
+                    return;
+                }
+
+                $gate->orWhereExists(function ($effects) use ($playerId): void {
+                    $effects->selectRaw('1')
+                        ->from('player_active_effects')
+                        ->whereColumn('player_active_effects.effect_id', 'monsters.required_active_effect_id')
+                        ->where('player_active_effects.player_id', $playerId)
+                        ->where(function ($expiry): void {
+                            $expiry->whereNull('player_active_effects.expires_at')
+                                ->orWhere('player_active_effects.expires_at', '>', now());
+                        });
+                });
             });
         });
     }

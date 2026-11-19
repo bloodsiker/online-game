@@ -5,13 +5,22 @@
     @php
         $archiveListing = ($isNewsArchive ?? false) && !$selectedNews;
         $archivePage = $archiveListing ? $newsPosts->currentPage() : 1;
+        $isEulaPage = $isEulaPage ?? false;
     @endphp
     @include('partials.google-tag')
+    @if($isEulaPage)
+    @include('partials.seo', [
+        'url' => route('eula'),
+        'title' => __('homepage.license').' — '.__('homepage.game_name').' (Eternum)',
+        'description' => __('homepage.eula_description'),
+    ])
+    @else
     @include('partials.seo', [
         'url' => $archiveListing ? route('news.index', $archivePage > 1 ? ['page' => $archivePage] : []) : url('/'),
         'title' => $archiveListing ? ($archivePage > 1 ? __('homepage.news_archive_page_title', ['page' => $archivePage]) : __('homepage.news_archive_title')) : __('homepage.seo_title'),
         'description' => $archiveListing ? __('homepage.news_archive_description') : __('homepage.seo_description'),
     ])
+    @endif
     @vite('resources/js/homepage.js')
     @include('partials.favicons')
     <script type="application/ld+json">
@@ -436,6 +445,9 @@
                 <div class="b-index__content u-style-bg-gradient">
 
                     <div id="post-list">
+                        @if($isEulaPage)
+                            @include('news::partials.eula')
+                        @endif
                         @if(isset($selectedNews) && $selectedNews)
                             <div class="b-news-item">
                                 <div class="b-post__container">
@@ -559,7 +571,7 @@
                             @endforeach
                         @endif
 
-                        @if(!$selectedNews && $newsPosts->isEmpty())
+                        @if(!$isEulaPage && !$selectedNews && $newsPosts->isEmpty())
                             <p>{{ __('homepage.no_news') }}</p>
                         @endif
 
@@ -570,7 +582,7 @@
                 <div class="b-index__footer text-center u-style-bg-gradient">
 
 
-                    <a class="b-link b-link--default" href="{{ $archiveListing ? route('index') : route('news.index') }}">{{ $archiveListing ? __('homepage.home') : __('homepage.all_news') }}</a>
+                    <a class="b-link b-link--default" href="{{ ($archiveListing || $isEulaPage) ? route('index') : route('news.index') }}">{{ ($archiveListing || $isEulaPage) ? __('homepage.home') : __('homepage.all_news') }}</a>
                 </div>
             </div>
 
@@ -588,7 +600,8 @@
 
             <footer class="b-footer">
                 <div class="b-footer__content">
-                    <a href="#" target="_blank"><b>{{ __('homepage.license') }}</b></a><br>
+                    <a href="{{ route('eula') }}"><b>{{ __('homepage.license') }}</b></a>
+                    <a href="https://rpgtop.su/27314" title="Рейтинг Ролевых Ресурсов - RPG TOP" target="_blank" style="margin-left: 8px; vertical-align: middle;"><img src="//img.rpgtop.su/top8015_12.gif" alt="Рейтинг Ролевых Ресурсов - RPG TOP" border="0" width="80" height="15" style="vertical-align: middle;"></a><br>
                     2024-{{ date('Y') }}
                 </div>
             </footer>

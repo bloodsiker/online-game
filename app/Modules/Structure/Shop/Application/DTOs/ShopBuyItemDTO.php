@@ -23,5 +23,6 @@ final readonly class ShopBuyItemDTO
         public string $infoUrl,
         public ?array $purchaseAvailability = null,
         public int $minReputationPoints = 0,
+        public string $rarity = 'common',
     ) {}
 }

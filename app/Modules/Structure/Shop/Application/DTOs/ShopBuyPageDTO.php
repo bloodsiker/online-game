@@ -22,5 +22,8 @@ final readonly class ShopBuyPageDTO
         public ?int $activeCategoryId,
         public ShopCartDTO $cart,
         public string $itemTooltipScript,
+        public ShopFilterDTO $filter = new ShopFilterDTO,
+        public int $totalItemsCount = 0,
+        public int $playerLevel = 0,
     ) {}
 }

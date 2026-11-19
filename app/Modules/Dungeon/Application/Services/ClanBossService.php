@@ -91,6 +91,9 @@ final class ClanBossService
                 throw new RuntimeException('Вы не состоите в клане.');
             }
             $clan = Clan::query()->whereKey($lockedClanId)->lockForUpdate()->firstOrFail();
+            if (! $clan->hasPaidTax()) {
+                throw new RuntimeException(__('clan.boss_tax_required'));
+            }
             $membership = ClanMember::query()
                 ->with('role')
                 ->where('clan_id', $clan->id)
@@ -191,6 +194,10 @@ final class ClanBossService
         $membership = $user->clanMembership;
         if ($membership === null || (int) $membership->clan_id !== (int) $run->clan_id) {
             throw new RuntimeException('Бить босса может только свой клан.');
+        }
+
+        if (! $membership->clan->hasPaidTax()) {
+            throw new RuntimeException(__('clan.boss_tax_required'));
         }
 
         $attackState = $this->lockPlayerAttackState($run, $user);

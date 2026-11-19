@@ -8,6 +8,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
+use App\Modules\Effect\Domain\Services\EffectBonusService;
 use App\Modules\Influence\Domain\Services\MapInfluenceBonusService;
 use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Item\Domain\Services\InstantItemRewardService;
@@ -87,6 +88,11 @@ class DropService
     private function dropMonsterItems(array $monsters, Location $location, User $dropRecipient, ?int $dungeonSessionId): void
     {
         $droppedItems = [];
+        // «Эликсир удачи охотника»: +% к шансу дропа (кроме сундуков и предметов под эффект).
+        $recipientPlayerId = $dropRecipient->player?->id;
+        $luckPercent = $recipientPlayerId !== null
+            ? app(EffectBonusService::class)->percent((int) $recipientPlayerId, EffectBonusService::DROP_CHANCE)
+            : 0.0;
         foreach ($monsters as $monster) {
             foreach ($monster->monster->items as $item) {
                 if ($item->max_drop_level_difference !== null && $dropRecipient->player->lvl - $monster->monster->lvl > $item->max_drop_level_difference) {
@@ -95,7 +101,11 @@ class DropService
                 if ($item->required_active_effect_id !== null && ! $this->hasActiveEffect($dropRecipient, $item->required_active_effect_id)) {
                     continue;
                 }
-                if (random_int(1, 100000) / 1000 <= $item->pivot->drop_chance) {
+                $chance = (float) $item->pivot->drop_chance;
+                if ($luckPercent > 0 && $item->type !== ShareItemType::CHEST && $item->required_active_effect_id === null) {
+                    $chance *= 1 + $luckPercent / 100;
+                }
+                if (random_int(1, 100000) / 1000 <= $chance) {
                     $droppedItems[] = ['item' => $item, 'count' => mt_rand($item->pivot->min_count, $item->pivot->max_count)];
                 }
             }

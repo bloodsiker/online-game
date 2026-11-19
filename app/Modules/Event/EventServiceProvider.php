@@ -18,7 +18,7 @@ class EventServiceProvider extends ServiceProvider
         WorldEventRun::observe(WorldEventRunObserver::class);
 
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'event');
-        View::composer(['location::index', 'location::take_items', 'item::pickup_items'], function ($view): void {
+        View::composer('location::index', function ($view): void {
             $view->with('locationEvents', auth()->check()
                 ? app(GetLocationWorldEvents::class)->execute(auth()->user())
                 : []);

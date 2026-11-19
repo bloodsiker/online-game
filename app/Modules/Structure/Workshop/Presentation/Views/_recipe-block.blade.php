@@ -49,7 +49,7 @@
                                         <b class="butt2 pointer @if(!$recipe['canCraft']) disabled @endif"><b><input value="Создать" type="submit" style="width: 45px;" @disabled(!$recipe['canCraft'])></b></b>
                                     </form>
                                 @endif
-                                <span class="collection-slot__qty"></span>
+                                <span class="collection-slot__qty"><b class="collection-slot__qty-current">×{{ $recipe['resultCount'] ?? 1 }}</b></span>
                             </div>
                         </td>
                     </tr>

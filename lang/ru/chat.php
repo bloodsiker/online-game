@@ -39,6 +39,7 @@ return [
     'clan_boss_clan_reward' => ':speak: Награда клана за босса <b>«:boss»</b>: :rewards',
     'clan_boss_run_expired' => ':speak: Поход в клановый данж <b>«:dungeon»</b> завершился по времени.',
     'reputation_exchange' => 'Вы сдали :count×«:item» и получили <b>+:points</b> репутации <b>«:reputation»</b>.',
+    'reputation_item_used' => 'Вы использовали :count×«:item» и получили <b>+:points</b> репутации <b>«:reputation»</b>. Всего: <b>:total</b>.',
     'reputation_offering' => 'Вы поднесли :count×«:item» и получили <b>+:points</b> репутации <b>«:reputation»</b>.:reward',
     'received_item' => ' Получен [[share_item_:item_id]] ×:count.',
     'gathering' => 'Вы получили вещь :resource:bonus',

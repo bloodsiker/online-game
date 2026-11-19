@@ -250,7 +250,7 @@
                     <div id="l100" class="s2box bl br">
                         <s id="z100">0</s>
                         <em>100</em>
-                        <cite>Городские ворота</cite>
+                        <cite>{{ __('Городские ворота') }}</cite>
                         <a href="?m=MjAwMA#2000" class="anorth">↑</a>
                     </div>
                 </div>
@@ -527,7 +527,7 @@
                     <div id="l39" class="s2box br bl bb">
                         <s id="z39">0</s><a name="39"></a>
                         <em>39</em>
-                        <cite>Площадь торгов</cite>
+                        <cite>{{ __('Площадь торгов') }}</cite>
                     </div>
                 </div>
             </div>
@@ -563,7 +563,9 @@
             <div class="a1" style="">
                 <div id="u43">
                     <div id="l43" class="s2box br bl bb">
-                        <s id="z43">0</s><a name="43"></a>43
+                        <s id="z43">0</s><a name="43"></a>
+                        <em>43</em>
+                        <cite>{{ __('Башня магов') }}</cite>
                     </div>
                 </div>
             </div>
@@ -611,7 +613,7 @@
                     <div id="l27" class="s2box bl bt bb">
                         <s id="z27">0</s><a name="27"></a>
                         <em>27</em>
-                        <cite>Кузня</cite>
+                        <cite>{{ __('Кузня') }}</cite>
                     </div>
                 </div>
             </div>
@@ -667,7 +669,7 @@
                     <div id="l16" class="s2box bt br bb">
                         <s id="z16">0</s><a name="16"></a>
                         <em>16</em>
-                        <cite>Магазин снаряжения</cite>
+                        <cite>{{ __('Магазин снаряжения') }}</cite>
                     </div>
                 </div>
             </div>
@@ -701,7 +703,7 @@
                     <div id="l35" class="s2box bb bt">
                         <s id="z35">0</s><a name="35"></a>
                         <em>35</em>
-                        <cite>Городские ворота</cite>
+                        <cite>{{ __('Городские ворота') }}</cite>
                     </div>
                 </div>
             </div>
@@ -775,7 +777,7 @@
                     <div id="l6" class="s2box bl br bt">
                         <s id="z6">0</s><a name="6"></a>
                         <em>6</em>
-                        <cite>Источник жизни</cite>
+                        <cite>{{ __('Источник жизни') }}</cite>
                         <br>
                         <a class="alvl" href="{{ map_transition_url('Hj7Kl0tEr2A', 819) }}">
                             <img src="{{ asset('img/icon/down.gif') }}" hspace="0" vspace="2" border="0" alt="down" width="26" height="7">
@@ -854,7 +856,7 @@
                     <div id="l24" class="s2box bt bb">
                         <s id="z24">0</s><a name="24"></a>
                         <em>24</em>
-                        <cite>Городские ворота</cite>
+                        <cite>{{ __('Городские ворота') }}</cite>
                     </div>
                 </div>
             </div>
@@ -896,7 +898,7 @@
                     <div id="l29" class="s2box bl bt bb">
                         <s id="z29">0</s><a name="29"></a>
                         <em>29</em>
-                        <cite>Регистрационная палата</cite>
+                        <cite>{{ __('Регистрационная палата') }}</cite>
                     </div>
                 </div>
             </div>
@@ -907,7 +909,7 @@
                     <div id="l28" class="s2box bb br">
                         <s id="z28">0</s><a name="28"></a>
                         <em>28</em>
-                        <cite>Клановый зал</cite>
+                        <cite>{{ __('Клановый зал') }}</cite>
                     </div>
                 </div>
             </div>
@@ -954,7 +956,7 @@
                     <div id="l18" class="s2box br bt bb">
                         <s id="z18">0</s><a name="18"></a>
                         <em>18</em>
-                        <cite>Торговая лавка</cite>
+                        <cite>{{ __('Торговая лавка') }}</cite>
                     </div>
                 </div>
             </div>
@@ -1026,7 +1028,7 @@
                     <div id="l47" class="s2box br bl bt">
                         <s id="z47">0</s><a name="47"></a>
                         <em>47</em>
-                        <cite>Складской двор</cite>
+                        <cite>{{ __('Складской двор') }}</cite>
                     </div>
                 </div>
             </div>
@@ -1064,7 +1066,7 @@
                     <div id="l51" class="s2box br bt bl">
                         <s id="z51">0</s><a name="51"></a>
                         <em>51</em>
-                        <cite>Гильдия мастеров</cite>
+                        <cite>{{ __('Гильдия мастеров') }}</cite>
                     </div>
                 </div>
             </div>
@@ -1103,7 +1105,7 @@
                     <div id="l1702" class="s2box bl bb br">
                         <s id="z1702">0</s><a name="1702"></a>
                         <em>1702</em>
-                        <cite>Темница</cite>
+                        <cite>{{ __('Темница') }}</cite>
                     </div>
                 </div>
             </div>
@@ -1115,7 +1117,7 @@
                     <div id="l46" class="s2box bl bb">
                         <s id="z46">0</s><a name="46"></a>
                         <em>46</em>
-                        <cite>Банковский двор</cite>
+                        <cite>{{ __('Банковский двор') }}</cite>
                     </div>
                 </div>
             </div>
@@ -1353,7 +1355,7 @@
                     <div id="l101" class="s2box bl br">
                         <s id="z101">0</s>
                         <em>101</em>
-                        <cite>Городские ворота</cite>
+                        <cite>{{ __('Городские ворота') }}</cite>
                         <a href="{{ map_transition_url('Gh865Vpo', 102) }}" class="asouth">↓</a>
                     </div>
                 </div>

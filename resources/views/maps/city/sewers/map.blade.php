@@ -1,6 +1,6 @@
-<html>
+<html lang="{{ app()->getLocale() }}">
 <head>
-    <title>Map</title>
+    <title>{{ __('Карта') }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="Description" content=""/>
     <script type="text/javascript">
@@ -293,7 +293,7 @@
                                 <div class="common-header common-header__small">
                                     <div class="h-inner">
                                         <div class="h-txt">
-                                            Канализация
+                                            {{ __('Канализация') }}
                                         </div>
                                     </div>
                                 </div>
@@ -357,7 +357,7 @@
                                                                                         <tr height="22">
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
                                                                                             <td class="tbl-usi_label-center">
-                                                                                                Проходы в другие области
+                                                                                                {{ __('Проходы в другие области') }}
                                                                                             </td>
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
                                                                                         </tr>
@@ -381,7 +381,7 @@
                                                                                           onmouseout="mark_l(819,0)"><span
                                                                                             class="listloc">819</span> <span
                                                                                             style="font-size:18px;">→</span> <a
-                                                                                            href="{{ map_transition_url('1p0OH76', 6) }}">Город</a> <span
+                                                                                            href="{{ map_transition_url('1p0OH76', 6) }}">{{ __('Город') }}</a> <span
                                                                                             class="listloc">6</span></span>
                                                                                             </td>
                                                                                         </tr>
@@ -417,7 +417,7 @@
                                                                                         <tr height="22">
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
                                                                                             <td class="tbl-usi_label-center">
-                                                                                                Условные обозначения
+                                                                                                {{ __('Условные обозначения') }}
                                                                                             </td>
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
                                                                                         </tr>
@@ -442,17 +442,17 @@
                                                                                                     onmouseover="area_show(819,1)"
                                                                                                     onmouseout="area_show(819,0)"><span
                                                                                                         class="a819 listloc"
-                                                                                                        style="">&nbsp;</span> - Канализация</span>
+                                                                                                        style="">&nbsp;</span> - {{ __('Канализация') }}</span>
                                                                                             </td>
                                                                                         </tr>
                                                                                         @auth
                                                                                         <tr class="bg_l">
                                                                                             <td class="brd2-top brd2-bt b">
-                                                                                                @if($currentMapUrl ?? null)<a href="{{ $currentMapUrl }}" title="Открыть карту текущей локации">@endif<span class="line-align"><span
+                                                                                                @if($currentMapUrl ?? null)<a href="{{ $currentMapUrl }}" title="{{ __('Открыть карту текущей локации') }}">@endif<span class="line-align"><span
                                                                                                         style="margin-top:6px;display:inline-block;"><span
                                                                                                             class="ulocation"><span
                                                                                                                 class="listloc"
-                                                                                                                id="lid">{{ auth()->user()->location_id }}</span></span> - Вы здесь</span></span>@if($currentMapUrl ?? null)</a>@endif
+                                                                                                                id="lid">{{ auth()->user()->location_id }}</span></span> - {{ __('Вы здесь') }}</span></span>@if($currentMapUrl ?? null)</a>@endif
                                                                                             </td>
                                                                                         </tr>
                                                                                         @endauth
@@ -499,10 +499,10 @@
                                                                     <td class="tbl-usi_bg" valign="top"
                                                                         style="padding: 6px 4px; text-align: justify;">
                                                                         <p>
-                                                                            <sup>1</sup>  Кликните на цифру в прямоугольнике, чтобы подсветить локацию.
+                                                                            <sup>1</sup>  {{ __('Кликните на цифру в прямоугольнике, чтобы подсветить локацию.') }}
                                                                         </p>
                                                                         <p>
-                                                                            <sup>2</sup>  Кликните на закрашенный прямоугольник, чтобы выделить местность.
+                                                                            <sup>2</sup>  {{ __('Кликните на закрашенный прямоугольник, чтобы выделить местность.') }}
                                                                         </p>
                                                                     </td>
                                                                     <td class="tbl-usi_right">&nbsp;</td>

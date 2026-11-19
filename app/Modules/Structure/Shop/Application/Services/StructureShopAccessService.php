@@ -28,9 +28,7 @@ class StructureShopAccessService
         if ($shop->reputation_id === null) {
             return null;
         }
-        $points = (int) DB::table('player_reputations')
-            ->where('player_id', $user->player_id)
-            ->where('reputation_id', $shop->reputation_id)->value('points');
+        $points = $this->reputationPoints($user, $shop);
         foreach ($lines as $line) {
             if ($points < (int) $line->shopItem->min_reputation_points) {
                 return __('commerce.reputation_required', ['item' => $line->shopItem->item->name, 'points' => $line->shopItem->min_reputation_points]);
@@ -38,5 +36,16 @@ class StructureShopAccessService
         }
 
         return null;
+    }
+
+    public function reputationPoints(User $user, Structure $shop): int
+    {
+        if ($shop->reputation_id === null) {
+            return 0;
+        }
+
+        return (int) DB::table('player_reputations')
+            ->where('player_id', $user->player_id)
+            ->where('reputation_id', $shop->reputation_id)->value('points');
     }
 }

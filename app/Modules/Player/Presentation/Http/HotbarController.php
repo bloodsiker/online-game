@@ -13,7 +13,6 @@ use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
-use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\TreasureHunt\Application\Services\TreasureHuntService;
 use Illuminate\Http\JsonResponse;
@@ -133,8 +132,8 @@ class HotbarController extends Controller
 
         $backpack->item->itemInfo->loadMissing('effects');
 
-        // Currency certificates must use the transactional inventory endpoint, not the legacy hotbar path.
-        if ($backpack->item->itemInfo->effects->contains(fn ($effect) => $effect->effect_type === ItemEffectType::GRANT_DIAMONDS)) {
+        // Certificates and item-producing/replacing items must use the transactional inventory endpoint, not the legacy hotbar path.
+        if ($backpack->item->itemInfo->effects->contains(fn ($effect) => $effect->effect_type->requiresInventoryUse())) {
             return response()->json(['status' => 'error', 'message' => __('Используйте этот предмет из рюкзака.')], 422);
         }
 

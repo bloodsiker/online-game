@@ -31,7 +31,8 @@ class EloquentLocationReadRepository implements LocationReadRepository
         $query = MonsterOnLocation::with('monster')
             ->where('location_id', $locationId)
             ->where('active', 1)
-            ->shownOnLocation();
+            ->shownOnLocation()
+            ->revealedTo($user);
 
         $session = $user !== null ? DungeonSession::query()->where('user_id', $user->id)->first() : null;
         if ($session !== null) {

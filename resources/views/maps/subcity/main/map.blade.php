@@ -1,6 +1,6 @@
-<html>
+<html lang="{{ app()->getLocale() }}">
 <head>
-    <title>Map</title>
+    <title>{{ __('Карта') }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="Description" content=""/>
     <script type="text/javascript">
@@ -293,7 +293,7 @@
                                 <div class="common-header common-header__small">
                                     <div class="h-inner">
                                         <div class="h-txt">
-                                            Шепчущий Лес
+                                            {{ __('Шепчущий Лес') }}
                                         </div>
                                     </div>
                                 </div>
@@ -358,7 +358,7 @@
                                                                                         <tr height="22">
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
                                                                                             <td class="tbl-usi_label-center">
-                                                                                                Проходы в другие области
+                                                                                                {{ __('Проходы в другие области') }}
                                                                                             </td>
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
                                                                                         </tr>
@@ -382,7 +382,7 @@
                                                       onmouseout="mark_l(102,0)"><span
                                                         class="listloc">102</span> <span
                                                         style="font-size:18px;">→</span> <a
-                                                        href="{{ map_transition_url('1p0OH76', 101) }}">Город</a> <span
+                                                        href="{{ map_transition_url('1p0OH76', 101) }}">{{ __('Город') }}</a> <span
                                                         class="listloc">101</span></span>
                                             </td>
                                         </tr>
@@ -393,7 +393,7 @@
                                                       onmouseout="mark_l(245,0)"><span
                                                         class="listloc">245</span> <span
                                                         style="font-size:18px;">→</span> <a
-                                                        href="{{ map_transition_url('9uF1sO7v', 511) }}">Катакомбы Жертвоприношений</a> <span
+                                                        href="{{ map_transition_url('9uF1sO7v', 511) }}">{{ __('Катакомбы Жертвоприношений') }}</a> <span
                                                         class="listloc">511</span></span>
                                             </td>
                                         </tr>
@@ -404,7 +404,7 @@
                                                       onmouseout="mark_l(418,0)"><span
                                                         class="listloc">418</span> <span
                                                         style="font-size:18px;">→</span> <a
-                                                        href="{{ map_transition_url('Kj9u18NJl3', 883) }}">Забытый Курган</a> <span
+                                                        href="{{ map_transition_url('Kj9u18NJl3', 883) }}">{{ __('Забытый Курган') }}</a> <span
                                                         class="listloc">883</span></span>
                                             </td>
                                         </tr>
@@ -415,7 +415,7 @@
                                                       onmouseout="mark_l(395,0)"><span
                                                         class="listloc">395</span> <span
                                                         style="font-size:18px;">→</span> <a
-                                                        href="{{ map_transition_url('6BJcCXXPZR', 1630) }}">Пепельные Предгорья</a> <span
+                                                        href="{{ map_transition_url('6BJcCXXPZR', 1630) }}">{{ __('Пепельные Предгорья') }}</a> <span
                                                         class="listloc">1630</span></span>
                                             </td>
                                         </tr>
@@ -451,7 +451,7 @@
                                                                                         <tr height="22">
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
                                                                                             <td class="tbl-usi_label-center">
-                                                                                                Условные обозначения
+                                                                                                {{ __('Условные обозначения') }}
                                                                                             </td>
                                                                                             <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
                                                                                         </tr>
@@ -476,7 +476,7 @@
                                                       onmouseover="area_show(2,1)"
                                                       onmouseout="area_show(2,0)"><span
                                                         class="a2 listloc"
-                                                        style="">&nbsp;</span> - Шепчущий Лес</span>
+                                                        style="">&nbsp;</span> - {{ __('Шепчущий Лес') }}</span>
                                             </td>
                                         </tr>
                                         <tr class=>
@@ -487,7 +487,7 @@
                                                       onmouseover="area_show(3,1)"
                                                       onmouseout="area_show(3,0)"><span
                                                         class="a3 listloc"
-                                                        style="">&nbsp;</span> - Опустевшая Долина</span>
+                                                        style="">&nbsp;</span> - {{ __('Опустевшая Долина') }}</span>
                                             </td>
                                         </tr>
                                         <tr class="bg_l">
@@ -498,7 +498,7 @@
                                                       onmouseover="area_show(4,1)"
                                                       onmouseout="area_show(4,0)"><span
                                                         class="a4 listloc"
-                                                        style="">&nbsp;</span> - Ожившая окраина</span>
+                                                        style="">&nbsp;</span> - {{ __('Ожившая окраина') }}</span>
                                             </td>
                                         </tr>
                                         <tr class=>
@@ -509,15 +509,15 @@
                                                       onmouseover="area_show(5,1)"
                                                       onmouseout="area_show(5,0)"><span
                                                         class="a5 listloc"
-                                                        style="">&nbsp;</span> - Заброшеное кладбище</span>
+                                                        style="">&nbsp;</span> - {{ __('Заброшеное кладбище') }}</span>
                                             </td>
                                         </tr>
                                         @auth
                                         <tr class="bg_l">
                                             <td class="brd2-top brd2-bt b">
-                                                @if($currentMapUrl ?? null)<a href="{{ $currentMapUrl }}" title="Открыть карту текущей локации">@endif<span class="line-align"><span style="margin-top:6px;display:inline-block;"><span
+                                                @if($currentMapUrl ?? null)<a href="{{ $currentMapUrl }}" title="{{ __('Открыть карту текущей локации') }}">@endif<span class="line-align"><span style="margin-top:6px;display:inline-block;"><span
                                                         class="ulocation"><span class="listloc"
-                                                            id="lid">{{ auth()->user()->location_id }}</span></span> - Вы здесь</span></span>@if($currentMapUrl ?? null)</a>@endif
+                                                            id="lid">{{ auth()->user()->location_id }}</span></span> - {{ __('Вы здесь') }}</span></span>@if($currentMapUrl ?? null)</a>@endif
                                             </td>
                                         </tr>
                                         @endauth
@@ -564,10 +564,10 @@
                                                                     <td class="tbl-usi_bg" valign="top"
                                                                         style="padding: 6px 4px; text-align: justify;">
                                                                         <p>
-                                                                            <sup>1</sup>  Кликните на цифру в прямоугольнике, чтобы подсветить локацию.
+                                                                            <sup>1</sup>  {{ __('Кликните на цифру в прямоугольнике, чтобы подсветить локацию.') }}
                                                                         </p>
                                                                         <p>
-                                                                            <sup>2</sup>  Кликните на закрашенный прямоугольник, чтобы выделить местность.
+                                                                            <sup>2</sup>  {{ __('Кликните на закрашенный прямоугольник, чтобы выделить местность.') }}
                                                                         </p>
                                                                     </td>
                                                                     <td class="tbl-usi_right">&nbsp;</td>

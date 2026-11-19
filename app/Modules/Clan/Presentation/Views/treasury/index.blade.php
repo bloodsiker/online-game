@@ -123,7 +123,7 @@
                         @if($taxPaid)
                             <span style="color:#397323;">{{ __('оплачен до') }} {{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
                         @else
-                            <span class="redd">{{ __('просрочен — чат, навыки и хранилище заблокированы') }}</span>
+                            <span class="redd">{{ __('просрочен — чат, навыки, хранилище и клановый рейд заблокированы') }}</span>
                         @endif
                         <br>
                         <span style="color:#777;">

@@ -9,6 +9,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Dungeon\Application\UseCases\AdvanceSurvivalWave;
 use App\Modules\Dungeon\Application\UseCases\GetActiveDungeonSession;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
+use App\Modules\Effect\Domain\Services\EffectBonusService;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
@@ -92,8 +93,14 @@ class BattleService
                 $monsterQuery->whereNull('dungeon_session_id');
             }
 
-            $monsterOnLocation = $monsterQuery->orderBy('id')->lockForUpdate()->get()->filter(function ($monster) {
-                return mt_rand(0, 100) < $monster->getAggression();
+            // Эликсиры Тихой тропы снижают шанс нападения (на боссов не действуют).
+            $playerId = $user->player?->id;
+            $aggressionFactor = $playerId !== null ? app(EffectBonusService::class)->aggressionFactor((int) $playerId) : 1.0;
+
+            $monsterOnLocation = $monsterQuery->orderBy('id')->lockForUpdate()->get()->filter(function ($monster) use ($aggressionFactor) {
+                $factor = $monster->monster?->isBoss() ? 1.0 : $aggressionFactor;
+
+                return mt_rand(0, 100) < $monster->getAggression() * $factor;
             });
 
             $checkTimeRespawnMonster = $location->time_not_attack > 0
@@ -141,7 +148,7 @@ class BattleService
                                     $location,
                                     $dungeonSessionId,
                                 );
-                                if (mt_rand(0, 100) < $agrMonster->aggression) {
+                                if (mt_rand(0, 100) < $agrMonster->aggression * $aggressionFactor) {
                                     $aggressionToUser->add($monsterOnLocation);
                                 }
                             }

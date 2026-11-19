@@ -110,7 +110,7 @@
     .reputation-top-tabs > tbody > tr > td.reputation-top-tabs__spacer { flex: 1 1 auto; }
     .reputation-top-tabs img { display: block; }
     .reputation-top-tabs > tbody > tr > td:has(> a) { box-sizing: border-box; height: 21px; padding: 3px 2px 4px !important; line-height: 14px; }
-    .reputation-top-tabs > tbody > tr > td > a { display: block; line-height: 14px; }
+    .reputation-top-tabs > tbody > tr > td > a { display: block; line-height: 14px; text-decoration: none; }
     .reputation-top-tabs br { display: none; }
 </style>
 <table class="reputation-top-tabs" border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
@@ -193,7 +193,11 @@
                                                onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
                                                onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $item->name }}</a>
                                         </div>
-                                        <div class="text-muted" style="margin-bottom: 3px;">Репутация {{ $item->minReputation }}–{{ $item->maxReputation }}</div>
+                                        @if($item->maxReputation < 1000000000)
+                                            <div class="text-muted" style="margin-bottom: 3px;">Репутация {{ $item->minReputation }}–{{ $item->maxReputation }}</div>
+                                        @elseif($item->minReputation > 0)
+                                            <div class="text-muted" style="margin-bottom: 3px;">Репутация от {{ $item->minReputation }}</div>
+                                        @endif
                                         <div>
                                             <span class="relic-badge {{ $item->isCurrentBracket ? 'active' : 'inactive' }}">
                                                 {{ $item->isCurrentBracket ? 'принимается сейчас' : 'не подходит для текущей репутации' }}

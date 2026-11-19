@@ -6,8 +6,10 @@ namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerItemUseLimitState;
 use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BlacksmithActionResultDTO;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -81,9 +83,36 @@ class UpgradeItemRarity
             $item = Item::query()->whereKey($slot->item_id)->lockForUpdate()->firstOrFail();
             $item->share_item_id = $target->id;
             $item->save();
+            $this->transferUseLimit((int) $user->player_id, $source, $target);
 
             return new BlacksmithActionResultDTO(true, sprintf('Апгрейд выполнен: «%s».', $target->name), true);
         });
+    }
+
+    /**
+     * Откат использования (share_item_use_limits) переходит на улучшенный предмет:
+     * апгрейд не должен давать лишнего использования в том же периоде (механизм Eternum).
+     */
+    private function transferUseLimit(int $playerId, ShareItem $source, ShareItem $target): void
+    {
+        $source->loadMissing('useLimit');
+        $target->loadMissing('useLimit');
+        if ($source->useLimit === null || $target->useLimit === null) {
+            return;
+        }
+
+        $state = PlayerItemUseLimitState::query()
+            ->where('player_id', $playerId)
+            ->where('share_item_use_limit_id', $source->useLimit->id)
+            ->first();
+        if ($state === null) {
+            return;
+        }
+
+        PlayerItemUseLimitState::query()->updateOrCreate(
+            ['player_id' => $playerId, 'share_item_use_limit_id' => $target->useLimit->id],
+            ['period_started_at' => $state->period_started_at, 'uses_count' => $state->uses_count],
+        );
     }
 
     private function availableMaterialCount(User $user, int $shareItemId, ?int $excludeBackpackId = null): int

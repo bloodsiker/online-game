@@ -525,7 +525,7 @@
 
                                                     <p class="text-center">
                                                         <input type="checkbox" name="license" onclick="check_next();" onchange="check_next();"
-                                                               id="license" value="1"/> Я принимаю и обязуюсь выполнять условия <a href="#" target="_blank"><b>Лицензионного соглашения</b>
+                                                               id="license" value="1"/> Я принимаю и обязуюсь выполнять условия <a href="{{ route('eula') }}" target="_blank"><b>Лицензионного соглашения</b>
                                                         </a>, <a href="#" target="_blank"><b>Основания для наказаний</b></a> и
                                                         <a href="#" target="_blank"><b>Правила игры</b></a></p>
 

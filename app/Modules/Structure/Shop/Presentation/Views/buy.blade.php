@@ -285,7 +285,7 @@
 </table>
 
 @if(count($page->categories) > 0)
-    <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+    <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px; margin-top: 5px;">
         <tbody>
         <tr height="21">
             @foreach($page->categories as $category)
@@ -317,7 +317,7 @@
                                 @endif
                                 <form method="post" action="{{ route($addCartRoute, ['id' => $page->shopId]) }}"
                                       class="{{ $isBarterShop ? 'barter-store-item__form' : '' }}"
-                                      @unless($isBarterShop) style="margin: 3px; display: inline-block;" @endunless>
+                                      @unless($isBarterShop) style="margin: 3px; display: inline-block; vertical-align: top;" @endunless>
                                     @csrf
                                     <table border="0" cellspacing="0" cellpadding="0" id="item_list"
                                            class="{{ $isBarterShop ? 'barter-store-item__table' : 'store-list-item' }}">
@@ -358,7 +358,6 @@
                                                                class="b {{ $isBarterShop ? 'barter-store-item__name' : '' }}"
                                                                style="color:{{ $item->color }}; @unless($isBarterShop) text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px; @endunless">{{ $item->name }}</a>
                                                             <x-game.purchase-limit :availability="$item->purchaseAvailability" />
-                                                            @if($item->minReputationPoints > 0)<div>{{ __("commerce.reputation_required", ["item" => $item->name, "points" => $item->minReputationPoints]) }}</div>@endif
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -368,15 +367,14 @@
                                                     </tr>
                                                     @if($item->requiredLevel !== null)
                                                         <tr>
-                                                            <td></td>
-                                                            <td colspan="2" title="Требуемый уровень" nowrap>
+                                                            <td colspan="3" title="Требуемый уровень" nowrap>
                                                                 <img src="{{ asset('img/icon/tbl-shp_level-icon.gif') }}" width="11" height="10" align="absmiddle">
                                                                 Уровень <b class="red">{{ $item->requiredLevel }}</b>
                                                             </td>
                                                         </tr>
                                                     @endif
                                                     <tr>
-                                                        <td class="b {{ $isBarterShop ? 'barter-store-item__money' : '' }}" title="Цена" @unless($isBarterShop) style="padding-top: 13px;" @endunless valign="top">
+                                                        <td class="b {{ $isBarterShop ? 'barter-store-item__money' : '' }}" title="Цена" @unless($isBarterShop) style="padding-top: 19px;" @endunless valign="top">
                                                             @if($item->price)
                                                                 <span title="Монеты" @unless($isBarterShop) style="display: block;" @endunless>
                                                                     <img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle">
@@ -389,19 +387,6 @@
                                                                     &nbsp;{{ format_money($item->diamond) }}
                                                                 </span>
                                                             @endif
-                                                            @unless($isBarterShop)
-                                                                @foreach($item->requirements as $requirement)
-                                                                    <div title="{{ $requirement['name'] }}">
-                                                                        <img src="{{ $requirement['image'] }}"
-                                                                             data-id="{{ $requirement['id'] }}"
-                                                                             onmouseover="showItemInfo(this,event,2)"
-                                                                             onmouseout="showItemInfo(this,event,0)"
-                                                                             width="18" height="18" align="absmiddle"
-                                                                             style="object-fit: contain; cursor: help;">
-                                                                        &nbsp;{{ $requirement['quantity'] }}
-                                                                    </div>
-                                                                @endforeach
-                                                            @endunless
                                                         </td>
                                                         <td align="center" valign="top" style="{{ $isBarterShop ? '' : 'padding-top: 16px;' }} width: 60px;">
                                                             <div class="cart-amount-sell-price">
@@ -416,7 +401,13 @@
                                                                 </span>
                                                             </div>
                                                         </td>
-                                                        <td align="center" valign="top" style="{{ $isBarterShop ? '' : 'padding-top: 16px;' }} width: 80px;">
+                                                        <td align="center" valign="top" style="{{ $isBarterShop ? '' : 'padding-top: 15px;' }} width: 80px;">
+                                                            @if($item->minReputationPoints > 0)
+                                                                {{-- над кнопкой, справа; абсолютно — чтобы не расширять колонку и не сдвигать кнопку --}}
+                                                                <div style="position: relative; height: 15px; {{ $isBarterShop ? '' : 'margin-top: -15px;' }}">
+                                                                    <div style="position: absolute; right: 0; top: 0; white-space: nowrap; line-height: 15px;">{{ __('commerce.reputation_requirement', ['points' => $item->minReputationPoints]) }}</div>
+                                                                </div>
+                                                            @endif
                                                             <b class="butt2 pointer "><b>
                                                                     <input value="В корзину" type="submit" onclick="if(document._submit)return false;document._submit=true;" style="width:{{ $isBarterShop ? 55 : 63 }}px">
                                                                 </b>
@@ -427,7 +418,7 @@
                                                 </table>
                                             </td>
                                         </tr>
-                                        @if($isBarterShop && count($item->requirements) > 0)
+                                        @if(count($item->requirements) > 0)
                                             <tr>
                                                 <td class="brd2-top barter-store-item__cost-label">
                                                     <b>Стоимость:</b>
@@ -459,7 +450,7 @@
                                 </div>
                             @endif
                         @else
-                            <div align="center" style="color: #49382D"><b>В этой категории товаров нет!</b></div>
+                            <div align="center" style="color: #49382D"><b>{{ $page->totalItemsCount > 0 ? 'По выбранным фильтрам ничего не найдено.' : 'В этой категории товаров нет!' }}</b></div>
                         @endif
         </td>
         <td width="10"></td>
@@ -593,6 +584,7 @@
                                             </tr>
                                             </tbody>
                                         </table>
+                                        @if($page->cart->getItems()->count())
                                         <br>
                                         <span class="butt1 pointer ">
                                             <span>
@@ -606,12 +598,13 @@
                                             </span>
                                         </span>
                                         <br>
+                                        @endif
                                     </form>
 
                                     @if($page->shopDescription !== null)
                                         <br>
                                         <div class="p10h p2v brd2-all bg_l" align="left">
-                                            {!! nl2br(e($page->shopDescription)) !!}
+                                            {!! nl2br($page->shopDescription) !!}
                                         </div>
                                     @endif
                     </td>
@@ -624,6 +617,7 @@
                 </tr>
                 </tbody>
             </table>
+            @include('shop::partials.filters')
         </td>
     </tr>
     </tbody>

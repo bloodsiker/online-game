@@ -44,7 +44,7 @@
         }
 
         locationElement.classList.add('map-search-highlight');
-        locationElement.title = 'Найденная локация №' + locationId;
+        locationElement.title = @js(__('Найденная локация №')) + locationId;
 
         window.requestAnimationFrame(function () {
             locationElement.scrollIntoView({block: 'center', inline: 'center'});

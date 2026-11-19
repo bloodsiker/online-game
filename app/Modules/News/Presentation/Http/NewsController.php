@@ -50,17 +50,37 @@ class NewsController extends Controller
         }
 
         return view('news::index', [
-            ...$rankings->execute(),
-            'hotForumTopics' => $forum->execute(),
-            'homepageBossBattles' => $bossBattles->execute(),
+            ...$this->layoutData($rankings, $forum, $bossBattles),
             'newsPosts' => $newsPosts,
             'selectedNews' => $selectedNews,
             'isNewsArchive' => $isNewsArchive,
             'newsItemTooltipScript' => $shortcodeRenderer->tooltipScript(),
+        ]);
+    }
+
+    public function eula(GetHomepageRankings $rankings, GetHotForumTopics $forum, GetHomepageBossBattles $bossBattles): View
+    {
+        return view('news::index', [
+            ...$this->layoutData($rankings, $forum, $bossBattles),
+            'newsPosts' => collect(),
+            'selectedNews' => null,
+            'isNewsArchive' => false,
+            'isEulaPage' => true,
+            'newsItemTooltipScript' => '',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function layoutData(GetHomepageRankings $rankings, GetHotForumTopics $forum, GetHomepageBossBattles $bossBattles): array
+    {
+        return [
+            ...$rankings->execute(),
+            'hotForumTopics' => $forum->execute(),
+            'homepageBossBattles' => $bossBattles->execute(),
             'onlineCount' => User::query()
                 ->where('last_online_at', '>=', now()->subMinutes((int) config('game.online_timeout_minutes', 30)))
                 ->count(),
-        ]);
+        ];
     }
 
     public function comment(Request $request, NewsPost $news): RedirectResponse

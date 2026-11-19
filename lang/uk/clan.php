@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'boss_tax_required' => 'Лігво кланових босів недоступне до сплати щомісячного податку клану.',
     'status' => [
         'invite' => 'очікує на згоду',
         'request' => 'заявка на вступ',

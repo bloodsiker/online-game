@@ -10,6 +10,7 @@ use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Item\Application\ItemEffect\ItemEffectStrategyFactory;
+use App\Modules\Item\Application\ItemEffect\Strategies\GrantReputationStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\RespecStatsStrategy;
 use App\Modules\Item\Application\Services\LockpickingService;
 use App\Modules\Item\Application\UseCases\DropItem;
@@ -38,6 +39,7 @@ use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -249,7 +251,7 @@ class ItemController extends Controller
         // использования любых его предметов, включая создание первой строки лимита.
         $player = Player::query()->whereKey($user->player_id)->lockForUpdate()->firstOrFail();
 
-        $backpack = Backpack::with(['item.itemInfo.effects', 'item.itemInfo.buffs.effect', 'item.itemInfo.debuffs.effect'])
+        $backpack = Backpack::with(['item.itemInfo.effects.targetItem', 'item.itemInfo.buffs.effect', 'item.itemInfo.debuffs.effect'])
             ->where('user_id', $user->id)
             ->where('item_id', $id)
             ->where('equipped', 0)
@@ -447,9 +449,22 @@ class ItemController extends Controller
             fn ($e) => $e->effect_type === ItemEffectType::RESPEC_STATS
         );
 
+        // Eternum и подобные: можно использовать сразу несколько штук из стопки.
+        $bulkQuantity = $instantEffects->isNotEmpty()
+            && $instantEffects->every(fn ($e) => $e->effect_type->supportsBulkUse())
+            && $itemBuffs->isEmpty() && $itemDebuffs->isEmpty()
+            ? max(1, min($request->integer('quantity', 1), (int) $backpack->count))
+            : 1;
+        $reputationGranted = 0;
+
         foreach ($instantEffects as $effectModel) {
             $effect = $effectModel->toValueObject();
             $strategy = ItemEffectStrategyFactory::make($effect->type);
+            if ($strategy instanceof GrantReputationStrategy) {
+                $reputationGranted += $strategy->grant($player, $effect, $bulkQuantity, (string) $backpack->item->itemInfo->name);
+
+                continue;
+            }
             $strategy->apply($player, $effect, $stats->getHpMax(), $stats->getMpMax());
         }
 
@@ -510,7 +525,14 @@ class ItemController extends Controller
             $profile->save();
         }
 
-        if ($hasRegularEffect || $questUse['consume']) {
+        // Механизм (PRODUCE_ITEM) остаётся в рюкзаке — частоту ограничивает лимит использования.
+        $keepsItem = $instantEffects->contains(fn ($e) => $e->effect_type->keepsItem());
+        // Механизм выдал новые предметы — фронту нужно перерисовать рюкзак.
+        $changesInventory = $instantEffects->contains(fn ($e) => $e->effect_type === ItemEffectType::PRODUCE_ITEM);
+
+        if ($bulkQuantity > 1) {
+            ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackStack($backpack, $bulkQuantity);
+        } elseif (! $keepsItem && ($hasRegularEffect || $questUse['consume'])) {
             ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackItem($backpack);
         } else {
             $removed = false;
@@ -544,8 +566,11 @@ class ItemController extends Controller
             'new_name' => $newName,
             'new_race' => $newRace?->name,
             'new_avatar_url' => $newAvatar?->image_url,
+            ...($changesInventory ? ['reload_backpack' => true] : []),
             'message' => match (true) {
                 $diamondsCredited > 0 => __('На ваш счёт начислено :amount бриллиантов.', ['amount' => $diamondsCredited]),
+                $changesInventory => $this->inventoryChangeMessage($instantEffects),
+                $reputationGranted > 0 => __('Получено репутации: +:points.', ['points' => $reputationGranted]),
                 $newName !== null => sprintf(__('Имя изменено на «%s».'), $newName),
                 $newRace !== null => sprintf(
                     __('Раса изменена на «%s»! Возвращено свободных очков для распределения: %d.'),
@@ -574,6 +599,33 @@ class ItemController extends Controller
     }
 
     /** @return array{removed: bool, count: int} */
+    /** Сообщение для механизма: что именно получено. */
+    private function inventoryChangeMessage(Collection $instantEffects): string
+    {
+        return $instantEffects
+            ->filter(fn ($e) => $e->effect_type === ItemEffectType::PRODUCE_ITEM)
+            ->map(fn ($e): string => __('Получено: :item × :count.', ['item' => (string) $e->targetItem?->name, 'count' => (int) $e->value]))
+            ->implode(' ');
+    }
+
+    /**
+     * Списание нескольких штук стакающегося предмета за одно использование (Eternum).
+     *
+     * @return array{removed: bool, count: int}
+     */
+    private function consumeBackpackStack(Backpack $backpack, int $quantity): array
+    {
+        if ((int) $backpack->count <= $quantity) {
+            $backpack->delete();
+
+            return ['removed' => true, 'count' => 0];
+        }
+
+        $backpack->decrement('count', $quantity);
+
+        return ['removed' => false, 'count' => (int) $backpack->count];
+    }
+
     private function consumeBackpackItem(Backpack $backpack): array
     {
         $item = $backpack->item;

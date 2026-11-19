@@ -77,6 +77,46 @@ class ClanBossServiceTest extends TestCase
         Event::fake([ClanBossRunStarted::class, ClanBossDefeated::class, ClanBossRunExpired::class, UserLocationChanged::class, ClanBossRewardGranted::class]);
     }
 
+    public function test_unpaid_tax_blocks_lair_page_and_direct_actions(): void
+    {
+        [, $fixtures] = $this->makeService();
+        $fixtures['clan']->update(['tax_paid_until' => now()]);
+        $this->actingAs($fixtures['leader']);
+        $controller = $this->app->make(ClanBossController::class);
+        foreach (['index', 'open', 'attack'] as $action) {
+            $response = $controller->{$action}($fixtures['structure']->id);
+            $this->assertSame(route('location'), $response->getTargetUrl());
+            $this->assertSame(__('clan.boss_tax_required'), session('message'));
+        }
+        $this->assertSame(0, ClanBossRun::query()->count());
+    }
+
+    public function test_unpaid_tax_blocks_opening_a_run_at_service_level(): void
+    {
+        [$service, $fixtures] = $this->makeService();
+        $fixtures['clan']->update(['tax_paid_until' => null]);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(__('clan.boss_tax_required'));
+        $service->openRun($fixtures['structure'], $fixtures['leader']);
+    }
+
+    public function test_tax_expiring_during_run_blocks_hits_without_spending_them(): void
+    {
+        [$service, $fixtures] = $this->makeService();
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+        $state = ClanBossRunStage::query()->where('clan_boss_run_id', $run->id)->firstOrFail();
+        $fixtures['clan']->update(['tax_paid_until' => now()]);
+        $fixtures['leader']->unsetRelation('clanMembership');
+        try {
+            $service->assertCanHit($fixtures['leader'], $state->bossInstance);
+            $this->fail('Unpaid tax must prevent hitting the boss.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame(__('clan.boss_tax_required'), $exception->getMessage());
+        }
+        $this->assertSame(0, ClanBossContribution::query()->count());
+        $this->assertTrue($run->fresh()->isActive());
+    }
+
     public function test_open_run_spawns_shared_instance_and_second_open_fails(): void
     {
         [$service, $fixtures] = $this->makeService();
@@ -728,7 +768,7 @@ class ClanBossServiceTest extends TestCase
         Schema::create('items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id');
-            foreach (['upgrade_lvl', 'upgrade_pity', 'upgrade_fail_streak', 'socket_count', 'rune_slot_count', 'additional_attack', 'count_use', 'is_open'] as $column) {
+            foreach (['upgrade_lvl', 'upgrade_pity', 'upgrade_fail_streak', 'socket_count', 'rune_slot_count', 'additional_attack', 'count_use', 'is_open', 'quiver_arrow_count'] as $column) {
                 $table->integer($column)->default(0);
             }
             $table->timestamps();
@@ -853,7 +893,7 @@ class ClanBossServiceTest extends TestCase
         $leader->forceFill(['player_id' => $leaderPlayer->id])->save();
         $member->forceFill(['player_id' => $memberPlayer->id])->save();
 
-        $clan = Clan::query()->create(['name' => 'Клан', 'owner_id' => $leader->id, 'lvl' => 1, 'experience' => 0, 'treasury' => 0, 'warehouse_capacity' => 50]);
+        $clan = Clan::query()->create(['name' => 'Клан', 'owner_id' => $leader->id, 'tax_paid_until' => now()->addMonth(), 'lvl' => 1, 'experience' => 0, 'treasury' => 0, 'warehouse_capacity' => 50]);
         $role = ClanRole::query()->create(['clan_id' => $clan->id, 'name' => 'Лидер', 'permissions' => 0, 'is_leader' => true, 'is_default' => false]);
         $memberRole = ClanRole::query()->create(['clan_id' => $clan->id, 'name' => 'Боец', 'permissions' => ClanPermission::START_CLAN_BOSS->bit(), 'is_leader' => false, 'is_default' => true]);
         ClanMember::query()->forceCreate([
@@ -943,6 +983,7 @@ class ClanBossServiceTest extends TestCase
         });
         Schema::create('clans', function (Blueprint $table): void {
             $table->id();
+            $table->timestamp('tax_paid_until')->nullable();
             $table->string('name');
             $table->integer('lvl')->default(1);
             $table->decimal('experience', 18, 2)->default(0);

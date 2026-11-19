@@ -14,6 +14,8 @@ use LogicException;
 
 class ShopPurchaseLimitService
 {
+    public const ONCE_PER_CHARACTER_SECONDS = 157680000;
+
     public function availability(User $user, Model $offer): ?array
     {
         $limit = (int) $offer->purchase_limit_quantity;
@@ -29,11 +31,14 @@ class ShopPurchaseLimitService
             'limit' => $limit,
             'remaining' => $remaining,
             'available_at' => $until?->isFuture() ? $until : null,
-            'label' => __('commerce.purchase_limit', [
-                'quantity' => $limit,
-                'period' => CarbonInterval::seconds($seconds)->cascade()->locale(app()->getLocale())->forHumans(),
-                'remaining' => $remaining,
-            ]),
+            // Период от 5 лет — это «один раз на персонажа», а не «раз в N лет».
+            'label' => $seconds >= self::ONCE_PER_CHARACTER_SECONDS
+                ? __('commerce.purchase_limit_once', ['quantity' => $limit, 'remaining' => $remaining])
+                : __('commerce.purchase_limit', [
+                    'quantity' => $limit,
+                    'period' => CarbonInterval::seconds($seconds)->cascade()->locale(app()->getLocale())->forHumans(),
+                    'remaining' => $remaining,
+                ]),
         ];
     }
 

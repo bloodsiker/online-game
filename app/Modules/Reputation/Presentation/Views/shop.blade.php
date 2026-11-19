@@ -176,7 +176,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="b" title="Цена" style="padding-top: 13px;" valign="top">
+                                            <td class="b" title="Цена" style="padding-top: 19px;" valign="top">
                                                 @if($item->price)
                                                     <div title="Монет"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle">&nbsp;{{ format_money($item->price) }}</div>
                                                 @endif
@@ -206,7 +206,7 @@
                                                     </div>
                                                 @endunless
                                             </td>
-                                            <td align="center" valign="top" style="padding-top: 16px; width: 80px;">
+                                            <td align="center" valign="top" style="padding-top: 15px; width: 80px;">
                                                 @if($locked)
                                                     <span style="color:#8a0108; font-size:10px;">@if($purchaseLocked){{ __('commerce.purchase_blocked', ['item' => $item->item->name]) }}@else Нужно {{ $item->min_points }} реп.@endif</span>
                                                 @else

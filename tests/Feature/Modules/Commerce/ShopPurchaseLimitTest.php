@@ -207,6 +207,7 @@ class ShopPurchaseLimitTest extends TestCase
             $table->string('type');
             $table->json('name');
             $table->json('description');
+            $table->string('image')->nullable();
             $table->unsignedBigInteger('npc_id');
             $table->unsignedBigInteger('location_id');
             $table->timestamps();
@@ -277,6 +278,28 @@ class ShopPurchaseLimitTest extends TestCase
         $this->assertDatabaseCount('shop_purchase_limit_states', 1);
         $redirect = app(ReputationController::class)->shop(35, Request::create('/reputation/35/shop', 'GET', ['category_id' => 23]));
         $this->assertSame(route('shop', ['id' => $shop->id, 'category_id' => 23]), $redirect->getTargetUrl());
+
+        DB::table('reputations')->insert(['id' => 2, 'npc_id' => 85]);
+        DB::table('reputation_categories')->insert(['reputation_id' => 2, 'share_structure_category_id' => 23]);
+        DB::table('reputation_shop_items')->insert(['id' => 12, 'reputation_id' => 2, 'share_item_id' => 1962, 'share_structure_category_id' => 23, 'price' => 5000, 'min_points' => 500, 'purchase_limit_quantity' => 1, 'purchase_limit_period_seconds' => 86400]);
+        DB::table('reputation_shop_item_requirements')->insert(['reputation_shop_item_id' => 12, 'share_item_id' => 1963, 'quantity' => 4]);
+        DB::table('shop_purchase_limit_states')->insert(['user_id' => 1, 'offer_type' => 'reputation_shop_items', 'offer_id' => 12, 'period_started_at' => now(), 'quantity' => 1]);
+        DB::table('reputation_shop_carts')->insert(['user_id' => 1, 'reputation_shop_item_id' => 12, 'quantity' => 2]);
+        $migration = require database_path('migrations/2026_11_16_000001_move_hunters_reputation_shop_to_structure.php');
+        $migration->up();
+        $migration->up();
+        $hunters = Structure::where('reputation_id', 2)->sole();
+        $offer = ShopItem::where('structure_id', $hunters->id)->sole();
+        $this->assertSame('Магазин Ордена Охотников', $hunters->getTranslation('name', 'ru'));
+        $this->assertEquals(5000, $offer->price);
+        $this->assertEquals(500, $offer->min_reputation_points);
+        $this->assertDatabaseHas('shop_item_requirements', ['shop_item_id' => $offer->id, 'share_item_id' => 1963, 'quantity' => 4]);
+        $this->assertDatabaseHas('shop_carts', ['shop_item_id' => $offer->id, 'user_id' => 1, 'quantity' => 2]);
+        $this->assertSame(0, app(ShopPurchaseLimitService::class)->availability($this->user(), $offer)['remaining']);
+        $redirect = app(ReputationController::class)->shop(2, Request::create('/reputation/2/shop', 'GET', ['category_id' => 23]));
+        $this->assertSame(route('shop', ['id' => $hunters->id, 'category_id' => 23]), $redirect->getTargetUrl());
+        $this->assertDatabaseCount('structures', 2);
+        $this->assertDatabaseCount('shop_items', 2);
     }
 
     public function test_structure_shop_preserves_npc_location_and_reputation_requirements(): void

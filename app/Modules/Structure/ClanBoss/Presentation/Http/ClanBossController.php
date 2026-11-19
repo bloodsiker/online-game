@@ -30,6 +30,9 @@ class ClanBossController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        if ($redirect = $this->redirectIfTaxUnpaid($user)) {
+            return $redirect;
+        }
         $structure = $this->findLair($id);
         $structure->loadMissing('clanBossDungeon.stages');
         $dungeon = $structure->clanBossDungeon;
@@ -118,6 +121,9 @@ class ClanBossController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        if ($redirect = $this->redirectIfTaxUnpaid($user)) {
+            return $redirect;
+        }
         $structure = $this->findLair($id);
 
         try {
@@ -133,6 +139,9 @@ class ClanBossController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        if ($redirect = $this->redirectIfTaxUnpaid($user)) {
+            return $redirect;
+        }
         $structure = $this->findLair($id);
 
         if ((int) $user->location_id !== (int) $structure->location_id) {
@@ -183,6 +192,16 @@ class ClanBossController extends Controller
         }
 
         return redirect()->route('fight.clan-boss', ['id' => $battle->id]);
+    }
+
+    private function redirectIfTaxUnpaid(User $user): ?RedirectResponse
+    {
+        $clan = $user->clanMembership?->clan;
+        if ($clan !== null && ! $clan->hasPaidTax()) {
+            return redirect()->route('location')->with('message', __('clan.boss_tax_required'));
+        }
+
+        return null;
     }
 
     private function findLair(int $id): Structure
