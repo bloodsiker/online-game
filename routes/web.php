@@ -18,8 +18,6 @@ Route::get('/map7', [HomeController::class, 'map7'])->name('map7');
 Route::get('/map8', [HomeController::class, 'map8'])->name('map8');
 Route::get('/clear', [HomeController::class, 'clear'])->name('clear');
 
-Route::get('/login/{id}', [HomeController::class, 'login'])->name('login.as');
-
 // // ======== Ручная настройка верификации ======== //
 //
 // // Показ уведомления о необходимости подтвердить email

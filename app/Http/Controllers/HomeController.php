@@ -16,15 +16,6 @@ use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
-    public function login($id)
-    {
-        $user = User::find($id);
-        Auth::login($user, true);
-
-        return redirect()->route('game');
-        //        return view('homepage');
-    }
-
     public function gebug()
     {
         $diff = time() - Carbon::parse('2024-09-20 15:53')->timestamp;
