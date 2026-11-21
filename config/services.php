@@ -45,6 +45,17 @@ return [
         'webhook_ips' => array_filter(explode(',', (string) env('HELEKET_WEBHOOK_IPS', '31.133.220.8'))),
     ],
 
+    // plata by mono (https://monobank.ua/api-docs/acquiring). Оплата картой в гривне.
+    'monobank' => [
+        'token' => env('MONOBANK_TOKEN'),
+        'base_url' => env('MONOBANK_BASE_URL', 'https://api.monobank.ua'),
+        // Цена бриллианта задаётся в USD, карта списывает гривну по курсу НБУ на день.
+        // uah_per_usd — запасной курс, если API НБУ недоступен и прошлого курса нет.
+        'nbu_url' => env('NBU_RATE_URL', 'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange'),
+        'uah_per_usd' => (float) env('MONOBANK_UAH_PER_USD', 42),
+        'validity' => (int) env('MONOBANK_INVOICE_VALIDITY', 3600),
+    ],
+
     // Тег Google (GTM). Пустое значение — тег не выводится.
     'google_tag' => [
         'id' => env('GOOGLE_TAG_ID', 'GTM-M9R2VFHZ'),

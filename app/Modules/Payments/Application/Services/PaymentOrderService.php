@@ -8,6 +8,7 @@ use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Notification\Application\Services\PlayerNotificationService;
 use App\Modules\Payments\Domain\Enums\PaymentOrderStatus;
 use App\Modules\Payments\Infrastructure\Heleket\HeleketClient;
+use App\Modules\Payments\Infrastructure\Monobank\MonobankClient;
 use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,7 +19,45 @@ final class PaymentOrderService
     public function __construct(
         private readonly PlayerNotificationService $notifications,
         private readonly HeleketClient $heleket,
+        private readonly MonobankClient $monobank,
     ) {}
+
+    /** Онлайн-провайдер по умолчанию; игрок может сменить его на странице ордера до создания счёта. */
+    public function defaultProvider(): string
+    {
+        return match (true) {
+            $this->heleket->isConfigured() => 'heleket',
+            $this->monobank->isConfigured() => 'monobank',
+            default => 'manual',
+        };
+    }
+
+    /** @return list<string> */
+    public function onlineProviders(): array
+    {
+        return array_values(array_filter([
+            $this->monobank->isConfigured() ? 'monobank' : null,
+            $this->heleket->isConfigured() ? 'heleket' : null,
+        ]));
+    }
+
+    /** Сменить способ оплаты можно, пока счёт у провайдера ещё не выставлен. */
+    public function switchProvider(PaymentOrder $order, string $provider): PaymentOrder
+    {
+        if ($order->provider === $provider) {
+            return $order;
+        }
+        if (! in_array($provider, $this->onlineProviders(), true)) {
+            throw ValidationException::withMessages(['order' => __('payments.provider_error')]);
+        }
+        $switched = PaymentOrder::query()->whereKey($order->id)->where('status', PaymentOrderStatus::PENDING)
+            ->whereNull('payment_url')->update(['provider' => $provider, 'updated_at' => now()]);
+        if ($switched === 0) {
+            throw ValidationException::withMessages(['order' => __('payments.provider_locked')]);
+        }
+
+        return $order->refresh();
+    }
 
     public function create(int $userId, int $diamonds, string $requestId): PaymentOrder
     {
@@ -45,7 +84,7 @@ final class PaymentOrderService
             }
             $order = PaymentOrder::create([
                 'public_id' => (string) Str::uuid(), 'user_id' => $userId, 'request_id' => $requestId,
-                'status' => PaymentOrderStatus::PENDING, 'provider' => $this->heleket->isConfigured() ? 'heleket' : 'manual', 'currency' => $settings->currency,
+                'status' => PaymentOrderStatus::PENDING, 'provider' => $this->defaultProvider(), 'currency' => $settings->currency,
                 'amount_minor' => $amount, 'diamond_price_minor' => $settings->diamond_price_minor, 'diamonds' => $diamonds,
             ]);
             $this->event($order, $userId, null, PaymentOrderStatus::PENDING);

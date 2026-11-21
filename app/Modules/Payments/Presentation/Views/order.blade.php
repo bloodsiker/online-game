@@ -9,6 +9,13 @@
         <dl><dt>{{ __('payments.number') }}</dt><dd>{{ $order->public_id }}</dd>
             <dt>{{ __('payments.created') }}</dt><dd>{{ $order->created_at->format('d.m.Y H:i') }}</dd>
             <dt>{{ __('payments.amount') }}</dt><dd><b>{{ $order->formattedAmount() }}</b></dd>
+            @php
+                $cardCharge = $order->formattedCharge();
+                if ($cardCharge === null && in_array('monobank', $providers, true)) {
+                    $cardCharge = number_format(\App\Modules\Payments\Application\Services\MonobankCheckout::chargeMinor($order) / 100, 2, '.', ' ').' UAH';
+                }
+            @endphp
+            @if($cardCharge)<dt>{{ __('payments.card_amount') }}</dt><dd><b>{{ $cardCharge }}</b></dd>@endif
             <dt>{{ __('payments.diamonds') }}</dt><dd><img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" alt=""> <b>{{ format_money($order->diamonds) }}</b></dd>
             <dt>{{ __('payments.state') }}</dt><dd><b data-order-status>{{ $order->status->label() }}</b></dd>
         </dl>
@@ -17,10 +24,10 @@
         <p data-order-note>{{ $order->review_note }}</p>
         <p class="premium-error" data-order-error role="status">{{ $errors->first() }}</p>
         <div class="payment-actions">
-            @if($order->isOnline())
-                {{-- Страница Heleket не открывается во фрейме игры — оплата в новой вкладке. --}}
-                <form method="post" action="{{ route('payments.orders.pay', $order->public_id) }}" target="_blank" data-order-pay @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>@csrf<span class="butt1 pointer"><span><button class="butt1" type="submit">{{ __('payments.pay_crypto') }}</button></span></span></form>
-            @endif
+            {{-- Страницы оплаты не открываются во фрейме игры — оплата в новой вкладке. --}}
+            @foreach($providers as $provider)
+                <form method="post" action="{{ route('payments.orders.pay', $order->public_id) }}" target="_blank" data-order-pay @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>@csrf<input type="hidden" name="method" value="{{ $provider }}"><span class="butt1 pointer"><span><button class="butt1" type="submit">{{ $provider === 'monobank' ? __('payments.pay_card') : __('payments.pay_crypto') }}</button></span></span></form>
+            @endforeach
             <span class="butt1 pointer"><span><button class="butt1" type="button" data-order-check>{{ __('payments.check') }}</button></span></span>
             <form method="post" action="{{ route('payments.orders.cancel', $order->public_id) }}" data-order-cancel @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>@csrf<span class="butt1 pointer"><span><button class="butt1" type="submit">{{ __('payments.cancel') }}</button></span></span></form>
             <a href="{{ route('premium.topup') }}">{{ __('payments.back') }}</a>

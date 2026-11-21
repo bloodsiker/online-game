@@ -46,6 +46,7 @@ Route::get('/payment-orders/{publicId}', [PaymentOrderController::class, 'show']
 Route::post('/payment-orders/{publicId}/confirm', [PaymentOrderController::class, 'confirm'])->name('payment_orders.confirm');
 Route::post('/payment-orders/{publicId}/reject', [PaymentOrderController::class, 'reject'])->name('payment_orders.reject');
 Route::post('/payment-settings', [PaymentOrderController::class, 'settings'])->name('payment_orders.settings');
+Route::post('/payment-settings/sync-rate', [PaymentOrderController::class, 'syncRate'])->middleware('throttle:6,1')->name('payment_orders.sync_rate');
 Route::post('/premium', [PremiumController::class, 'save'])->name('premium.save');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

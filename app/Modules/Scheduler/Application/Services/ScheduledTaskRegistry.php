@@ -10,6 +10,7 @@ use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
 use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
 use App\Modules\Npc\Application\Services\NpcMovementService;
+use App\Modules\Payments\Infrastructure\Nbu\NbuExchangeRate;
 use App\Modules\Player\Application\UseCases\PruneExpiredPlayerInjuries;
 use App\Modules\Scheduler\Domain\DTOs\ScheduledTaskDefinition;
 use App\Modules\Scheduler\Domain\Enums\ScheduledTaskFrequency;
@@ -38,6 +39,8 @@ class ScheduledTaskRegistry
 
     public const MOVE_NPCS = 'npcs.move';
 
+    public const SYNC_NBU_RATE = 'payments.sync_nbu_rate';
+
     public function __construct(
         private readonly ConsoleKernel $console,
         private readonly PruneExpiredPlayerInjuries $pruneExpiredPlayerInjuries,
@@ -48,6 +51,7 @@ class ScheduledTaskRegistry
         private readonly ProcessExpiredClanBossRuns $processExpiredClanBossRuns,
         private readonly DatabaseBackupService $databaseBackupService,
         private readonly NpcMovementService $npcMovementService,
+        private readonly NbuExchangeRate $nbuExchangeRate,
     ) {}
 
     /** @return array<string, ScheduledTaskDefinition> */
@@ -144,6 +148,16 @@ class ScheduledTaskRegistry
                 lockSeconds: 3600,
                 successHistoryIntervalSeconds: 3600,
             ),
+            self::SYNC_NBU_RATE => new ScheduledTaskDefinition(
+                key: self::SYNC_NBU_RATE,
+                name: 'Курс НБУ (USD/UAH)',
+                description: 'Раз в сутки ночью загружает официальный курс НБУ на новый день в историю курсов. По нему считается сумма оплаты картой (plata by mono).',
+                defaultFrequency: ScheduledTaskFrequency::DAILY,
+                allowedFrequencies: [ScheduledTaskFrequency::DAILY],
+                settingsMutable: false,
+                lockSeconds: 300,
+                successHistoryIntervalSeconds: 3600,
+            ),
         ];
     }
 
@@ -179,6 +193,7 @@ class ScheduledTaskRegistry
                 $this->processExpiredClanBossRuns->execute(now()),
             ),
             self::DATABASE_BACKUP => $this->createDatabaseBackup(),
+            self::SYNC_NBU_RATE => sprintf('Курс НБУ: %s грн за 1 USD.', number_format($this->nbuExchangeRate->sync(), 4, '.', '')),
             default => throw new InvalidArgumentException('Неизвестная задача планировщика.'),
         };
     }

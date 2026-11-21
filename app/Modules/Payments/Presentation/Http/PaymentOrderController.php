@@ -6,6 +6,7 @@ namespace App\Modules\Payments\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Payments\Application\Services\HeleketCheckout;
+use App\Modules\Payments\Application\Services\MonobankCheckout;
 use App\Modules\Payments\Application\Services\PaymentOrderService;
 use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
 use Illuminate\Http\JsonResponse;
@@ -28,7 +29,10 @@ final class PaymentOrderController extends Controller
 
     public function show(Request $request, string $publicId): View
     {
-        return view('payments::order', ['order' => $this->ownedOrder($request, $publicId)]);
+        $order = $this->ownedOrder($request, $publicId);
+        $providers = $order->payment_url ? [$order->provider] : app(PaymentOrderService::class)->onlineProviders();
+
+        return view('payments::order', ['order' => $order, 'providers' => $order->isOnline() ? $providers : []]);
     }
 
     public function status(Request $request, string $publicId): JsonResponse
@@ -42,9 +46,20 @@ final class PaymentOrderController extends Controller
         ])->header('Cache-Control', 'no-store, private');
     }
 
-    public function pay(Request $request, string $publicId, HeleketCheckout $checkout): RedirectResponse
+    public function pay(Request $request, string $publicId, PaymentOrderService $service, HeleketCheckout $heleket, MonobankCheckout $monobank): RedirectResponse
     {
-        return redirect()->away($checkout->paymentUrl($this->ownedOrder($request, $publicId)));
+        $order = $this->ownedOrder($request, $publicId);
+        $method = $request->input('method');
+        if (is_string($method) && $method !== '') {
+            $order = $service->switchProvider($order, $method);
+        }
+
+        $url = match ($order->provider) {
+            'monobank' => $monobank->paymentUrl($order),
+            default => $heleket->paymentUrl($order),
+        };
+
+        return redirect()->away($url);
     }
 
     public function cancel(Request $request, string $publicId, PaymentOrderService $service): RedirectResponse

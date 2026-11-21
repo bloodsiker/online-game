@@ -8,6 +8,7 @@ use App\Modules\Notification\Domain\Events\PlayerNotificationAvailable;
 use App\Modules\Payments\Application\Services\ManagePaymentSettings;
 use App\Modules\Payments\Application\Services\PaymentOrderService;
 use App\Modules\Payments\Domain\Enums\PaymentOrderStatus;
+use App\Modules\Payments\Infrastructure\Nbu\NbuExchangeRate;
 use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\QueryException;
@@ -58,6 +59,9 @@ final class PaymentOrderTest extends TestCase
         (require database_path('migrations/2026_10_21_000003_create_payment_orders.php'))->up();
         (require database_path('migrations/2026_10_21_000004_use_usd_for_new_payment_orders.php'))->up();
         (require database_path('migrations/2026_11_21_000001_add_payment_url_to_payment_orders.php'))->up();
+        (require database_path('migrations/2026_11_22_000001_add_charge_amount_to_payment_orders.php'))->up();
+        (require database_path('migrations/2026_11_22_000002_create_exchange_rates.php'))->up();
+        config(['services.monobank.token' => null]);
         app(ManagePaymentSettings::class)->execute(['diamond_price' => '6.50', 'minimum_amount' => '500.00', 'is_enabled' => 1]);
     }
 
@@ -367,5 +371,149 @@ final class PaymentOrderTest extends TestCase
         $this->enableHeleket();
         config(['services.heleket.webhook_ips' => ['31.133.220.8']]);
         $this->sendWebhook(['type' => 'payment', 'order_id' => 'x'])->assertForbidden();
+    }
+
+    private ?\OpenSSLAsymmetricKey $monoKey = null;
+
+    private function enableMonobank(): void
+    {
+        config(['services.monobank' => ['token' => 'mono-token', 'base_url' => 'https://api.mono.test', 'uah_per_usd' => 40.0, 'validity' => 3600,
+            'nbu_url' => 'https://nbu.test/exchange']]);
+        $this->monoKey = openssl_pkey_new(['private_key_type' => OPENSSL_KEYTYPE_EC, 'curve_name' => 'prime256v1']);
+        $pem = openssl_pkey_get_details($this->monoKey)['key'];
+        Http::fake([
+            'api.mono.test/api/merchant/pubkey' => Http::response(['key' => base64_encode($pem)]),
+            'api.mono.test/api/merchant/invoice/create' => Http::response(['invoiceId' => 'mono-inv-1', 'pageUrl' => 'https://pay.mbnk.test/mono-inv-1']),
+        ]);
+        DB::table('exchange_rates')->insert(['rate_date' => now('Europe/Kyiv')->toDateString(), 'currency' => 'USD', 'rate' => 42.0, 'source' => 'nbu']);
+    }
+
+    /** @param  array<string, mixed>  $data */
+    private function sendMonoWebhook(array $data, ?string $sign = null): TestResponse
+    {
+        $body = (string) json_encode($data);
+        openssl_sign($body, $signature, $this->monoKey, OPENSSL_ALGO_SHA256);
+
+        return $this->call('POST', route('payments.monobank.webhook'), [], [], [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_X_SIGN' => $sign ?? base64_encode($signature)], $body);
+    }
+
+    public function test_monobank_invoice_is_created_in_uah_and_reused(): void
+    {
+        $this->enableMonobank();
+        $order = $this->createOrder();
+        $this->assertSame('monobank', $order->provider);
+
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id), ['method' => 'monobank'])->assertRedirect('https://pay.mbnk.test/mono-inv-1');
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id))->assertRedirect('https://pay.mbnk.test/mono-inv-1');
+
+        Http::assertSentCount(1);
+        Http::assertSent(fn ($request): bool => $request->url() === 'https://api.mono.test/api/merchant/invoice/create'
+            && $request->header('X-Token')[0] === 'mono-token'
+            && $request['amount'] === 2102100 && $request['ccy'] === 980
+            && $request['merchantPaymInfo']['reference'] === $order->public_id
+            && $request['webHookUrl'] === route('payments.monobank.webhook'));
+        $fresh = $order->fresh();
+        $this->assertSame('mono-inv-1', $fresh->provider_payment_id);
+        $this->assertSame(2102100, $fresh->charge_amount_minor);
+        $this->assertSame('UAH', $fresh->charge_currency);
+        $this->assertSame(42.0, $fresh->charge_rate);
+        $this->loginAs(3)->get(route('admin.payment_orders.show', $order->public_id))->assertOk()
+            ->assertSee('21 021.00 UAH')->assertSee('курс НБУ 42.0000');
+    }
+
+    public function test_provider_can_be_switched_only_before_invoice(): void
+    {
+        $this->enableMonobank();
+        $this->enableHeleket();
+        $order = $this->createOrder();
+        $this->assertSame('heleket', $order->provider);
+        $this->loginAs(1)->get(route('payments.orders.show', $order->public_id))->assertOk()
+            ->assertSee('21 021.00 UAH')->assertSee(__('payments.pay_card'))->assertSee(__('payments.pay_crypto'));
+
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id), ['method' => 'monobank'])->assertRedirect('https://pay.mbnk.test/mono-inv-1');
+        $this->assertSame('monobank', $order->fresh()->provider);
+
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id), ['method' => 'heleket'])->assertSessionHasErrors('order');
+        $this->assertSame('monobank', $order->fresh()->provider);
+        $this->loginAs(1)->get(route('payments.orders.show', $order->public_id))->assertOk()
+            ->assertSee(__('payments.pay_card'))->assertDontSee(__('payments.pay_crypto'));
+    }
+
+    public function test_monobank_success_webhook_credits_once_and_rejects_forgery(): void
+    {
+        $this->enableMonobank();
+        $order = $this->createOrder();
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id), ['method' => 'monobank']);
+        $payload = ['invoiceId' => 'mono-inv-1', 'status' => 'success', 'amount' => 2102100, 'ccy' => 980, 'finalAmount' => 2102100, 'reference' => $order->public_id];
+
+        $this->sendMonoWebhook($payload, base64_encode('forged'))->assertForbidden();
+        $this->sendMonoWebhook(['amount' => 100] + $payload)->assertOk();
+        $this->assertSame(PaymentOrderStatus::PENDING, $order->fresh()->status);
+
+        $this->sendMonoWebhook($payload)->assertOk();
+        $this->sendMonoWebhook($payload)->assertOk();
+        // Запоздалый промежуточный статус не трогает оплаченный ордер.
+        $this->sendMonoWebhook(['status' => 'processing'] + $payload)->assertOk();
+
+        $fresh = $order->fresh();
+        $this->assertSame(PaymentOrderStatus::PAID, $fresh->status);
+        $this->assertSame('success', $fresh->provider_status);
+        $this->assertEquals(87, DB::table('users')->where('id', 1)->value('diamond'));
+    }
+
+    public function test_monobank_failure_closes_order(): void
+    {
+        $this->enableMonobank();
+        $order = $this->createOrder();
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id), ['method' => 'monobank']);
+
+        $this->sendMonoWebhook(['invoiceId' => 'mono-inv-1', 'status' => 'failure', 'amount' => 2102100, 'ccy' => 980, 'reference' => $order->public_id])->assertOk();
+
+        $this->assertSame(PaymentOrderStatus::CANCELLED, $order->fresh()->status);
+        $this->assertEquals(10, DB::table('users')->where('id', 1)->value('diamond'));
+    }
+
+    public function test_nbu_rate_is_synced_to_history_and_used_without_requests(): void
+    {
+        config(['services.monobank.nbu_url' => 'https://nbu.test/exchange', 'services.monobank.uah_per_usd' => 40.0]);
+        $rates = app(NbuExchangeRate::class);
+        $this->assertSame(40.0, $rates->usdToUah()); // истории нет — запасной курс
+
+        $ok = [['r030' => 840, 'rate' => 44.9293, 'cc' => 'USD']];
+        Http::fake(['nbu.test/*' => Http::sequence()->push($ok)->push($ok)->whenEmpty(Http::response('down', 500))]);
+        $this->artisan('payments:sync-nbu-rate')->assertSuccessful();
+        $this->artisan('payments:sync-nbu-rate')->assertSuccessful(); // повтор за тот же день не дублирует
+
+        $this->assertSame(1, DB::table('exchange_rates')->count());
+        $this->assertSame(44.9293, $rates->usdToUah());
+        Http::assertSent(fn ($request): bool => str_contains($request->url(), 'valcode=USD') && str_contains($request->url(), 'date='.now('Europe/Kyiv')->format('Ymd')));
+
+        $this->expectException(\RuntimeException::class);
+        $rates->sync();
+    }
+
+    public function test_admin_sees_rate_history(): void
+    {
+        DB::table('exchange_rates')->insert([
+            ['rate_date' => now('Europe/Kyiv')->subDay()->toDateString(), 'currency' => 'USD', 'rate' => 44.5, 'source' => 'nbu'],
+            ['rate_date' => now('Europe/Kyiv')->toDateString(), 'currency' => 'USD', 'rate' => 44.9293, 'source' => 'nbu'],
+        ]);
+        $this->loginAs(3)->get(route('admin.payment_orders.index'))->assertOk()
+            ->assertSee('44.9293 грн')->assertSee('+0.4293')->assertSee('История курсов');
+    }
+
+    public function test_admin_can_sync_rate_manually_and_player_cannot(): void
+    {
+        config(['services.monobank.nbu_url' => 'https://nbu.test/exchange']);
+        Http::fake(['nbu.test/*' => Http::response([['r030' => 840, 'rate' => 45.0532, 'cc' => 'USD']])]);
+
+        $this->loginAs(1)->post(route('admin.payment_orders.sync_rate'))->assertRedirect(); // не админ — уводит из админки
+        $this->assertSame(0, DB::table('exchange_rates')->count());
+
+        $this->loginAs(3)->post(route('admin.payment_orders.sync_rate'))
+            ->assertRedirect(route('admin.payment_orders.index'))->assertSessionHas('message');
+        $this->assertEquals(45.0532, DB::table('exchange_rates')->value('rate'));
+        $this->get(route('admin.payment_orders.index'))->assertSee('Обновить курс НБУ сейчас');
     }
 }

@@ -8,12 +8,14 @@ use App\Http\Controllers\Controller;
 use App\Modules\Payments\Application\Services\ManagePaymentSettings;
 use App\Modules\Payments\Application\Services\PaymentOrderService;
 use App\Modules\Payments\Domain\Enums\PaymentOrderStatus;
+use App\Modules\Payments\Infrastructure\Nbu\NbuExchangeRate;
 use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Throwable;
 
 final class PaymentOrderController extends Controller
 {
@@ -32,6 +34,8 @@ final class PaymentOrderController extends Controller
         return view('payments::admin.index', [
             'orders' => $orders, 'statuses' => PaymentOrderStatus::cases(),
             'settings' => DB::table('payment_settings')->find(1),
+            'currentRate' => app(NbuExchangeRate::class)->current(),
+            'rateHistory' => app(NbuExchangeRate::class)->history(30),
         ]);
     }
 
@@ -70,5 +74,20 @@ final class PaymentOrderController extends Controller
         app(ManagePaymentSettings::class)->execute($data);
 
         return redirect()->route('admin.payment_orders.index')->with('message', 'Настройки покупки сохранены.');
+    }
+
+    /** Ручной запрос курса НБУ на сегодня (помимо ночной задачи планировщика). */
+    public function syncRate(NbuExchangeRate $rates): RedirectResponse
+    {
+        try {
+            $rate = $rates->sync();
+        } catch (Throwable $e) {
+            report($e);
+
+            return redirect()->route('admin.payment_orders.index')->withErrors(['rate' => 'Не удалось получить курс НБУ: '.$e->getMessage()]);
+        }
+
+        return redirect()->route('admin.payment_orders.index')
+            ->with('message', 'Курс НБУ обновлён: '.number_format($rate, 4, '.', ' ').' грн за 1 USD.');
     }
 }

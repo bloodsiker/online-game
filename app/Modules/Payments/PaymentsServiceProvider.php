@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Payments;
 
+use App\Modules\Payments\Presentation\Console\SyncNbuRate;
 use App\Modules\Payments\Presentation\Http\HeleketWebhookController;
+use App\Modules\Payments\Presentation\Http\MonobankWebhookController;
 use App\Modules\Payments\Presentation\Http\PaymentOrderController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -14,6 +16,9 @@ final class PaymentsServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'payments');
+        if ($this->app->runningInConsole()) {
+            $this->commands([SyncNbuRate::class]);
+        }
         Route::middleware(['web', 'auth'])->group(function (): void {
             Route::post('/payments/orders', [PaymentOrderController::class, 'store'])->middleware('throttle:10,1')->name('payments.orders.store');
             Route::get('/payments/orders/{publicId}', [PaymentOrderController::class, 'show'])->name('payments.orders.show');
@@ -24,5 +29,8 @@ final class PaymentsServiceProvider extends ServiceProvider
         // Вебхук Heleket: без сессии и CSRF, доверие — по подписи (и IP отправителя).
         Route::post('/payments/heleket/webhook', HeleketWebhookController::class)
             ->middleware('throttle:120,1')->name('payments.heleket.webhook');
+        // Вебхук plata by mono: доверие — по подписи X-Sign (ECDSA).
+        Route::post('/payments/monobank/webhook', MonobankWebhookController::class)
+            ->middleware('throttle:120,1')->name('payments.monobank.webhook');
     }
 }

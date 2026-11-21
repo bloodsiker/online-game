@@ -8,6 +8,7 @@
     <dl class="row"><dt class="col-sm-3">Номер</dt><dd class="col-sm-9">{{ $order->public_id }}</dd>
         <dt class="col-sm-3">Игрок</dt><dd class="col-sm-9"><a href="{{ url('/admin/player/'.$order->user_id) }}">{{ $order->user?->name }} [{{ $order->user_id }}]</a></dd>
         <dt class="col-sm-3">Сумма</dt><dd class="col-sm-9">{{ $order->formattedAmount() }}</dd>
+        @if($order->formattedCharge())<dt class="col-sm-3">Списано картой</dt><dd class="col-sm-9">{{ $order->formattedCharge() }}@if($order->charge_rate) — курс НБУ {{ number_format($order->charge_rate, 4, '.', ' ') }} грн/USD @endif</dd>@endif
         <dt class="col-sm-3">Провайдер</dt><dd class="col-sm-9">{{ $order->provider }}@if($order->provider_status) — {{ $order->provider_status }}@endif @if($order->provider_payment_id)<br><small>{{ $order->provider_payment_id }}</small>@endif</dd>
         <dt class="col-sm-3">Курс за бриллиант</dt><dd class="col-sm-9">{{ number_format($order->diamond_price_minor / 100, 2, '.', ' ') }} {{ $order->currency }}</dd>
         <dt class="col-sm-3">К начислению</dt><dd class="col-sm-9">{{ format_money($order->diamonds) }} бриллиантов</dd>
