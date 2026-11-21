@@ -322,7 +322,7 @@ class ItemsSeeder
         $sItem7->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem8 = new ShareItem;
-        $sItem8->type = ShareItemType::ARMOR;
+        $sItem8->type = ShareItemType::CHAIN_ARMOR;
         $sItem8->price = 2000;
         $sItem8->break_crystal = 2;
         $sItem8->name = 'Кольчуга «Ночной бури»';
@@ -358,7 +358,7 @@ class ItemsSeeder
         $this->command->info('Create Items success');
 
         $sItem9 = new ShareItem;
-        $sItem9->type = ShareItemType::ARMOR;
+        $sItem9->type = ShareItemType::HELMET;
         $sItem9->price = 100;
         $sItem9->name = 'Шлем «Ночной бури»';
         $sItem9->description = 'Шлем «Ночной бури»';
@@ -374,7 +374,7 @@ class ItemsSeeder
         $sItem9->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem10 = new ShareItem;
-        $sItem10->type = ShareItemType::ARMOR;
+        $sItem10->type = ShareItemType::GLOVES;
         $sItem10->price = 90;
         $sItem10->name = 'Наручи «Ночной бури»';
         $sItem10->description = 'Наручи «Ночной бури»';
@@ -390,7 +390,7 @@ class ItemsSeeder
         $sItem10->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem11 = new ShareItem;
-        $sItem11->type = ShareItemType::ARMOR;
+        $sItem11->type = ShareItemType::SHOES;
         $sItem11->price = 110;
         $sItem11->name = 'Сапоги «Ночной бури»';
         $sItem11->description = 'Сапоги «Ночной бури»';
@@ -406,7 +406,7 @@ class ItemsSeeder
         $sItem11->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem11 = new ShareItem;
-        $sItem11->type = ShareItemType::ARMOR;
+        $sItem11->type = ShareItemType::CLOAK;
         $sItem11->price = 105;
         $sItem11->name = 'Легкий плащ';
         $sItem11->description = 'Легкий плащ';

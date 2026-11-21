@@ -22,6 +22,12 @@
     padding: 0;
 }
 
+/* У форума у контента нет внутренних отступов — заголовку («Беседка» и т.п.) задаём свои */
+.forum-screen .library-page-title {
+    margin: 0;
+    padding: 12px 16px 10px;
+}
+
 .forum-screen .library-content-frame .b-common-block__bgr {
     min-width: 0;
 }

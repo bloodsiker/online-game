@@ -24,7 +24,7 @@ class InsertGem
         $itemSlot = $this->inventoryRepository->findOwnedSlotByTypes($data->user, $data->itemId, [
             ShareItemType::WEAPON->value,
             ShareItemType::SHIELD->value,
-            ShareItemType::ARMOR->value,
+            ...ShareItemType::values(ShareItemType::armorTypes()),
         ]);
 
         if ($itemSlot === null) {

@@ -34,7 +34,8 @@ class OneHandWeaponStrategy implements AttackStrategyInterface
             ? $this->player->getLeftHandMaxDmg()
             : $this->player->getRightHandMaxDmg();
 
-        $hit = $this->hitCalc->hit($this->player, $this->monster, $min, $max, $this->weaponSkillLevel);
+        $roll = fn () => $this->hitCalc->hit($this->player, $this->monster, $min, $max, $this->weaponSkillLevel);
+        $hit = $roll()->setReroll($roll);
 
         return [
             $hit

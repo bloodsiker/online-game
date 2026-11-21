@@ -15,5 +15,8 @@ final readonly class ShopSellPageDTO
         public int $diamonds,
         public array $items,
         public string $itemTooltipScript,
+        public ShopSellCartDTO $sellCart = new ShopSellCartDTO,
+        public int $bagUsed = 0,
+        public int $bagCapacity = 0,
     ) {}
 }

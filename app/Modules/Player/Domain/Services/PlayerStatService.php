@@ -12,6 +12,7 @@ use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerItemBuff;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
@@ -193,6 +194,11 @@ class PlayerStatService
         $sheet->dodge = $computed['dodge'];
         $sheet->critical = $computed['critical'];
         $sheet->armor = $computed['armor'];
+        // «Пробивание брони» руны/оружия — не стат, а доля брони цели, которую игнорируют удары (HitCalculator)
+        $sheet->armorPierce = min(0.9, app(PlayerRunePassiveService::class)->totalValue(
+            app(PlayerRunePassiveService::class)->resolve($player),
+            CombatPassiveType::ARMOR_PIERCE,
+        ) / 100);
         $sheet->magicResistance = $computed['magic_resistance'];
         $sheet->hpMax = $computed['hp_max'];
         $sheet->mpMax = $computed['mp_max'];

@@ -265,8 +265,6 @@ class ReputationSeeder extends Seeder
         foreach ([
             ['share_item_id' => 17, 'price' => 500,  'min_points' => 0,    'sort_order' => 1], // Эликсир жизни
             ['share_item_id' => 18, 'price' => 500,  'min_points' => 0,    'sort_order' => 2], // Эликсир маны
-            ['share_item_id' => 20, 'price' => 3000, 'min_points' => 500,  'sort_order' => 3], // Рюкзак путешественника
-            ['share_item_id' => 19, 'price' => 5000, 'min_points' => 1000, 'sort_order' => 4], // Пояс титана
         ] as $si) {
             ReputationShopItem::firstOrCreate(
                 ['reputation_id' => $reputation->id, 'share_item_id' => $si['share_item_id']],

@@ -105,13 +105,13 @@ class StarterEquipmentSeeder extends Seeder
     private const SLOTS = [
         'weapon' => [1, 'меч', 'm', ShareItemSlot::HAND, ShareItemType::WEAPON, PlayerStatKey::STRENGTH],
         'armor' => [1, 'доспех', 'm', ShareItemSlot::ARMOR, ShareItemType::ARMOR, PlayerStatKey::STRENGTH],
-        'shoes' => [2, 'сапоги', 'pl', ShareItemSlot::SHOES, ShareItemType::ARMOR, PlayerStatKey::AGILITY],
-        'forearm' => [4, 'наручи', 'pl', ShareItemSlot::FOREARM, ShareItemType::ARMOR, PlayerStatKey::STRENGTH],
-        'helmet' => [7, 'шлем', 'm', ShareItemSlot::HELMET, ShareItemType::ARMOR, PlayerStatKey::INTUITION],
-        'legging' => [10, 'поножи', 'pl', ShareItemSlot::LEGGING, ShareItemType::ARMOR, PlayerStatKey::AGILITY],
-        'shoulder' => [13, 'наплечники', 'pl', ShareItemSlot::SHOULDER, ShareItemType::ARMOR, PlayerStatKey::INTUITION],
+        'shoes' => [2, 'сапоги', 'pl', ShareItemSlot::SHOES, ShareItemType::SHOES, PlayerStatKey::AGILITY],
+        'forearm' => [4, 'наручи', 'pl', ShareItemSlot::FOREARM, ShareItemType::FOREARM, PlayerStatKey::STRENGTH],
+        'helmet' => [7, 'шлем', 'm', ShareItemSlot::HELMET, ShareItemType::HELMET, PlayerStatKey::INTUITION],
+        'legging' => [10, 'поножи', 'pl', ShareItemSlot::LEGGING, ShareItemType::LEGGING, PlayerStatKey::AGILITY],
+        'shoulder' => [13, 'наплечники', 'pl', ShareItemSlot::SHOULDER, ShareItemType::SHOULDER, PlayerStatKey::INTUITION],
         'shield' => [16, 'щит', 'm', ShareItemSlot::HAND, ShareItemType::SHIELD, PlayerStatKey::STRENGTH],
-        'chain_armor' => [20, 'кольчуга', 'f', ShareItemSlot::CHAIN_ARMOR, ShareItemType::ARMOR, PlayerStatKey::STRENGTH],
+        'chain_armor' => [20, 'кольчуга', 'f', ShareItemSlot::CHAIN_ARMOR, ShareItemType::CHAIN_ARMOR, PlayerStatKey::STRENGTH],
     ];
 
     /**

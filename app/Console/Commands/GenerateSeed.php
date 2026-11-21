@@ -1496,7 +1496,7 @@ class GenerateSeed extends Command
         $npc->save();
 
         $npc2 = Npc::firstOrCreate(
-            ['name' => 'Воевода Гидвер'],
+            ['name' => 'Воевода Торвальд'],
             ['location_id' => 4, 'description' => 'Дока военного искусства, тактик и стратег, он посвятил свою жизнь развитию военного дела и обучению молодых солдат его премудростям.', 'image' => '/img/npc/voevoda.jpg']
         );
 

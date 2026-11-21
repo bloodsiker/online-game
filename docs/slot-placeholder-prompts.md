@@ -1,6 +1,6 @@
 # Промпты: плейсхолдеры пустых слотов экипировки
 
-Полупрозрачные контурные силуэты (тонкие линии предмета с очень лёгкой подкраской, не сплошная заливка) для пустых ячеек манекена (поверх `public/img/bg/empty_slot.gif`, 60×60). Всего 15 картинок, каждый промпт готов целиком — хвост (стиль линий, прозрачный фон, PNG 1024×1024) уже внутри. Для игры уменьшить до 60×60 и 120×120 (@2x), сохранить как PNG с альфа-каналом.
+Полупрозрачные контурные силуэты (тонкие линии предмета с очень лёгкой подкраской, не сплошная заливка) для пустых ячеек манекена (поверх `public/img/bg/empty_slot.gif`, 60×60). Всего 16 картинок, каждый промпт готов целиком — хвост (стиль линий, прозрачный фон, PNG 1024×1024) уже внутри. Для игры уменьшить до 60×60 и 120×120 (@2x), сохранить как PNG с альфа-каналом.
 
 Пояс и сумка используются в двух слотах каждый (пояс 1/2, сумка 1/2) — одной картинки достаточно. Левая и правая рука — разные картинки.
 
@@ -21,6 +21,7 @@
 | 13 | Серьга | `earring.png` |
 | 14 | Ожерелье | `necklace.png` |
 | 15 | Колчан | `quiver.png` |
+| 16 | Плащ | `cloak.png` |
 
 ## 1. Шлем (`helmet.png`)
 
@@ -110,4 +111,10 @@ Fantasy MMORPG empty equipment slot placeholder icon, outline silhouette: silhou
 
 ```text
 Fantasy MMORPG empty equipment slot placeholder icon, outline silhouette: silhouette of a leather quiver tilted slightly, with three arrows with fletching sticking out of the top. Style: a ghosted engraved outline of the item, like a faint etched imprint on parchment. Thin, clean, evenly weighted contour lines in dark warm brown (#60462C), drawn semi-transparent at about 50% alpha, trace the outer shape and the main inner details of the item (seams, plates, rim, straps, gem facets). The inside of the shape is only very lightly tinted with the same brown at about 7% opacity, so it reads as a light, mostly empty, see-through outline and not as a solid filled blob. No gradients, no highlights, no gloss, no shadow, no colour other than brown, no text. Centered, occupying about 70% of the canvas with even margins, line width about 14 px at 1024 so the contour stays readable at 60×60 pixels. Fully transparent background with a true alpha channel (the silhouette will be placed over a beige parchment slot at about 35–40% opacity). PNG, square 1:1, 1024×1024.
+```
+
+## 16. Плащ (`cloak.png`)
+
+```text
+Fantasy MMORPG empty equipment slot placeholder icon, outline silhouette: silhouette of a long hooded cloak hanging straight down, front view, with the hood raised at the top, a round clasp joining the two edges at the collar and soft vertical folds flowing to a slightly flared hem. Style: a ghosted engraved outline of the item, like a faint etched imprint on parchment. Thin, clean, evenly weighted contour lines in dark warm brown (#60462C), drawn semi-transparent at about 50% alpha, trace the outer shape and the main inner details of the item (seams, plates, rim, straps, gem facets). The inside of the shape is only very lightly tinted with the same brown at about 7% opacity, so it reads as a light, mostly empty, see-through outline and not as a solid filled blob. No gradients, no highlights, no gloss, no shadow, no colour other than brown, no text. Centered, occupying about 70% of the canvas with even margins, line width about 14 px at 1024 so the contour stays readable at 60×60 pixels. Fully transparent background with a true alpha channel (the silhouette will be placed over a beige parchment slot at about 35–40% opacity). PNG, square 1:1, 1024×1024.
 ```

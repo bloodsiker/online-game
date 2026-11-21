@@ -32,6 +32,13 @@ class RelicSeekersReputationSeeder extends Seeder
             throw new RuntimeException('Репутация «'.self::REPUTATION_NAME.'» или её НПС не найдены.');
         }
 
+        // Подвиг уже переделан в цепочку (RelicSeekersWorshipChainSeeder) — повторный запуск его бы затёр.
+        if (DB::table('quests')->where('title->ru', 'like', '[Искатели реликтов] Поклонение:%')->exists()) {
+            $this->command?->warn('RelicSeekersReputationSeeder: цепочка «Поклонение» уже создана — пропуск.');
+
+            return;
+        }
+
         $worshipItem = ShareItem::query()
             ->where('name->ru', self::WORSHIP_ITEM_NAME)
             ->firstOrFail();

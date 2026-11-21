@@ -19,6 +19,11 @@ final class PaymentOrder extends Model
         'paid_at' => 'datetime', 'credited_at' => 'datetime', 'reviewed_at' => 'datetime',
     ];
 
+    public function isOnline(): bool
+    {
+        return $this->provider === 'heleket';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class)->without('player');

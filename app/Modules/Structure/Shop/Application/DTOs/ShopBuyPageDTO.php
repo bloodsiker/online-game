@@ -25,5 +25,7 @@ final readonly class ShopBuyPageDTO
         public ShopFilterDTO $filter = new ShopFilterDTO,
         public int $totalItemsCount = 0,
         public int $playerLevel = 0,
+        /** @var array<int, int> Сколько предметов-требований (бартер) у игрока в сумке: share_item_id => count */
+        public array $ownedRequirementCounts = [],
     ) {}
 }

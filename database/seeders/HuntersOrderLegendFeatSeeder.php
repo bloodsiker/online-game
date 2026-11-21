@@ -202,7 +202,8 @@ class HuntersOrderLegendFeatSeeder extends Seeder
             'name' => $this->json([$ru, 'Еліксир Чуття Прародителя']),
             'description_legacy' => $descRu,
             'description' => $this->json([$descRu, $descUk]),
-            'is_sell' => 0,
+            'is_sell' => 1,
+            'is_droppable' => 0,
             'is_auction_sellable' => 0,
             'is_give' => 0,
             'is_clan_warehouse_allowed' => 0,
@@ -223,6 +224,8 @@ class HuntersOrderLegendFeatSeeder extends Seeder
             ]));
         } else {
             $id = (int) $id;
+            // Флаги торговли (продажа/выброс/передача) правятся в админке — у существующего предмета не трогаем.
+            unset($row['is_sell'], $row['is_auction_sellable'], $row['is_give'], $row['is_clan_warehouse_allowed']);
             DB::table('share_items')->where('id', $id)->update($row);
         }
 

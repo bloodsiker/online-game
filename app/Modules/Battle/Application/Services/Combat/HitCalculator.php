@@ -6,6 +6,7 @@ use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\Player\Domain\Services\PlayerStatFormulas;
 
 readonly class HitCalculator
@@ -110,6 +111,18 @@ readonly class HitCalculator
      * Масштаб констант от среднего уровня сторон: на 12 уровне ×1,
      * дальше пропорционально — сохраняет форму кривых на любом уровне.
      */
+    /**
+     * Та же формула брони, что и у обычного удара (A/(A+armor), A растёт с уровнем), но без крита/пробития —
+     * для урона, который приходит не через hit(): механики боссов (высасывание, массовая атака, взрыв).
+     */
+    public static function mitigateByArmor(int $damage, float $armor, int $attackerLevel, int $defenderLevel): int
+    {
+        $levelScale = max(1.0, (($attackerLevel + $defenderLevel) / 2) / self::REFERENCE_LEVEL);
+        $armorConstant = self::ARMOR_CONSTANT * $levelScale;
+
+        return max(1, (int) round($damage * ($armorConstant / ($armorConstant + max(0.0, $armor)))));
+    }
+
     private function levelScale(FightHitInterface $attacker, FightHitInterface $defender): float
     {
         $avgLevel = ($attacker->getLevel() + $defender->getLevel()) / 2;
@@ -133,6 +146,11 @@ readonly class HitCalculator
     private function effectiveArmor(FightHitInterface $attacker, FightHitInterface $defender, bool $isCrit): float
     {
         $armor = (float) $defender->getArmor();
+
+        // Пассивка «Пробивание брони» (руна/оружие игрока): всегда, независимо от крита
+        if ($attacker instanceof StatSheet && $attacker->armorPierce > 0) {
+            $armor *= 1 - $attacker->armorPierce;
+        }
 
         if (! $isCrit) {
             return $armor;

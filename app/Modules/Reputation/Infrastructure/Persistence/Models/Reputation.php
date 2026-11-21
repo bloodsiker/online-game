@@ -26,13 +26,14 @@ class Reputation extends Model
     protected $table = 'reputations';
 
     protected $fillable = [
-        'name', 'description', 'npc_id', 'icon',
+        'name', 'description', 'npc_id', 'quest_cooldown_hours', 'icon',
         'favor_effect_type', 'favor_proc_chance', 'elixir_share_item_id', 'favor_marker_effect_id',
     ];
 
     protected $casts = [
         'favor_effect_type' => DivineFavorType::class,
         'favor_proc_chance' => 'integer',
+        'quest_cooldown_hours' => 'integer',
     ];
 
     public function npc(): BelongsTo

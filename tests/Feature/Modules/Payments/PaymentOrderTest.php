@@ -14,8 +14,10 @@ use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
@@ -55,6 +57,7 @@ final class PaymentOrderTest extends TestCase
         });
         (require database_path('migrations/2026_10_21_000003_create_payment_orders.php'))->up();
         (require database_path('migrations/2026_10_21_000004_use_usd_for_new_payment_orders.php'))->up();
+        (require database_path('migrations/2026_11_21_000001_add_payment_url_to_payment_orders.php'))->up();
         app(ManagePaymentSettings::class)->execute(['diamond_price' => '6.50', 'minimum_amount' => '500.00', 'is_enabled' => 1]);
     }
 
@@ -284,5 +287,85 @@ final class PaymentOrderTest extends TestCase
         $this->loginAs(1)->withHeaders(['X-CSRF-TOKEN' => 'wrong'])
             ->postJson(route('payments.orders.store'), ['diamonds' => 77, 'agree' => 1, 'request_id' => (string) Str::uuid()])->assertStatus(419);
         $this->assertEquals(10, DB::table('users')->where('id', 1)->value('diamond'));
+    }
+
+    private function enableHeleket(): void
+    {
+        config(['services.heleket' => [
+            'merchant' => 'merchant-uuid', 'api_key' => 'secret-key', 'base_url' => 'https://api.heleket.test',
+            'lifetime' => 3600, 'webhook_ips' => [],
+        ]]);
+    }
+
+    /** @param  array<string, mixed>  $data */
+    private function sendWebhook(array $data): TestResponse
+    {
+        $data['sign'] = md5(base64_encode((string) json_encode($data, JSON_UNESCAPED_UNICODE)).'secret-key');
+
+        return $this->call('POST', route('payments.heleket.webhook'), [], [], [], ['CONTENT_TYPE' => 'application/json'], (string) json_encode($data));
+    }
+
+    public function test_heleket_invoice_is_signed_and_reused(): void
+    {
+        $this->enableHeleket();
+        Http::fake(['api.heleket.test/*' => Http::response(['state' => 0, 'result' => ['uuid' => 'inv-1', 'url' => 'https://pay.heleket.test/inv-1']])]);
+        $order = $this->createOrder();
+        $this->assertSame('heleket', $order->provider);
+
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id))->assertRedirect('https://pay.heleket.test/inv-1');
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id))->assertRedirect('https://pay.heleket.test/inv-1');
+
+        Http::assertSentCount(1);
+        Http::assertSent(function ($request) use ($order): bool {
+            $body = $request->body();
+
+            return $request->url() === 'https://api.heleket.test/v1/payment'
+                && $request->header('merchant')[0] === 'merchant-uuid'
+                && $request->header('sign')[0] === md5(base64_encode($body).'secret-key')
+                && $request['amount'] === '500.50' && $request['currency'] === 'USD' && $request['order_id'] === $order->public_id;
+        });
+        $this->assertSame('inv-1', $order->fresh()->provider_payment_id);
+    }
+
+    public function test_heleket_paid_webhook_credits_once(): void
+    {
+        $this->enableHeleket();
+        $order = $this->createOrder();
+        $payload = ['type' => 'payment', 'uuid' => 'inv-1', 'order_id' => $order->public_id, 'amount' => '500.50',
+            'currency' => 'USD', 'payment_amount' => '500.50', 'payer_currency' => 'USDT', 'status' => 'paid', 'txid' => 'abc/def'];
+
+        $this->sendWebhook($payload)->assertOk();
+        $this->sendWebhook($payload)->assertOk();
+
+        $this->assertSame(PaymentOrderStatus::PAID, $order->fresh()->status);
+        $this->assertSame('paid', $order->fresh()->provider_status);
+        $this->assertEquals(87, DB::table('users')->where('id', 1)->value('diamond'));
+    }
+
+    public function test_heleket_webhook_rejects_bad_sign_wrong_amount_and_closes_cancelled(): void
+    {
+        $this->enableHeleket();
+        $order = $this->createOrder();
+        $payload = ['type' => 'payment', 'uuid' => 'inv-1', 'order_id' => $order->public_id, 'amount' => '500.50', 'currency' => 'USD', 'status' => 'paid'];
+
+        $this->call('POST', route('payments.heleket.webhook'), [], [], [], ['CONTENT_TYPE' => 'application/json'],
+            (string) json_encode($payload + ['sign' => 'forged']))->assertForbidden();
+        $this->sendWebhook(['amount' => '1.00'] + $payload)->assertOk();
+        $this->assertSame(PaymentOrderStatus::PENDING, $order->fresh()->status);
+
+        $this->sendWebhook(['status' => 'cancel'] + $payload)->assertOk();
+        $this->assertSame(PaymentOrderStatus::CANCELLED, $order->fresh()->status);
+        $this->assertEquals(10, DB::table('users')->where('id', 1)->value('diamond'));
+
+        // Игрок мог отменить ордер, но всё же оплатить — деньги получены, начисляем.
+        $this->sendWebhook($payload)->assertOk();
+        $this->assertSame(PaymentOrderStatus::PAID, $order->fresh()->status);
+    }
+
+    public function test_heleket_webhook_rejects_foreign_ip(): void
+    {
+        $this->enableHeleket();
+        config(['services.heleket.webhook_ips' => ['31.133.220.8']]);
+        $this->sendWebhook(['type' => 'payment', 'order_id' => 'x'])->assertForbidden();
     }
 }

@@ -18,6 +18,10 @@
                             <select id="sel-npc" name="npc_id" class="form-control"></select>
                         </div>
                         <div class="form-group">
+                            <label class="col-form-label">Откат квеста репутации, часов</label>
+                            <input type="number" class="form-control" name="quest_cooldown_hours" value="{{ old('quest_cooldown_hours', 48) }}" min="0" max="65535">
+                        </div>
+                        <div class="form-group">
                             <label class="col-form-label">Иконка (URL)</label>
                             <input type="text" class="form-control" name="icon" value="{{ old('icon') }}">
                         </div>

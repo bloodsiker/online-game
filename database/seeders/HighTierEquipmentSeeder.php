@@ -135,12 +135,12 @@ class HighTierEquipmentSeeder extends Seeder
         'weapon' => [self::WEAPON_LEVEL, ShareItemSlot::HAND, ShareItemType::WEAPON],
         'shield' => [self::SHIELD_LEVEL, ShareItemSlot::HAND, ShareItemType::SHIELD],
         'armor' => [60, ShareItemSlot::ARMOR, ShareItemType::ARMOR],
-        'shoes' => [65, ShareItemSlot::SHOES, ShareItemType::ARMOR],
-        'forearm' => [70, ShareItemSlot::FOREARM, ShareItemType::ARMOR],
-        'helmet' => [75, ShareItemSlot::HELMET, ShareItemType::ARMOR],
-        'legging' => [80, ShareItemSlot::LEGGING, ShareItemType::ARMOR],
-        'shoulder' => [85, ShareItemSlot::SHOULDER, ShareItemType::ARMOR],
-        'chain_armor' => [90, ShareItemSlot::CHAIN_ARMOR, ShareItemType::ARMOR],
+        'shoes' => [65, ShareItemSlot::SHOES, ShareItemType::SHOES],
+        'forearm' => [70, ShareItemSlot::FOREARM, ShareItemType::FOREARM],
+        'helmet' => [75, ShareItemSlot::HELMET, ShareItemType::HELMET],
+        'legging' => [80, ShareItemSlot::LEGGING, ShareItemType::LEGGING],
+        'shoulder' => [85, ShareItemSlot::SHOULDER, ShareItemType::SHOULDER],
+        'chain_armor' => [90, ShareItemSlot::CHAIN_ARMOR, ShareItemType::CHAIN_ARMOR],
     ];
 
     /** setKey => [вторичная стата, гейт-стата, двуручное ли оружие, множитель урона] */

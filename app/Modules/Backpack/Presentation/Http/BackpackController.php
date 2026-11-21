@@ -48,6 +48,7 @@ class BackpackController extends Controller
             $playerEquip->leggingSlot,
             $playerEquip->chainArmorSlot,
             $playerEquip->shoesSlot,
+            $playerEquip->cloakSlot,
             $playerEquip->beltFirstSlot,
             $playerEquip->beltSecondSlot,
             $playerEquip->bagFirstSlot,

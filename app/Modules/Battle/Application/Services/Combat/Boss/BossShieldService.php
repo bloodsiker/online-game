@@ -103,8 +103,10 @@ readonly class BossShieldService
         $metadata = $battle->boss_metadata ?? [];
         $shield = $metadata['shield'];
 
-        // Перевіряємо чи закінчився щит
-        if ($shield['expires_at_turn'] <= $battle->rounds) {
+        // Щит, створений у раунді N на duration ходів (expires_at_turn = N + duration), діє в раундах
+        // N+1 … N+duration і розсіюється на початку раунду N+duration+1 (як імунітет/телепорт: `<`).
+        // Раніше тут було `<=` — щит зникав на ход раніше і поглинав лише duration-1 ударів.
+        if ($shield['expires_at_turn'] < $battle->rounds) {
             $result->log(BattleLogTranslator::format(
                 '<p><b class="color-info">🛡️ Щит босса рассеялся!</b></p>'
             ));

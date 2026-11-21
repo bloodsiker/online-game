@@ -27,7 +27,7 @@ class SimulatePveRoster extends Command
     {
         $fights = max(100, (int) $this->option('fights'));
         $items = ShareItem::query()
-            ->whereIn('type', [ShareItemType::WEAPON, ShareItemType::ARMOR, ShareItemType::SHIELD])
+            ->whereIn('type', [ShareItemType::WEAPON, ...ShareItemType::armorTypes(), ShareItemType::SHIELD])
             ->with(['stats', 'requirements'])
             ->get();
         $monsters = Monster::query()->whereBetween('lvl', [1, (int) $this->option('max-level')])->orderBy('lvl')->get();

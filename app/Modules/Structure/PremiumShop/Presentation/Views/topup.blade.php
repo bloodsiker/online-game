@@ -228,12 +228,12 @@
                                                         <div class="bank-bundles__item-controls">
                                                             <div class="bank-bundles__item-controls-type">
                                                                 <img src="{{ asset('main/images/bank/bundle/money-gold.png') }}" alt="" style="width: 22px">
-                                                                <i class="bank-bundles__item-controls-arrow arrow-left" onmousedown="calc_exchange('bank-bundle-x0-1', 'bank-bundle-x1-1', 0, -1, paymentUnitPrice)"></i><input type="text" name="diamonds" form="top-up-form" inputmode="numeric" id="bank-bundle-x0-1" size="5" maxlength="5" value="{{ old('diamonds', $paymentDefaultDiamonds) }}" oninput="calc_exchange('bank-bundle-x0-1', 'bank-bundle-x1-1', 0, 0, paymentUnitPrice)" onfocus="this.select()"><i class="bank-bundles__item-controls-arrow arrow-right" onmousedown="calc_exchange('bank-bundle-x0-1', 'bank-bundle-x1-1', 0, 1, paymentUnitPrice)"></i>
+                                                                <i class="bank-bundles__item-controls-arrow arrow-left" onmousedown="calc_exchange('bank-bundle-x0-1', 'bank-bundle-x1-1', 0, -1, paymentUnitPrice)"></i><input type="text" name="diamonds" form="top-up-form" inputmode="numeric" id="bank-bundle-x0-1" size="5" maxlength="5" value="{{ old('diamonds', $paymentDefaultDiamonds) }}" oninput="calc_exchange('bank-bundle-x0-1', 'bank-bundle-x1-1', 0, 0, paymentUnitPrice, true)" onchange="calc_exchange('bank-bundle-x0-1', 'bank-bundle-x1-1', 0, 0, paymentUnitPrice)" onfocus="this.select()"><i class="bank-bundles__item-controls-arrow arrow-right" onmousedown="calc_exchange('bank-bundle-x0-1', 'bank-bundle-x1-1', 0, 1, paymentUnitPrice)"></i>
                                                             </div>
                                                             <span class="bank-bundles__item-exchange"><img src="{{ asset('img/icon/premium-exchange-arrow.gif') }}" width="18" height="10" alt=""></span>
                                                             <div class="bank-bundles__item-controls-type">
                                                                 <span class="bank-bundles__item-controls-label" data-title="$">$</span>
-                                                                <i class="bank-bundles__item-controls-arrow arrow-left" onmousedown="calc_exchange('bank-bundle-x1-1', 'bank-bundle-x0-1', 1, -1, paymentUnitPrice)"></i><input type="text" inputmode="decimal" id="bank-bundle-x1-1" size="5" maxlength="10" value="{{ number_format($paymentDefaultDiamonds * $paymentRate, 2, '.', '') }}" oninput="calc_exchange('bank-bundle-x1-1', 'bank-bundle-x0-1', 1, 0, paymentUnitPrice)" onfocus="this.select()"><i class="bank-bundles__item-controls-arrow arrow-right" onmousedown="calc_exchange('bank-bundle-x1-1', 'bank-bundle-x0-1', 1, 1, paymentUnitPrice)"></i>
+                                                                <i class="bank-bundles__item-controls-arrow arrow-left" onmousedown="calc_exchange('bank-bundle-x1-1', 'bank-bundle-x0-1', 1, -1, paymentUnitPrice)"></i><input type="text" inputmode="decimal" id="bank-bundle-x1-1" size="5" maxlength="10" value="{{ number_format($paymentDefaultDiamonds * $paymentRate, 2, '.', '') }}" oninput="calc_exchange('bank-bundle-x1-1', 'bank-bundle-x0-1', 1, 0, paymentUnitPrice, true)" onchange="calc_exchange('bank-bundle-x1-1', 'bank-bundle-x0-1', 1, 0, paymentUnitPrice)" onfocus="this.select()"><i class="bank-bundles__item-controls-arrow arrow-right" onmousedown="calc_exchange('bank-bundle-x1-1', 'bank-bundle-x0-1', 1, 1, paymentUnitPrice)"></i>
                                                             </div>
                                                         </div>
                                                         <div class="bank-bundles__item-bar">
@@ -257,11 +257,23 @@
 
                                                 <br>
                                                 - Средства возврату не подлежат<br>
+                                                @if($paymentOnline)
+                                                - Оплата криптовалютой через Heleket (USDT, BTC, ETH, TON и др.)<br>
+                                                - Начисление автоматическое, круглосуточно — сразу после подтверждения сети<br>
+                                                - Сумма в USD конвертируется в выбранную криптовалюту по курсу на момент оплаты<br>
+                                                @else
                                                 - Начисление от 5 мин до 6 часов<br>в период с 09:00 по 23:00<br>
                                                 - Автоматическая конвертация из любой валюты в USD<br>
+                                                @endif
                                                 @if($paymentSettings?->minimum_amount_minor > 0)<b style="color:#fff200;">{{ __('payments.minimum', ['amount' => number_format($paymentSettings->minimum_amount_minor / 100, 2, '.', ' ')]) }}</b><br>@endif
                                                 <br><br>
+                                                @if($paymentOnline)
+                                                <b style="color:green;">Бриллианты начисляются на ваш аккаунт автоматически, обычно в течение нескольких минут.</b><br>
+                                                Счёт действует 1 час. Оплачивайте точную сумму, указанную на странице Heleket, в выбранной сети — иначе ордер уйдёт на ручную проверку.<br>
+                                                Если бриллианты не пришли — напишите администратору и укажите номер ордера.<br>
+                                                @else
                                                 <b style="color:red;">При желании вы можете пополнить счёт другому игроку, указав его ID</b><br><b style="color:green;">Начисление на баланс: от 5 мин до 6 часов<br>Рабочее время: с 09:00 по 23:00</b>, в другое время лучше не пополнять, если не хотите ждать до утра<br>
+                                                @endif
                                                 Администратор: @include('premium_shop::_administrator')
                                                 @if(!$paymentSettings?->is_enabled)<p>{{ __('payments.disabled') }}</p>@endif
                                                 @if($errors->any())<p style="color:#fffc00">{{ $errors->first() }}</p>@endif
@@ -862,16 +874,23 @@ var paymentUnitPrice = @json($paymentRate);
 var paymentRateMinor = @json($paymentSettings?->diamond_price_minor ?? 650);
 var paymentEnabled = @json((bool) $paymentSettings?->is_enabled);
 var paymentMinimumDiamonds = @json($paymentDefaultDiamonds);
-function calc_exchange(from, to, mode, op, exchange_ratio) {
+// live = true — пока игрок печатает: не подставляем минимум и не трогаем само поле
+// (иначе «1» сразу превращалось в 30 и нельзя было набрать 100). Минимум — при выходе из поля,
+// стрелками и перед отправкой формы.
+function calc_exchange(from, to, mode, op, exchange_ratio, live) {
     if (paymentRateMinor < 1) return;
     var el = document.getElementById(from);
     var el1 = document.getElementById(to);
     var value = Math.max(0, Number(el.value.replace(',', '.')) || 0);
     var diamonds = mode ? Math.ceil(Math.round(value * 100) / paymentRateMinor) : Math.floor(value);
-    diamonds = Math.max(0, diamonds + op);
-    diamonds = Math.min(max_amount, Math.max(paymentMinimumDiamonds, diamonds));
+    diamonds = Math.min(max_amount, Math.max(0, diamonds + op));
+    if (!live) {
+        diamonds = Math.max(paymentMinimumDiamonds, diamonds);
+    }
     var amount = (diamonds * paymentRateMinor / 100).toFixed(2);
-    el.value = mode ? amount : diamonds;
+    if (!live) {
+        el.value = mode ? amount : diamonds;
+    }
     el1.value = mode ? diamonds : amount;
     document.querySelectorAll('.pack__custom .bank-bundles__item-controls .arrow-left').forEach(function (arrow) {
         var disabled = diamonds <= paymentMinimumDiamonds;
@@ -890,6 +909,7 @@ checkbox.addEventListener('change', function() {
 });
 document.getElementById('top-up-form').addEventListener('submit', function(e) {
     if (document._submit || !paymentEnabled) { e.preventDefault(); return; }
+    calc_exchange('bank-bundle-x0-1', 'bank-bundle-x1-1', 0, 0, paymentUnitPrice);
     document._submit = true;
     submitButton.disabled = true;
 });

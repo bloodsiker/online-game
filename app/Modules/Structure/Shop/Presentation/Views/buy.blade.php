@@ -17,6 +17,8 @@
         a {
             text-decoration: none;
         }
+        .shop-cart-quantity { width: 1%; padding: 4px 6px; text-align: center; vertical-align: middle; white-space: nowrap; }
+        .shop-cart-quantity .cart-amount-sell-price { display: inline-block; vertical-align: middle; }
 
         .bg {
             background-color: #000;
@@ -232,6 +234,9 @@
         .barter-store-item__available {
             color: red;
         }
+        /* Хватает ли предметов для обмена: зелёный — хватает, красный — нет */
+        .req-enough, .barter-store-item__available.req-enough { color: #1d7a1d !important; }
+        .req-short, .barter-store-item__available.req-short { color: #c00000 !important; }
     </style>
 
     {!! $playerStatsScript !!}
@@ -262,22 +267,23 @@
     <tbody>
     <tr height="21">
         <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-        <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
+        <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 5px;">
             <a id="center_1" href="{{ route($indexRoute, ['id' => $page->shopId]) }}" title="Купить" class="btn_2">Купить</a>
         </td>
         <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
 
         @unless($isBarterShop)
             <td width="19"><img id="left_2" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-            <td width="60" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <td width="60" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 5px;">
                 <a id="center_2" href="{{ route('shop.sell_item', ['id' => $page->shopId]) }}" title="Продать" class="btn_1">Продать</a></td>
             <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
         @endunless
 
         <td width="100%"></td>
 
         <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="60" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+        <td width="60" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 5px;">
             <a id="center_4" href="{{ route('location') }}" title="Выход" class="btn_1">Выход</a></td>
         <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
@@ -291,7 +297,7 @@
             @foreach($page->categories as $category)
                 @php $active = $page->activeCategoryId === $category['id']; @endphp
                 <td width="19"><img src="{{ asset($active ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                <td width="60" align="center" style="background: url({{ asset($active ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0 2px 6px;">
+                <td width="60" align="center" style="background: url({{ asset($active ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 5px;">
                     <a href="{{ route($indexRoute, ['id' => $page->shopId, 'category_id' => $category['id']]) }}" class="{{ $active ? 'btn_2' : 'btn_1' }}">{{ $category['name'] }}</a>
                 </td>
                 <td width="19"><img src="{{ asset($active ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
@@ -435,7 +441,8 @@
                                                                      onmouseover="showItemInfo(this,event,2)"
                                                                      onmouseout="showItemInfo(this,event,0)"
                                                                      alt="{{ $requirement['name'] }}">
-                                                                <b>{{ $requirement['quantity'] }}</b>&nbsp;/&nbsp;<b class="barter-store-item__available">{{ $requirement['availableQuantity'] }}</b>
+                                                                @php($enough = $requirement['availableQuantity'] >= $requirement['quantity'])
+                                                                <b class="{{ $enough ? 'req-enough' : 'req-short' }}">{{ $requirement['quantity'] }}</b>&nbsp;/&nbsp;<b class="barter-store-item__available {{ $enough ? 'req-enough' : 'req-short' }}" title="В сумке">{{ $requirement['availableQuantity'] }}</b>
                                                             </div>
                                                         @endforeach
                                                     </div>
@@ -478,19 +485,21 @@
                 <tr>
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" align="center" style="padding: 6px 4px">
-                                    <form method="post" action="{{ route($purchaseRoute, ['id' => $page->shopId]) }}" id="action_form">
+                                    <form method="post" action="{{ route($purchaseRoute, ['id' => $page->shopId]) }}" id="action_form" data-cart-quantity-form
+                                          data-update-url="{{ route($routePrefix.'.update_cart', ['id' => $page->shopId]) }}"
+                                          data-save-error="Не удалось сохранить количество товара. Попробуйте ещё раз.">
                                         @csrf
                                         @if($page->cart->getItems()->count())
                                             <table class="coll w100 p10h p4v brd2">
                                                 <colgroup>
                                                     <col>
                                                     <col>
-                                                    <col>
+                                                    <col width="1%">
                                                     <col width="1%">
                                                 </colgroup>
                                                 <tbody>
                                                 @foreach($page->cart->getItems() as $cartItem)
-                                                    <tr class="bg_l">
+                                                    <tr class="bg_l" data-cart-row="{{ $cartItem->shop_item_id }}">
                                                         <td>
                                                             <a href="{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}"
                                                                data-id="{{ $cartItem->shopItem->item->id }}"
@@ -503,13 +512,13 @@
                                                             @if($cartItem->shopItem->diamond)
                                                                 <span title="Бриллиант">
                                                                     <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="diamond" border="0" width="11" height="11" align="absmiddle">
-                                                                </span>&nbsp;{{ format_money($cartItem->shopItem->diamond * $cartItem->quantity) }}
+                                                                </span>&nbsp;<span data-cart-line-diamond>{{ format_money($cartItem->shopItem->diamond * $cartItem->quantity) }}</span>
                                                                 <br>
                                                             @endif
                                                             @if($cartItem->shopItem->price)
                                                                 <span title="Монет">
                                                                     <img src="{{ asset('img/icon/m_game.gif') }}" alt="money" border="0" width="11" height="11" align="absmiddle">
-                                                                </span>&nbsp;{{ format_money($page->cart->unitPrice((int) $cartItem->shopItem->price) * $cartItem->quantity) }}
+                                                                </span>&nbsp;<span data-cart-line-price>{{ format_money($page->cart->unitPrice((int) $cartItem->shopItem->price) * $cartItem->quantity) }}</span>
                                                                 <br>
                                                             @endif
                                                             @foreach($cartItem->shopItem->requirements as $requirement)
@@ -520,10 +529,24 @@
                                                                          onmouseout="showItemInfo(this,event,0)"
                                                                          width="18" height="18" align="absmiddle"
                                                                          style="object-fit: contain; cursor: help;">
-                                                                </span>&nbsp;{{ $requirement->quantity * $cartItem->quantity }}<br>
+                                                                </span>&nbsp;@php($lineNeed = $requirement->quantity * $cartItem->quantity)@php($owned = $page->ownedRequirementCounts[(int) $requirement->share_item_id] ?? 0)<span data-cart-line-req="{{ $requirement->share_item_id }}" data-owned="{{ $owned }}" class="{{ $owned >= $lineNeed ? 'req-enough' : 'req-short' }}">{{ $lineNeed }}</span><br>
                                                             @endforeach
                                                         </td>
-                                                        <td>{{ $cartItem->quantity }} шт</td>
+                                                        <td class="shop-cart-quantity" align="center">
+                                                            <div class="cart-amount-sell-price">
+                                                                <span class="cart-amount-input-cont">
+                                                                    <span class="b-input">
+                                                                        <span class="b-input__inner">
+                                                                            <span class="arrow left @if($cartItem->quantity <= 1) left-disabled @endif" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
+                                                                            <span class="arrow right @if($cartItem->quantity >= 10000) right-disabled @endif" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
+                                                                            <input type="text" name="cart_quantities[{{ $cartItem->shop_item_id }}]" value="{{ $cartItem->quantity }}"
+                                                                                   data-cart-quantity="{{ $cartItem->shop_item_id }}" inputmode="numeric" aria-label="Количество"
+                                                                                   class="cart_amount_sell_input" autocomplete="off">
+                                                                        </span>
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <a href="{{ route($deleteCartRoute, ['id' => $page->shopId, 'cartId' => $cartItem->id]) }}" title="Удалить">
                                                                 <img src="{{ asset('img/icon/tbl-shp_x.gif') }}" alt="delete" width="11" height="13" border="0">
@@ -552,12 +575,12 @@
                                                         @if($page->cart->getTotalDiamond())
                                                             <span title="Бриллиант">
                                                                 <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="diamond" border="0" width="11" height="11" align="absmiddle">
-                                                            </span>&nbsp;{{ format_money($page->cart->getTotalDiamond()) }}<br>
+                                                            </span>&nbsp;<span data-cart-total-diamond>{{ format_money($page->cart->getTotalDiamond()) }}</span><br>
                                                         @endif
                                                         @if($page->cart->getTotalPrice())
                                                             <span title="Монет">
                                                                 <img src="{{ asset('img/icon/m_game.gif') }}" alt="money" border="0" width="11" height="11" align="absmiddle">
-                                                            </span>&nbsp;{{ format_money($page->cart->getTotalPrice()) }}<br>
+                                                            </span>&nbsp;<span data-cart-total-price>{{ format_money($page->cart->getTotalPrice()) }}</span><br>
                                                         @endif
                                                         @foreach($page->cart->getRequirementTotals() as $requirement)
                                                             <span title="{{ $requirement['item']->name }}">
@@ -567,7 +590,7 @@
                                                                      onmouseout="showItemInfo(this,event,0)"
                                                                      width="18" height="18" align="absmiddle"
                                                                      style="object-fit: contain; cursor: help;">
-                                                            </span>&nbsp;{{ $requirement['quantity'] }}<br>
+                                                            </span>&nbsp;@php($owned = $page->ownedRequirementCounts[(int) $requirement['item']->id] ?? 0)<span data-cart-total-req="{{ $requirement['item']->id }}" data-owned="{{ $owned }}" class="{{ $owned >= $requirement['quantity'] ? 'req-enough' : 'req-short' }}">{{ $requirement['quantity'] }}</span>&nbsp;/&nbsp;<span title="В сумке">{{ $owned }}</span><br>
                                                         @endforeach
                                                     </td>
                                                 </tr>
@@ -638,7 +661,7 @@
     function shopItemCounter(el) {
         const current = el;
 
-        if (current.classList.contains('left-disabled')) {
+        if (current.classList.contains('left-disabled') || current.classList.contains('right-disabled')) {
             return false;
         }
 
@@ -667,7 +690,8 @@
     }
 
     function shopCounterValue(el) {
-        return Math.max(1, parseInt(el.value) || 1);
+        const value = Math.max(1, parseInt(el.value) || 1);
+        return el.hasAttribute('data-cart-quantity') ? Math.min(10000, value) : value;
     }
 
     function shopChangeCounter(el) {
@@ -681,7 +705,33 @@
         }
 
         el.value = value;
+        // Количество в корзине сохраняется сразу (public/js/shop-cart-quantity.js)
+        if (el.hasAttribute('data-cart-quantity')) {
+            el.closest('.b-input__inner').querySelector('.right').classList.toggle('right-disabled', value >= 10000);
+            el.dispatchEvent(new CustomEvent('shop-cart-quantity-change', { bubbles: true }));
+        }
     }
+
+    // Зелёный — предметов в сумке хватает, красный — нет.
+    function markRequirement(el, need) {
+        const enough = Number(el.dataset.owned || 0) >= Number(need);
+        el.classList.toggle('req-enough', enough);
+        el.classList.toggle('req-short', !enough);
+    }
+
+    // Ресурсы-требования (бартер) пересчитываются вместе с количеством.
+    document.querySelector('[data-cart-quantity-form]')?.addEventListener('shop-cart-quantity-saved', (event) => {
+        const { id, data } = event.detail;
+        const row = event.currentTarget.querySelector('[data-cart-row="' + id + '"]');
+        Object.entries(data.line_requirements || {}).forEach(([itemId, quantity]) => {
+            const el = row?.querySelector('[data-cart-line-req="' + itemId + '"]');
+            if (el) { el.textContent = quantity; markRequirement(el, quantity); }
+        });
+        Object.entries(data.total_requirements || {}).forEach(([itemId, quantity]) => {
+            const el = event.currentTarget.querySelector('[data-cart-total-req="' + itemId + '"]');
+            if (el) { el.textContent = quantity; markRequirement(el, quantity); }
+        });
+    });
 
     function shopCounterKeypress(e, el) {
         const key = e.keyCode || e.which;
@@ -720,6 +770,7 @@
         window.parent.showErrorIframe('{{ session('message') }}')
     @endif
 </script>
+<script src="{{ asset('js/shop-cart-quantity.js') }}?v={{ filemtime(public_path('js/shop-cart-quantity.js')) }}"></script>
 
 </body>
 </html>

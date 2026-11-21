@@ -18,7 +18,7 @@ class AoeAttackMechanic extends BaseBossMechanic
         $baseDamage = mt_rand($monster->min_dmg, $monster->max_dmg);
 
         $damage = (int) (($baseDamage * $damagePercent) / 100);
-        $actualDamage = max(1, $damage - $context->getPlayer()->getArmor());
+        $actualDamage = $this->mitigateByPlayerArmor($context, $damage);
 
         $context->dealDamageToPlayer($actualDamage);
 

@@ -4,7 +4,6 @@ namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
 use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
-use App\Modules\Player\Domain\Services\PlayerStatService;
 
 /**
  * Висмоктування життя - завдає урон і лікується на цю ж кількість
@@ -20,10 +19,7 @@ class LifeDrainMechanic extends BaseBossMechanic
         $baseDamage = ($monster->min_dmg + $monster->max_dmg) / 2;
         $drainDamage = (int) (($baseDamage * $drainPercent) / 100);
 
-        // Броня — из итоговых стат (сырая модель Player статов боя не знает)
-        $player = $context->getPlayer();
-        $armor = app(PlayerStatService::class)->resolve($player)->getArmor();
-        $actualDamage = max(1, $drainDamage - $armor);
+        $actualDamage = $this->mitigateByPlayerArmor($context, $drainDamage);
 
         // Завдаємо урон гравцю
         $context->dealDamageToPlayer($actualDamage);

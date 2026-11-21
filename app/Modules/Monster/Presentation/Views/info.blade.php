@@ -110,7 +110,7 @@
         .monster-ability-icon:hover { border-color: #f0d08a; }
         .monster-ability-icon img { display: block; width: 60px; height: 60px; object-fit: contain; }
         .monster-drop-grid { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 5px 2px; padding: 5px 0; }
-        .monster-drop-item { width: 74px; text-align: center; }
+        .monster-drop-item { width: 72px; text-align: center; }
         .monster-drop-icon { position: relative; display: block; width: 72px; height: 71px; margin: 0 auto; background: url({{ asset('main/images/user-reward-frame.png') }}) no-repeat; }
         .monster-drop-icon img { position: absolute; top: 5px; left: 6px; width: 60px; height: 60px; object-fit: contain; }
         .monster-drop-count { display: block; margin-top: 3px; color: #955c4a; font-size: 10px; font-weight: bold; }

@@ -260,6 +260,9 @@ class ReputationController extends Controller
         app(ContentTranslationEditor::class)->fill(model: $reputation, request: $request);
         $reputation->npc_id = $request->input('npc_id') ?: null;
         $reputation->icon = $request->input('icon');
+        $reputation->quest_cooldown_hours = $request->filled('quest_cooldown_hours')
+            ? max(0, min(65535, (int) $request->input('quest_cooldown_hours')))
+            : 48;
         $reputation->favor_effect_type = $request->input('favor_effect_type') ?: null;
         $reputation->favor_proc_chance = $request->filled('favor_proc_chance') ? (int) $request->input('favor_proc_chance') : null;
         $reputation->elixir_share_item_id = $request->input('elixir_share_item_id') ?: null;

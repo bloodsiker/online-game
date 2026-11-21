@@ -40,6 +40,11 @@ class PlayerSkillService
                 if ($req) {
                     $playerSkill->exp_up = $req->exp_required;
                     $playerSkill->exp_diff = $req->exp_diff;
+                } else {
+                    // Нет строки в skill_level_requirements (не заполнена таблица или потолок навыка):
+                    // раньше exp_up оставался прежним и навык рос на +1 уровень с КАЖДОГО удара.
+                    // Останавливаем рост, пока таблицу не дополнят.
+                    $playerSkill->exp_up = 2147483647;
                 }
             }
 

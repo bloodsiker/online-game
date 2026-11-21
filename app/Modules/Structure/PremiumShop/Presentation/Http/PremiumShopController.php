@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
+use App\Modules\Payments\Infrastructure\Heleket\HeleketClient;
 use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
 use App\Modules\Structure\Bank\Infrastructure\Persistence\Models\BankStock;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
@@ -142,8 +143,9 @@ class PremiumShopController extends Controller
         $paymentRate = ($paymentSettings?->diamond_price_minor ?? 650) / 100;
         $paymentDefaultDiamonds = max(1, (int) ceil(($paymentSettings?->minimum_amount_minor ?? 50000) / ($paymentSettings?->diamond_price_minor ?: 650)));
         $paymentAdministrator = $characters->find(userId: 1);
+        $paymentOnline = app(HeleketClient::class)->isConfigured();
 
-        return view('premium_shop::topup', compact('user', 'paymentSettings', 'paymentOrders', 'paymentRequestId', 'paymentRate', 'paymentDefaultDiamonds', 'paymentAdministrator'));
+        return view('premium_shop::topup', compact('user', 'paymentSettings', 'paymentOrders', 'paymentRequestId', 'paymentRate', 'paymentDefaultDiamonds', 'paymentAdministrator', 'paymentOnline'));
     }
 
     public function stock(ItemTooltipCollector $tooltipCollector): mixed

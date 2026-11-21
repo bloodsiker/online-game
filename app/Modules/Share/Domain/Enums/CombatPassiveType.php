@@ -31,6 +31,9 @@ enum CombatPassiveType: string
     case REFLECT = 'reflect';        // отражение % входящего урона
     case RAGE = 'rage';           // +% урон когда HP < 30%
     case SHIELD = 'shield';         // % шанс полностью заблокировать атаку
+    case ARMOR_PIERCE = 'armor_pierce';   // физические удары игнорируют % брони цели (всегда, без шанса)
+    case COUNTER_ATTACK = 'counter_attack'; // % шанс после уклонения ударить в ответ на 50% урона
+    case SECOND_WIND = 'second_wind';    // раз за бой при HP < 20% лечит % от максимума HP
 
     public function label(): string
     {
@@ -42,6 +45,9 @@ enum CombatPassiveType: string
             self::REFLECT => 'Отражение',
             self::RAGE => 'Ярость',
             self::SHIELD => 'Щит',
+            self::ARMOR_PIERCE => 'Пробивание брони',
+            self::COUNTER_ATTACK => 'Контратака',
+            self::SECOND_WIND => 'Второе дыхание',
         };
     }
 
@@ -56,6 +62,9 @@ enum CombatPassiveType: string
             self::REFLECT => "Отражает {$value}% входящего урона обратно атакующему",
             self::RAGE => "При HP < 30% увеличивает урон на {$value}%",
             self::SHIELD => "При получении урона {$value}% шанс полностью заблокировать удар",
+            self::ARMOR_PIERCE => "Физические удары игнорируют {$value}% брони цели",
+            self::COUNTER_ATTACK => "После уклонения {$value}% шанс контратаковать на 50% урона оружия",
+            self::SECOND_WIND => "Один раз за бой при HP < 20% восстанавливает {$value}% максимального HP",
         };
     }
 
@@ -80,6 +89,10 @@ enum CombatPassiveType: string
             self::REFLECT => "Монстр отражает {$value}% полученного урона обратно атакующему",
             self::RAGE => "При HP < 30% урон монстра увеличивается на {$value}%",
             self::SHIELD => "Монстр блокирует {$value}% входящих ударов полностью",
+            // Для монстров пока не реализованы (MonsterAttackService::applyPassive)
+            self::ARMOR_PIERCE => "Удары монстра игнорируют {$value}% брони (у монстров пока не действует)",
+            self::COUNTER_ATTACK => 'Монстр контратакует после уклонения (у монстров пока не действует)',
+            self::SECOND_WIND => "Монстр восстанавливает {$value}% HP при HP < 20% (у монстров пока не действует)",
         };
     }
 
@@ -94,6 +107,9 @@ enum CombatPassiveType: string
             self::REFLECT => [5,  10],
             self::RAGE => [15, 25],
             self::SHIELD => [8,  15],
+            self::ARMOR_PIERCE => [25, 40],
+            self::COUNTER_ATTACK => [15, 25],
+            self::SECOND_WIND => [15, 25],
         };
     }
 

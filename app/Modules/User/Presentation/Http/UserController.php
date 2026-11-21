@@ -208,6 +208,7 @@ final class UserController
             $equip->leggingSlot,
             $equip->chainArmorSlot,
             $equip->shoesSlot,
+            $equip->cloakSlot,
             $equip->beltFirstSlot,
             $equip->beltSecondSlot,
             $equip->bagFirstSlot,

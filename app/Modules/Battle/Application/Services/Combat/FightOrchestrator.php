@@ -141,7 +141,16 @@ readonly class FightOrchestrator
                 } else {
                     $this->monsterAttackService->execute($player, $locationMonster, $monsterLog);
                 }
+
+                // «Контратака»: после уклонения игрок может ударить в ответ (до проверки смерти монстра)
+                if ($monsterLog->playerDodged()) {
+                    $xpMultiplier = (float) ($user->currentLocation->dungeon?->xp_multiplier ?? 1.0);
+                    $this->attackService->counterAttack($player, $locationMonster, $battle, $xpMultiplier, $monsterLog);
+                }
             }
+
+            // «Второе дыхание»: раз за бой при HP < 20% (только если игрок ещё жив)
+            $this->attackService->trySecondWind($player, $battle, $monsterLog);
 
             if ($locationMonster->hp_now <= 0) {
                 if ($clanBossStage !== null) {

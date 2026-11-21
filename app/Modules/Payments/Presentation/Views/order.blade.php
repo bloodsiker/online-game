@@ -12,11 +12,15 @@
             <dt>{{ __('payments.diamonds') }}</dt><dd><img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" alt=""> <b>{{ format_money($order->diamonds) }}</b></dd>
             <dt>{{ __('payments.state') }}</dt><dd><b data-order-status>{{ $order->status->label() }}</b></dd>
         </dl>
-        <p data-order-pending @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>{{ __('payments.manual_notice') }}</p>
+        <p data-order-pending @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>{{ $order->isOnline() ? __('payments.online_notice') : __('payments.manual_notice') }}</p>
         <p class="payment-success" data-order-paid @if($order->credited_at === null) hidden @endif>{{ __('payments.credited') }}</p>
         <p data-order-note>{{ $order->review_note }}</p>
         <p class="premium-error" data-order-error role="status">{{ $errors->first() }}</p>
         <div class="payment-actions">
+            @if($order->isOnline())
+                {{-- Страница Heleket не открывается во фрейме игры — оплата в новой вкладке. --}}
+                <form method="post" action="{{ route('payments.orders.pay', $order->public_id) }}" target="_blank" data-order-pay @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>@csrf<span class="butt1 pointer"><span><button class="butt1" type="submit">{{ __('payments.pay_crypto') }}</button></span></span></form>
+            @endif
             <span class="butt1 pointer"><span><button class="butt1" type="button" data-order-check>{{ __('payments.check') }}</button></span></span>
             <form method="post" action="{{ route('payments.orders.cancel', $order->public_id) }}" data-order-cancel @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>@csrf<span class="butt1 pointer"><span><button class="butt1" type="submit">{{ __('payments.cancel') }}</button></span></span></form>
             <a href="{{ route('premium.topup') }}">{{ __('payments.back') }}</a>

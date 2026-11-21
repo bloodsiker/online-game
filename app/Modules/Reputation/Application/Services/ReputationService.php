@@ -82,7 +82,7 @@ class ReputationService
             return true;
         }
 
-        return $pr->last_completed_at->addDays(2)->isPast();
+        return $pr->last_completed_at->addHours($reputation->quest_cooldown_hours)->isPast();
     }
 
     public function getActiveQuest(Player $player, Reputation $reputation): ?QuestPlayer
@@ -232,7 +232,7 @@ class ReputationService
             return null;
         }
 
-        $availableAt = $pr->last_completed_at->addDays(2);
+        $availableAt = $pr->last_completed_at->addHours($reputation->quest_cooldown_hours);
         if ($availableAt->isPast()) {
             return null;
         }

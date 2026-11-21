@@ -25,13 +25,14 @@ class DualWieldStrategy implements AttackStrategyInterface
         $hits = [];
 
         // Левая рука
-        $leftHit = $this->hitCalc->hit(
+        $leftRoll = fn () => $this->hitCalc->hit(
             $this->player,
             $this->monster,
             $this->player->getLeftHandMinDmg(),
             $this->player->getLeftHandMaxDmg(),
             $this->leftWeaponSkillLevel,
         );
+        $leftHit = $leftRoll()->setReroll($leftRoll);
         $hits[] = $leftHit
             ->setWeaponName($this->leftWeapon->name)
             ->setSkill($this->leftWeapon->skill)
@@ -39,13 +40,14 @@ class DualWieldStrategy implements AttackStrategyInterface
             ->setHandSide('left');
 
         // Правая рука
-        $rightHit = $this->hitCalc->hit(
+        $rightRoll = fn () => $this->hitCalc->hit(
             $this->player,
             $this->monster,
             $this->player->getRightHandMinDmg(),
             $this->player->getRightHandMaxDmg(),
             $this->rightWeaponSkillLevel,
         );
+        $rightHit = $rightRoll()->setReroll($rightRoll);
         $hits[] = $rightHit
             ->setWeaponName($this->rightWeapon->name)
             ->setSkill($this->rightWeapon->skill)

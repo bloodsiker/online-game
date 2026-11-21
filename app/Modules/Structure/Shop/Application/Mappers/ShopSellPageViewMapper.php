@@ -7,6 +7,7 @@ namespace App\Modules\Structure\Shop\Application\Mappers;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Structure\Shop\Application\DTOs\ShopSellCartDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopSellItemDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopSellPageDTO;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -21,7 +22,7 @@ class ShopSellPageViewMapper
     /**
      * @param  Collection<int, Backpack>  $items
      */
-    public function map(User $user, int $shopId, Collection $items): ShopSellPageDTO
+    public function map(User $user, int $shopId, Collection $items, ShopSellCartDTO $sellCart = new ShopSellCartDTO, int $bagUsed = 0, int $bagCapacity = 0): ShopSellPageDTO
     {
         $itemTooltipScript = $this->collector
             ->collectFrom(new BackpackItemTooltipStrategy($items))
@@ -45,6 +46,9 @@ class ShopSellPageViewMapper
                 )
             )->all(),
             itemTooltipScript: $itemTooltipScript,
+            sellCart: $sellCart,
+            bagUsed: $bagUsed,
+            bagCapacity: $bagCapacity,
         );
     }
 }

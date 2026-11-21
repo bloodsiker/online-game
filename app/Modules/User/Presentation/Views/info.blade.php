@@ -278,7 +278,7 @@
                                                             <img src="{{ $slotImage($equip?->shoulderSlot, 'shoulder') }}" class="hero-itm @if($equip?->shoulderSlot) equipped @endif" id="i4n1">
                                                         @endif
                                                     </td>
-                                                    <td class="profile-avatar-cell" align="center" rowspan="5" colspan="3">
+                                                    <td class="profile-avatar-cell" align="center" rowspan="4" colspan="3">
                                                         <div class="profile-avatar-frame">
                                                             <img class="profile-avatar-frame__image" src="{{ public_media_url($user->profile?->avatar, fallback: 'img/avatar/dark_elf.jpg') }}" alt="{{ $user->name }}">
                                                         </div>
@@ -292,18 +292,28 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td {!! $slotAttrs($injuriesBySlot->has('hand_left') ? null : $equip?->handLeft) !!}>
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('hand_left') ? null : ($equip?->handLeft ?? $equip?->hand_left_mirror)) !!}>
                                                         @if($injury = $injuriesBySlot->get('hand_left'))
                                                             @include('backpack::partials.injury_slot', compact('injury'))
                                                         @else
-                                                            <img src="{{ $slotImage($equip?->handLeft, 'hand_left') }}" class="hero-itm @if($equip?->handLeft) equipped @endif" id="i4n1">
+                                                            @if(! $equip?->handLeft && $equip?->hand_left_mirror)
+                                                                {{-- Дворучное оружие из другой руки — полупрозрачно, как на манекене в рюкзаке --}}
+                                                                <img src="{{ $equip->hand_left_mirror->itemInfo->image }}" class="hero-itm equipped" style="opacity: .6;" id="i4n1">
+                                                            @else
+                                                                <img src="{{ $slotImage($equip?->handLeft, 'hand_left') }}" class="hero-itm @if($equip?->handLeft) equipped @endif" id="i4n1">
+                                                            @endif
                                                         @endif
                                                     </td>
-                                                    <td {!! $slotAttrs($injuriesBySlot->has('hand_right') ? null : $equip?->handRight) !!}>
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('hand_right') ? null : ($equip?->handRight ?? $equip?->hand_right_mirror)) !!}>
                                                         @if($injury = $injuriesBySlot->get('hand_right'))
                                                             @include('backpack::partials.injury_slot', compact('injury'))
                                                         @else
-                                                            <img src="{{ $slotImage($equip?->handRight, 'hand_right') }}" class="hero-itm @if($equip?->handRight) equipped @endif" id="i4n1">
+                                                            @if(! $equip?->handRight && $equip?->hand_right_mirror)
+                                                                {{-- Дворучное оружие из другой руки — полупрозрачно, как на манекене в рюкзаке --}}
+                                                                <img src="{{ $equip->hand_right_mirror->itemInfo->image }}" class="hero-itm equipped" style="opacity: .6;" id="i4n1">
+                                                            @else
+                                                                <img src="{{ $slotImage($equip?->handRight, 'hand_right') }}" class="hero-itm @if($equip?->handRight) equipped @endif" id="i4n1">
+                                                            @endif
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -339,10 +349,10 @@
                                                         @endif
                                                     </td>
                                                 </tr>
-                                                <tr>
-                                                    <td {!! $slotAttrs($equip?->cloakSlot) !!}><img src="{{ $slotImage($equip?->cloakSlot, 'cloak') }}" class="hero-itm @if($equip?->cloakSlot) equipped @endif"></td>
-                                                    <td></td>
-                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            <table class="equip-grid" cellspacing="0" cellpadding="0" border="0" align="center">
+                                                <tbody>
                                                 <tr>
                                                     {{-- Кольца --}}
                                                     <td {!! $slotAttrs($equip?->ring1Slot) !!} align="center"><img src="{{ $slotImage($equip?->ring1Slot, 'ring') }}" class="hero-itm @if($equip?->ring1Slot) equipped @endif"></td>
@@ -356,7 +366,6 @@
                                             <table class="equip-grid" cellspacing="0" cellpadding="0" border="0" align="center">
                                                 <tbody>
                                                 <tr>
-                                                    <td align="center" width="30"></td>
                                                     <td {!! $slotAttrs($equip?->beltFirstSlot) !!} align="center">
                                                         <img src="{{ $slotImage($equip?->beltFirstSlot, 'belt') }}" class="hero-itm @if($equip?->beltFirstSlot) equipped @endif">
                                                     </td>
@@ -369,6 +378,13 @@
                                                     <td {!! $slotAttrs($equip?->bagSecondSlot) !!} align="center">
                                                         <img src="{{ $slotImage($equip?->bagSecondSlot, 'bag') }}" class="hero-itm @if($equip?->bagSecondSlot) equipped @endif">
                                                     </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            <table class="equip-grid" cellspacing="0" cellpadding="0" border="0" align="center">
+                                                <tbody>
+                                                <tr>
+                                                    <td {!! $slotAttrs($equip?->cloakSlot) !!} align="center"><img src="{{ $slotImage($equip?->cloakSlot, 'cloak') }}" class="hero-itm @if($equip?->cloakSlot) equipped @endif"></td>
                                                     <td {!! $slotAttrs($equip?->quiverSlot) !!} align="center"><img src="{{ $slotImage($equip?->quiverSlot, 'quiver') }}" class="hero-itm @if($equip?->quiverSlot) equipped @endif"></td>
                                                 </tr>
                                                 </tbody>

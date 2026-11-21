@@ -244,10 +244,15 @@ class ShopPurchaseLimitTest extends TestCase
             });
         }
         foreach (['shop_carts' => 'shop_item_id', 'reputation_shop_carts' => 'reputation_shop_item_id'] as $name => $foreign) {
-            Schema::create($name, function (Blueprint $table) use ($foreign): void {
+            Schema::create($name, function (Blueprint $table) use ($name, $foreign): void {
                 $table->id();
-                $table->unsignedBigInteger($foreign);
+                $table->unsignedBigInteger($foreign)->nullable();
                 $table->unsignedBigInteger('user_id');
+                if ($name === 'shop_carts') {
+                    $table->string('type', 8)->default('buy');
+                    $table->unsignedBigInteger('structure_id')->nullable();
+                    $table->unsignedBigInteger('item_id')->nullable();
+                }
                 $table->integer('quantity');
                 $table->timestamps();
             });

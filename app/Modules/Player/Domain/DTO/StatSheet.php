@@ -39,6 +39,9 @@ class StatSheet implements FightHitInterface
 
     public int $armor = 0;
 
+    /** Доля брони цели, которую игнорируют физические удары игрока (пассивка «Пробивание брони»), 0..1 */
+    public float $armorPierce = 0.0;
+
     public int $hpMax = 0;
 
     public int $mpMax = 0;

@@ -55,6 +55,14 @@ final class FightHitDTO
 
     protected Collection $selfAppliedEffects;
 
+    /**
+     * Новий незалежний кидок цього ж удару (той самий діапазон урону й навик, свій крит/ухилення).
+     * Задає стратегія зброї; використовує «Подвійний удар» руни. null — удар не можна повторити (магія).
+     *
+     * @var (\Closure(): self)|null
+     */
+    protected ?\Closure $reroll = null;
+
     public function __construct()
     {
         $this->appliedEffects = collect();
@@ -240,5 +248,28 @@ final class FightHitDTO
     public function getSelfAppliedEffects(): Collection
     {
         return $this->selfAppliedEffects;
+    }
+
+    /** @param  (\Closure(): self)|null  $reroll */
+    public function setReroll(?\Closure $reroll): self
+    {
+        $this->reroll = $reroll;
+
+        return $this;
+    }
+
+    /** Новий кидок удару з тією ж зброєю/рукою/набоєм; null — якщо удар не повторюваний. */
+    public function reroll(): ?self
+    {
+        if ($this->reroll === null) {
+            return null;
+        }
+
+        return ($this->reroll)()
+            ->setWeaponName($this->weaponName)
+            ->setSkill($this->skill)
+            ->setWeapon($this->weapon)
+            ->setAmmo($this->ammo)
+            ->setHandSide($this->handSide);
     }
 }

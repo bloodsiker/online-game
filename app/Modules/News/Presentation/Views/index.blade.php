@@ -2,6 +2,7 @@
 <html lang="{{ app()->getLocale() }}" class="lang-{{ app()->getLocale() }} {{ app()->getLocale() }} {{ auth()->check() ? 'isUser' : 'isGuest' }}">
 <head>
     <meta charset="utf-8">
+    <meta name="heleket" content="104d4938" />
     @php
         $archiveListing = ($isNewsArchive ?? false) && !$selectedNews;
         $archivePage = $archiveListing ? $newsPosts->currentPage() : 1;

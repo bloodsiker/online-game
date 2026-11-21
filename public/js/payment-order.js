@@ -23,6 +23,8 @@
             root.querySelector('[data-order-note]').textContent = result.note || '';
             root.querySelector('[data-order-pending]').hidden = status !== 'pending';
             root.querySelector('[data-order-cancel]').hidden = status !== 'pending';
+            const pay = root.querySelector('[data-order-pay]');
+            if (pay) pay.hidden = status !== 'pending';
             root.querySelector('[data-order-paid]').hidden = !result.credited_at;
             error.textContent = '';
             if (result.credited_at) window.parent.sendToFrame?.('character-frame', { money: result.money, diamond: result.diamond });

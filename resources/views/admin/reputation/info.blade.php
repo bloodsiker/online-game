@@ -57,6 +57,11 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Откат квеста репутации, часов</label>
+                                                <input type="number" class="form-control" name="quest_cooldown_hours" value="{{ $reputation->quest_cooldown_hours ?? 48 }}" min="0" max="65535">
+                                                <small class="text-muted">Через сколько часов после сдачи (или отказа) можно взять следующее задание. 24 = раз в сутки.</small>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Иконка (URL)</label>
                                                 <input type="text" class="form-control" name="icon" value="{{ $reputation->icon }}">
                                                 @if($reputation->icon)

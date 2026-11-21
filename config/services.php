@@ -35,6 +35,16 @@ return [
         ],
     ],
 
+    // Криптоплатежи Heleket (https://doc.heleket.hk/ru). Без merchant/api_key ордера остаются ручными.
+    'heleket' => [
+        'merchant' => env('HELEKET_MERCHANT_UUID'),
+        'api_key' => env('HELEKET_PAYMENT_API_KEY'),
+        'base_url' => env('HELEKET_BASE_URL', 'https://api.heleket.hk'),
+        'lifetime' => (int) env('HELEKET_INVOICE_LIFETIME', 3600),
+        // IP отправителя вебхуков. Пусто — проверяется только подпись (например, за прокси без real-ip).
+        'webhook_ips' => array_filter(explode(',', (string) env('HELEKET_WEBHOOK_IPS', '31.133.220.8'))),
+    ],
+
     // Тег Google (GTM). Пустое значение — тег не выводится.
     'google_tag' => [
         'id' => env('GOOGLE_TAG_ID', 'GTM-M9R2VFHZ'),

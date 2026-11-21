@@ -26,7 +26,6 @@ use App\Modules\Structure\Auction\Application\UseCases\GetLotForEdit;
 use App\Modules\Structure\Auction\Application\UseCases\GetMyOrders;
 use App\Modules\Structure\Auction\Application\UseCases\GetSaleProceeds;
 use App\Modules\Structure\Auction\Application\UseCases\GetSellableItems;
-use App\Modules\Structure\Auction\Application\UseCases\SellToShop;
 use App\Modules\Structure\Auction\Application\UseCases\TakeClaim;
 use App\Modules\Structure\Auction\Application\UseCases\TakeSaleProceeds;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
@@ -45,7 +44,6 @@ class AuctionController extends Controller
         private readonly CancelOrder $cancelOrder,
         private readonly FulfillOrder $fulfillOrder,
         private readonly TakeClaim $takeClaim,
-        private readonly SellToShop $sellToShop,
         private readonly GetAuctionLots $getAuctionLots,
         private readonly GetLotForEdit $getLotForEdit,
         private readonly GetExchangeOrders $getExchangeOrders,
@@ -183,25 +181,6 @@ class AuctionController extends Controller
         session()->flash('message', $result->message);
 
         return redirect()->back();
-    }
-
-    public function sellItem(Request $request, int $id): mixed
-    {
-        $user = Auth::user();
-        $shop = Structure::findOrFail($id);
-
-        if ($request->isMethod('POST')) {
-            $result = $this->sellToShop->execute($user, (array) $request->input('item', []));
-            session()->flash('message', $result->message);
-
-            if (! $result->ok) {
-                return redirect()->back();
-            }
-        }
-
-        $itemsToSell = $this->getSellableItems->execute($user->id);
-
-        return view('shop::sell', compact('shop', 'user', 'itemsToSell'));
     }
 
     public function exchange(Request $request, int $id): mixed

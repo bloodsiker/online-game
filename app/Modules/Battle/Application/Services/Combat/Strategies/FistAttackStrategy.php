@@ -26,13 +26,14 @@ class FistAttackStrategy implements AttackStrategyInterface
             'skill:hand:'.Skill::SKILL_HAND_ID,
             static fn () => Skill::find(Skill::SKILL_HAND_ID)
         );
-        $hit = $this->hitCalc->hit(
+        $roll = fn () => $this->hitCalc->hit(
             $this->player,
             $this->monster,
             $this->player->getLeftHandMinDmg(),
             $this->player->getLeftHandMaxDmg(),
             $this->weaponSkillLevel,
         );
+        $hit = $roll()->setReroll($roll);
 
         return [$hit->setWeaponName('кулаком')->setSkill($skill)];
     }

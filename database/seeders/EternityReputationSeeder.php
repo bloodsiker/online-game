@@ -33,7 +33,7 @@ class EternityReputationSeeder extends Seeder
 
     private const CATEGORY_MISC = 8;
 
-    /** Шаблоны колонок share_items: «Рюкзак путешественника» и «Пояс титана». */
+    /** Шаблоны колонок share_items (id 20/19 удалены — берётся первая сумка/пояс в базе, см. upsertEquipment). */
     private const BAG_TEMPLATE_ID = 20;
 
     private const BELT_TEMPLATE_ID = 19;
@@ -400,7 +400,12 @@ class EternityReputationSeeder extends Seeder
      */
     private function upsertEquipment(int $templateId, array $name, array $desc, string $rarity, int $sellPrice, string $statType, int $slots): int
     {
-        $template = (array) DB::table('share_items')->where('id', $templateId)->first();
+        // Шаблон колонок — первая сумка/пояс в базе (раньше это были удалённые «Рюкзак путешественника»/«Пояс титана»)
+        $template = (array) (DB::table('share_items')->where('id', $templateId)->first()
+            ?? DB::table('share_items')->where('type', $templateId === self::BAG_TEMPLATE_ID ? 'bag' : 'belt')->orderBy('id')->first());
+        if ($template === []) {
+            throw new \RuntimeException('Нет ни одной сумки/пояса для шаблона колонок.');
+        }
         $row = [
             'name_legacy' => $name[0],
             'name' => $this->json($name),
@@ -482,6 +487,8 @@ class EternityReputationSeeder extends Seeder
 
         $id = DB::table('share_items')->where('name_legacy', $name[0])->where('type', $type)->value('id');
         if ($id !== null) {
+            // Флаги торговли (продажа/выброс/передача) правятся в админке — у существующего предмета не трогаем.
+            unset($row['is_sell'], $row['is_give'], $row['is_droppable'], $row['is_auction_sellable'], $row['is_clan_warehouse_allowed']);
             DB::table('share_items')->where('id', $id)->update($row);
 
             return (int) $id;

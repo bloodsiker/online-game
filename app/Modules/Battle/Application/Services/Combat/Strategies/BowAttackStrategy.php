@@ -47,7 +47,8 @@ class BowAttackStrategy implements AttackStrategyInterface
         $min = ($this->bowInLeftHand ? $this->player->getLeftHandMinDmg() : $this->player->getRightHandMinDmg()) + $bonusMin;
         $max = ($this->bowInLeftHand ? $this->player->getLeftHandMaxDmg() : $this->player->getRightHandMaxDmg()) + $bonusMax;
 
-        $hit = $this->hitCalc->hit($this->player, $this->monster, $min, max($min, $max), $this->weaponSkillLevel);
+        $roll = fn () => $this->hitCalc->hit($this->player, $this->monster, $min, max($min, $max), $this->weaponSkillLevel);
+        $hit = $roll()->setReroll($roll);
 
         return [
             $hit

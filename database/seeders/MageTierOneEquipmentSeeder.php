@@ -93,7 +93,7 @@ class MageTierOneEquipmentSeeder extends Seeder
             $item = LocalizedItemSeederQuery::firstOrCreate(
                 ['name' => $definition['name']],
                 [
-                    'type' => ShareItemType::ARMOR,
+                    'type' => ShareItemType::forArmorSlot($definition['slot']),
                     'slot' => $definition['slot'],
                     'rarity' => ItemRarity::COMMON,
                     'price' => $this->price($definition['level']),

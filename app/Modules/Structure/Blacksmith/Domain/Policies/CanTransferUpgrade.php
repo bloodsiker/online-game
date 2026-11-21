@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Policies;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 final readonly class CanTransferUpgrade
@@ -25,7 +24,7 @@ final readonly class CanTransferUpgrade
             return null;
         }
 
-        if ($item->type === ShareItemType::ARMOR) {
+        if ($item->type->isArmor()) {
             return $item->slot === null ? null : $item->type->value.':'.$item->slot->value;
         }
 

@@ -50,6 +50,7 @@ readonly class MonsterAttackService
         $hit = $this->resolveHit($monster, $sheet, $monster->min_dmg, $monster->max_dmg, $isMagic);
 
         if (! $isMagic && $hit->isDodge()) {
+            $result->markPlayerDodged();
             $result->log(BattleLogTranslator::format(
                 $this->phrases()->monsterMiss($monster->attack_style),
                 BattleLogTranslator::contentName($monster),
@@ -331,6 +332,7 @@ readonly class MonsterAttackService
         $hit = $this->resolveHit($monster, $sheet, $minDmg, $maxDmg, $isMagic);
 
         if (! $isMagic && $hit->isDodge()) {
+            $result->markPlayerDodged();
             $result->log(BattleLogTranslator::format(
                 $this->phrases()->monsterMiss($monster->attack_style),
                 '<b class="color-boss">'.BattleLogTranslator::contentName($monster).'</b>',
@@ -418,6 +420,7 @@ readonly class MonsterAttackService
         $hit = $this->resolveHit($monster, $sheet, $skillMinDmg, $skillMaxDmg, $isMagic, $powerCoefficient);
 
         if (! $isMagic && $hit->isDodge()) {
+            $result->markPlayerDodged();
             $result->log(BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> использует <b>%s</b>, но вы <b class="color-green">увернулись</b>!</p>',
                 BattleLogTranslator::contentName($monster),

@@ -61,7 +61,11 @@ class PlayerInjury extends Model
     {
         return (float) config(
             'injuries.levels.'.$this->severity->value.'.stat_penalty_percent',
-            $this->severity->value * 5,
+            match ($this->severity->value) {
+                1 => 5,
+                2 => 10,
+                default => 20,
+            },
         );
     }
 

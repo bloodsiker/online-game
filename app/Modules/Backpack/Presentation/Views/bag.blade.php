@@ -1493,7 +1493,7 @@
         // а не расходуется — в отличие от артефактов-расходников вроде Сферы возрождения.
         var wearable = el.getAttribute('data-wearable') === '1';
 
-        var equippable = ['tool','weapon','shield','armor','belt','bag','ring','earring','necklace','quiver'].indexOf(type) !== -1
+        var equippable = ['tool','weapon','shield','armor','helmet','shoulder','forearm','legging','chain_armor','cloak','shoes','gloves','belt','bag','ring','earring','necklace','quiver'].indexOf(type) !== -1
             || wearable;
         // is_use — фолбэк для предметов с инстант-эффектом, чей тип не входит
         // в этот список (например misc): см. share_items.is_use.

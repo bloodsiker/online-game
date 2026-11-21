@@ -4,7 +4,9 @@ namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossMechanicInterface;
+use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 
 abstract class BaseBossMechanic implements BossMechanicInterface
 {
@@ -16,6 +18,23 @@ abstract class BaseBossMechanic implements BossMechanicInterface
     {
         $this->mechanic = $mechanic;
         $this->config = $mechanic->config ?? [];
+    }
+
+    /**
+     * Урон механики по игроку с учётом его брони — по той же формуле, что и обычный удар
+     * (а не «урон − броня», при которой почти любой урон упирался в минимум 1).
+     */
+    protected function mitigateByPlayerArmor(BossFightContext $context, int $damage): int
+    {
+        $player = $context->getPlayer();
+        $armor = app(PlayerStatService::class)->resolve($player)->getArmor();
+
+        return HitCalculator::mitigateByArmor(
+            $damage,
+            (float) $armor,
+            (int) $context->getLocationMonster()->monster->lvl,
+            max(1, (int) $player->lvl),
+        );
     }
 
     public function canTrigger(BossFightContext $context): bool

@@ -26,7 +26,7 @@ class ShopCartService
 
         return DB::transaction(function () use ($user, $shopItemId, $quantity) {
             User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
-            $cartItem = ShopCart::where('user_id', $user->id)
+            $cartItem = ShopCart::buying()->where('user_id', $user->id)
                 ->where('shop_item_id', $shopItemId)
                 ->lockForUpdate()
                 ->first();
@@ -37,6 +37,7 @@ class ShopCartService
             } else {
                 $cartItem = ShopCart::create([
                     'user_id' => $user->id,
+                    'type' => ShopCart::TYPE_BUY,
                     'shop_item_id' => $shopItemId,
                     'quantity' => $quantity,
                 ]);
@@ -50,7 +51,7 @@ class ShopCartService
     {
         return DB::transaction(function () use ($user, $shopItemId, $quantity, $structureId) {
             User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
-            $cartItem = ShopCart::where('user_id', $user->id)
+            $cartItem = ShopCart::buying()->where('user_id', $user->id)
                 ->where('shop_item_id', $shopItemId)
                 ->when($structureId !== null, fn ($query) => $query->whereHas(
                     'shopItem',
@@ -76,7 +77,7 @@ class ShopCartService
         return DB::transaction(function () use ($user, $cartId, $structureId): bool {
             User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
 
-            return ShopCart::where('user_id', $user->id)
+            return ShopCart::buying()->where('user_id', $user->id)
                 ->where('id', $cartId)
                 ->when(
                     $structureId !== null,
@@ -95,6 +96,7 @@ class ShopCartService
             ->join('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id')
             ->where('shop_items.structure_id', $structureId)
             ->where('shop_carts.user_id', $user->id)
+            ->where('shop_carts.type', ShopCart::TYPE_BUY)
             ->select('shop_carts.*')
             ->get();
 
@@ -132,7 +134,7 @@ class ShopCartService
         return DB::transaction(function () use ($user, $structureId): int {
             User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
 
-            return ShopCart::where('user_id', $user->id)
+            return ShopCart::buying()->where('user_id', $user->id)
                 ->join('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id')
                 ->where('shop_items.structure_id', $structureId)
                 ->delete();

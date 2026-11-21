@@ -52,11 +52,8 @@ class BossMechanicsService
 
                     // Зберігаємо що механіка спрацювала
                     $this->markMechanicAsTriggered($battle, $mechanicModel);
-
-                    $result->log(sprintf(
-                        '<p><b class="color-boss">%s</b></p>',
-                        $mechanic->getDescription()
-                    ));
+                    // Повідомлення в лог пише сама механіка в execute(); окремий getDescription()
+                    // тут дублював його (і не перекладався українською).
                 }
             } catch (\Exception $e) {
                 Log::error('Failed to execute boss mechanic', [

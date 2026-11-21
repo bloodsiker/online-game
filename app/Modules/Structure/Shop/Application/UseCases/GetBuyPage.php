@@ -42,8 +42,10 @@ class GetBuyPage
 
         $items = $this->readRepository->getShopItems($shop->id, $activeCategoryId);
         $cart = $this->shopCartService->getCart($user, $shop->id);
+        // Требования и товаров категории, и всего в корзине (корзина бывает из других категорий)
         $requirementItemIds = $items
             ->flatMap(static fn ($item) => $item->requirements->pluck('share_item_id'))
+            ->merge($cart->getItems()->flatMap(static fn ($line) => $line->shopItem->requirements->pluck('share_item_id')))
             ->map(static fn ($id): int => (int) $id)
             ->unique()
             ->values()
@@ -87,6 +89,7 @@ class GetBuyPage
             filter: $filter,
             totalItemsCount: count($page->items),
             playerLevel: $playerLevel,
+            ownedRequirementCounts: collect($backpackShareItemCounts)->map(static fn ($count): int => (int) $count)->all(),
         );
     }
 }

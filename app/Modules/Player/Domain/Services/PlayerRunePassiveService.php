@@ -6,6 +6,7 @@ namespace App\Modules\Player\Domain\Services;
 
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 /**
  * Пассивки читаются live из экипировки игрока (см.
@@ -22,7 +23,7 @@ class PlayerRunePassiveService
     ) {}
 
     /**
-     * @return list<array{type: CombatPassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string}>
+     * @return list<array{type: CombatPassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string, source: ShareItem, isInnate: bool}>
      */
     public function resolve(Player $player): array
     {
@@ -61,6 +62,9 @@ class PlayerRunePassiveService
                     'runeShareItemId' => $item->itemInfo->id,
                     'itemName' => $item->itemInfo->name,
                     'handSide' => $handSide,
+                    // Источник для лога боя: встроенная пассивка — сам предмет, иначе — руна
+                    'source' => $item->itemInfo,
+                    'isInnate' => true,
                 ];
             }
 
@@ -76,6 +80,8 @@ class PlayerRunePassiveService
                     'runeShareItemId' => $rune->runeInfo->id,
                     'itemName' => $item->itemInfo->name,
                     'handSide' => $handSide,
+                    'source' => $rune->runeInfo,
+                    'isInnate' => false,
                 ];
             }
         }
@@ -93,6 +99,8 @@ class PlayerRunePassiveService
                     'runeShareItemId' => $rune->runeInfo->id,
                     'itemName' => $item->itemInfo->name,
                     'handSide' => null,
+                    'source' => $rune->runeInfo,
+                    'isInnate' => false,
                 ];
             }
         }
@@ -115,7 +123,7 @@ class PlayerRunePassiveService
      * специально: руна оружия в руке всё равно должна сработать, даже если
      * урон в этот раз нанесён заклинанием, а не самим оружием.
      *
-     * @param  list<array{type: CombatPassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string}>  $passives
+     * @param  list<array{type: CombatPassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string, source: ShareItem, isInnate: bool}>  $passives
      */
     public function totalValue(array $passives, CombatPassiveType $type, ?string $requiredHandSide = null): int
     {
@@ -129,5 +137,36 @@ class PlayerRunePassiveService
                 return $requiredHandSide === null || $p['handSide'] === null || $p['handSide'] === $requiredHandSide;
             }),
         ));
+    }
+
+    /**
+     * Какой источник (руна или встроенная пассивка предмета) «сработал», когда шанс брошен по сумме
+     * totalValue(): выбираем пропорционально вкладу каждого источника. Нужен только для подписи в логе.
+     *
+     * @param  list<array{type: CombatPassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string, source: ShareItem, isInnate: bool}>  $passives
+     * @return array{type: CombatPassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string, source: ShareItem, isInnate: bool}|null
+     */
+    public function pickSource(array $passives, CombatPassiveType $type, ?string $requiredHandSide = null): ?array
+    {
+        $candidates = array_values(array_filter(
+            $passives,
+            static fn (array $p): bool => $p['type'] === $type
+                && $p['value'] > 0
+                && ($requiredHandSide === null || $p['handSide'] === null || $p['handSide'] === $requiredHandSide),
+        ));
+
+        if ($candidates === []) {
+            return null;
+        }
+
+        $roll = random_int(1, array_sum(array_column($candidates, 'value')));
+        foreach ($candidates as $candidate) {
+            $roll -= $candidate['value'];
+            if ($roll <= 0) {
+                return $candidate;
+            }
+        }
+
+        return $candidates[array_key_last($candidates)];
     }
 }

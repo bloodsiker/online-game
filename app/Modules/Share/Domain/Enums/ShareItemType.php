@@ -15,6 +15,14 @@ enum ShareItemType: string
     case WEAPON = 'weapon';
     case SHIELD = 'shield';
     case ARMOR = 'armor';
+    case HELMET = 'helmet';
+    case SHOULDER = 'shoulder';
+    case FOREARM = 'forearm';
+    case LEGGING = 'legging';
+    case CHAIN_ARMOR = 'chain_armor';
+    case CLOAK = 'cloak';
+    case SHOES = 'shoes';
+    case GLOVES = 'gloves';
     case BELT = 'belt';
     case BAG = 'bag';
     case RING = 'ring';
@@ -52,7 +60,7 @@ enum ShareItemType: string
             self::TOOL,
             self::WEAPON,
             self::SHIELD,
-            self::ARMOR,
+            ...self::armorTypes(),
             self::BELT,
             self::BAG,
             self::RING,
@@ -61,6 +69,42 @@ enum ShareItemType: string
             self::QUIVER,
             self::ARTIFACT,
         ], true);
+    }
+
+    /**
+     * Типы брони — по одному на слот доспеха. Кузница (заточка, камни, разбор) работает с ними одинаково.
+     *
+     * @return list<self>
+     */
+    public static function armorTypes(): array
+    {
+        return [
+            self::HELMET,
+            self::SHOULDER,
+            self::FOREARM,
+            self::ARMOR,
+            self::LEGGING,
+            self::CHAIN_ARMOR,
+            self::CLOAK,
+            self::SHOES,
+            self::GLOVES,
+        ];
+    }
+
+    public function isArmor(): bool
+    {
+        return in_array($this, self::armorTypes(), true);
+    }
+
+    /** Тип брони для слота доспеха (слот и тип совпадают по значению). */
+    public static function forArmorSlot(ShareItemSlot $slot): self
+    {
+        $type = self::from($slot->value);
+        if (! $type->isArmor()) {
+            throw new \InvalidArgumentException("Слот {$slot->value} не является слотом брони.");
+        }
+
+        return $type;
     }
 
     public function isGatheringResource(): bool
@@ -92,6 +136,14 @@ enum ShareItemType: string
             self::WEAPON => __('Оружие'),
             self::SHIELD => __('Щит'),
             self::ARMOR => __('Броня'),
+            self::HELMET => __('Шлем'),
+            self::SHOULDER => __('Наплечники'),
+            self::FOREARM => __('Наручи'),
+            self::LEGGING => __('Поножи'),
+            self::CHAIN_ARMOR => __('Кольчуга'),
+            self::CLOAK => __('Плащ'),
+            self::SHOES => __('Обувь'),
+            self::GLOVES => __('Перчатки'),
             self::BELT => __('Пояс'),
             self::BAG => __('Сумка'),
             self::RING => __('Кольцо'),
@@ -129,7 +181,7 @@ enum ShareItemType: string
                 self::TOOL,
                 self::WEAPON,
                 self::SHIELD,
-                self::ARMOR,
+                ...self::armorTypes(),
                 self::BELT,
                 self::BAG,
                 self::RING,

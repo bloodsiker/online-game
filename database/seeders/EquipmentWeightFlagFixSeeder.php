@@ -23,7 +23,7 @@ use Illuminate\Database\Seeder;
  */
 class EquipmentWeightFlagFixSeeder extends Seeder
 {
-    private const TYPES = ['weapon', 'armor', 'shield', 'belt'];
+    private const TYPES = ['weapon', 'armor', 'helmet', 'shoulder', 'forearm', 'legging', 'chain_armor', 'cloak', 'shoes', 'gloves', 'shield', 'belt'];
 
     public function run(): void
     {

@@ -82,7 +82,7 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->whereIn('share_items.type', [
                 ShareItemType::WEAPON->value,
                 ShareItemType::SHIELD->value,
-                ShareItemType::ARMOR->value,
+                ...ShareItemType::values(ShareItemType::armorTypes()),
             ])
             ->get();
     }
@@ -144,7 +144,7 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->whereIn('share_items.type', [
                 ShareItemType::WEAPON->value,
                 ShareItemType::SHIELD->value,
-                ShareItemType::ARMOR->value,
+                ...ShareItemType::values(ShareItemType::armorTypes()),
             ])
             ->get();
     }

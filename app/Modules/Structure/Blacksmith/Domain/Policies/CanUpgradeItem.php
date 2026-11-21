@@ -14,7 +14,7 @@ final class CanUpgradeItem
         return in_array($item->type, [
             ShareItemType::WEAPON,
             ShareItemType::SHIELD,
-            ShareItemType::ARMOR,
+            ...ShareItemType::armorTypes(),
         ], true);
     }
 }

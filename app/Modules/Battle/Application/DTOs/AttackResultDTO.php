@@ -18,6 +18,21 @@ final class AttackResultDTO
     /** @var list<PlayerEffectNotificationDTO> */
     private array $playerEffects = [];
 
+    /** Игрок уклонился от физической атаки монстра в этом ходу — повод для «Контратаки». */
+    private bool $playerDodged = false;
+
+    public function markPlayerDodged(): self
+    {
+        $this->playerDodged = true;
+
+        return $this;
+    }
+
+    public function playerDodged(): bool
+    {
+        return $this->playerDodged;
+    }
+
     public function log(string $text): self
     {
         $this->logs[] = $text;

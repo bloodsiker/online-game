@@ -70,7 +70,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': form.querySelector('[name="_token"]').value
                     },
-                    body: JSON.stringify({shop_item_id: Number(id), quantity: quantity})
+                    body: JSON.stringify({[form.dataset.idField || 'shop_item_id']: Number(id), quantity: quantity})
                 });
                 const data = await response.json().catch(function () { return {}; });
                 if (!response.ok) throw new Error(data.message || message);
@@ -84,6 +84,7 @@
                 }
                 setText('[data-cart-total-price]', data.total_price);
                 setText('[data-cart-total-diamond]', data.total_diamond);
+                form.dispatchEvent(new root.CustomEvent('shop-cart-quantity-saved', {detail: {id: id, data: data}}));
             },
             onError: showError
         });

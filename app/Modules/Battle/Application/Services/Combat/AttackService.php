@@ -61,6 +61,7 @@ readonly class AttackService
         private DungeonStageService $dungeonStageService,
         private ChatService $chatService,
         private PlayerLevelUpService $levelUpService,
+        private HitCalculator $hitCalc,
         private MonsterLootService $monsterLootService = new MonsterLootService,
         private ?BattlePhraseBook $phraseBook = null,
         private CityGuardPerksService $guardPerks = new CityGuardPerksService,
@@ -122,48 +123,19 @@ readonly class AttackService
             $damage = $this->guardPerks->boostOutgoingDamage((int) $player->id, $damage);
 
             if ($isBoss && $battle) {
+                $passed = $this->applyBossDefenses($battle, $locMonster, $player, $hit, $damage, $result);
 
-                // Телепортація - удар не долетає взагалі, ще до розрахунку імунітету/щита
-                if ($this->checkTeleportDodge($battle, $locMonster, $result)) {
-                    continue;
-                }
-
-                // Перевірка імунітету
-                $damage = $this->checkImmunity($battle, $damage, $hit, $result);
-                if ($damage <= 0) {
-                    continue;
-                }
-
-                // Тимчасове підвищення захисту (BuffSelfMechanic)
-                $damage = $this->applyDefenseBuff($battle, $damage, $result);
-                if ($damage <= 0) {
-                    continue;
-                }
-
-                // 🆕 Перевірка конвертації урону в лікування (ПЕРЕД щитом!)
-                $damageConverted = $this->checkDamageToHeal($battle, $damage, $locMonster, $result);
-
-                if ($damageConverted) {
-                    // Урон було сконвертовано в лікування - пропускаємо далі
-
-                    // Нараховуємо досвід за спробу атаки (опціонально)
+                if ($passed === null) {
+                    // Урон сконвертовано в лікування — нараховуємо досвід лише за спробу атаки
                     $exp = $this->calculateExperience($player, $locMonster->monster, 1, $locMonster->hp_max, $xpMultiplier);
                     $this->awardMonsterExperience($player, $locMonster->monster, $exp);
 
                     continue;
                 }
-
-                // Обробка щита (якщо урон не сконвертовано)
-                if ($this->shieldService->hasActiveShield($battle)) {
-                    $damage = $this->shieldService->damageShield($battle, $damage, $result);
-
-                    if ($damage <= 0) {
-                        continue;
-                    }
+                if ($passed <= 0) {
+                    continue;
                 }
-
-                // Відбиття урону
-                $this->reflectDamage($battle, $damage, $player, $result);
+                $damage = $passed;
             }
 
             $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max, $xpMultiplier);
@@ -197,7 +169,7 @@ readonly class AttackService
                 }
             }
 
-            $this->applyOffensiveRunePassives($player, $locMonster, $battle, $damage, $hit->getHandSide(), $runePassives, $xpMultiplier, $effectiveHpMax, $result);
+            $this->applyOffensiveRunePassives($player, $locMonster, $battle, $damage, $hit, $isBoss, $runePassives, $xpMultiplier, $effectiveHpMax, $result);
             $this->applyDivineFavors($player, $locMonster, $battle, $divineFavors, $effectiveHpMax, $result);
         }
 
@@ -314,6 +286,153 @@ readonly class AttackService
     }
 
     /**
+     * Пассивка «Контратака»: после уклонения от физической атаки монстра — шанс ударить в ответ
+     * на 50% урона оружия (свой бросок урона/крита/уклонения монстра, броня с учётом пробивания).
+     * У босса удар проходит его защиту, как обычный. Никаких других пассивок и эффектов не запускает.
+     */
+    public function counterAttack(Player $player, MonsterOnLocation $locMonster, Battle $battle, float $xpMultiplier, AttackResultDTO $result): void
+    {
+        if ($locMonster->hp_now <= 0 || $player->hp_now <= 0) {
+            return;
+        }
+
+        $runePassives = $this->runePassiveService->resolve($player);
+        $chance = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::COUNTER_ATTACK);
+        if ($chance <= 0 || ! $this->random->chance($chance)) {
+            return;
+        }
+
+        $source = $this->passiveSourceName($runePassives, CombatPassiveType::COUNTER_ATTACK, null);
+        $sheet = $this->statService->resolve($player);
+        // Бьём рукой с большим уроном (оружие; без оружия — кулак)
+        [$min, $max] = $sheet->getRightHandMaxDmg() > $sheet->getLeftHandMaxDmg()
+            ? [$sheet->getRightHandMinDmg(), $sheet->getRightHandMaxDmg()]
+            : [$sheet->getLeftHandMinDmg(), $sheet->getLeftHandMaxDmg()];
+        $hit = $this->hitCalc->hit($sheet, $locMonster->monster, $min, $max);
+
+        if ($hit->isDodge() || $hit->getDamage() <= 0) {
+            $result->log(BattleLogTranslator::format(
+                '<p><b class="color-red">↩ %s: контратака!</b> %s <b class="color-green">уклоняется</b>.</p>',
+                $source,
+                BattleLogTranslator::contentName($locMonster->monster),
+            ));
+
+            return;
+        }
+
+        $damage = max(1, (int) round($hit->getDamage() * 0.5));
+        $damage = $this->guardPerks->boostOutgoingDamage((int) $player->id, $damage);
+
+        if ($locMonster->monster->isBoss()) {
+            $damage = $this->applyBossDefenses($battle, $locMonster, $player, $hit, $damage, $result) ?? 0;
+            if ($damage <= 0) {
+                return;
+            }
+        }
+
+        $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max, $xpMultiplier);
+        $this->monsterLootService->damage($locMonster, $damage, $player->user_id, $battle->id);
+        $this->awardMonsterExperience($player, $locMonster->monster, $exp);
+        $this->applyMonsterReflectPassive($locMonster->monster, $player, $damage, $result);
+
+        $result->log(BattleLogTranslator::format(
+            $hit->isCritical()
+                ? '<p><b class="color-red">↩ %s: контратака! Критический удар по %s — <b>%d</b> урона (опыт +%d)</b></p>'
+                : '<p><b class="color-red">↩ %s: контратака!</b> Вы наносите %s <b>%d</b> урона (опыт +%d)</p>',
+            $source,
+            BattleLogTranslator::contentName($locMonster->monster),
+            $damage,
+            $exp,
+        ));
+    }
+
+    /**
+     * Пассивка «Второе дыхание»: один раз за бой, когда HP опускается ниже 20% (но игрок жив),
+     * лечит % от максимального HP. Факт срабатывания хранится в battles.boss_metadata (общий json боя).
+     */
+    public function trySecondWind(Player $player, Battle $battle, AttackResultDTO $result): void
+    {
+        if ($player->hp_now <= 0) {
+            return;
+        }
+
+        $hpMax = $this->statService->resolve($player)->getHpMax();
+        if ($hpMax <= 0 || $player->hp_now >= $hpMax * 0.2) {
+            return;
+        }
+
+        $runePassives = $this->runePassiveService->resolve($player);
+        $percent = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::SECOND_WIND);
+        if ($percent <= 0) {
+            return;
+        }
+
+        $metadata = $battle->boss_metadata ?? [];
+        $used = $metadata['second_wind_used'] ?? [];
+        if (in_array((int) $player->id, $used, true)) {
+            return;
+        }
+        $metadata['second_wind_used'] = [...$used, (int) $player->id];
+        $battle->boss_metadata = $metadata;
+        $battle->save();
+
+        $before = $player->hp_now;
+        $player->hp_now = min($hpMax, $player->hp_now + max(1, (int) round($hpMax * $percent / 100)));
+
+        $result->log(BattleLogTranslator::format(
+            '<p><b class="color-buff">💨 %s: второе дыхание! Вы восстанавливаете %d HP.</b></p>',
+            $this->passiveSourceName($runePassives, CombatPassiveType::SECOND_WIND, null),
+            $player->hp_now - $before,
+        ));
+    }
+
+    /**
+     * Захист боса від одного удару гравця (бойові механіки з battle.boss_metadata), по черзі:
+     * телепорт → імунітет → підвищення захисту → конвертація в лікування → щит → відбиття.
+     * Повертає урон, що дійшов до HP боса (0 — заблоковано), або null — урон сконвертовано в лікування.
+     */
+    private function applyBossDefenses(
+        Battle $battle,
+        MonsterOnLocation $locMonster,
+        Player $player,
+        FightHitDTO $hit,
+        int $damage,
+        AttackResultDTO $result,
+    ): ?int {
+        // Телепортація - удар не долетає взагалі, ще до розрахунку імунітету/щита
+        if ($this->checkTeleportDodge($battle, $locMonster, $result)) {
+            return 0;
+        }
+
+        $damage = $this->checkImmunity($battle, $damage, $hit, $result);
+        if ($damage <= 0) {
+            return 0;
+        }
+
+        // Тимчасове підвищення захисту (BuffSelfMechanic)
+        $damage = $this->applyDefenseBuff($battle, $damage, $result);
+        if ($damage <= 0) {
+            return 0;
+        }
+
+        // Конвертація урону в лікування (ПЕРЕД щитом!)
+        if ($this->checkDamageToHeal($battle, $damage, $locMonster, $result)) {
+            return null;
+        }
+
+        if ($this->shieldService->hasActiveShield($battle)) {
+            $damage = $this->shieldService->damageShield($battle, $damage, $result);
+            if ($damage <= 0) {
+                return 0;
+            }
+        }
+
+        $this->reflectDamage($battle, $damage, $player, $result);
+
+        return $damage;
+    }
+
+    /**
      * Триггеры пассивок рун при успешной атаке игрока: Вампиризм (лечение %
      * от урона), Оглушение (шанс оглушить моба на 10 секунд), Двойной удар (шанс
      * повторить урон этого хита) и Цепная атака (шанс задеть второго живого
@@ -331,7 +450,8 @@ readonly class AttackService
         MonsterOnLocation $locMonster,
         Battle $battle,
         int $damage,
-        ?string $handSide,
+        FightHitDTO $hit,
+        bool $isBoss,
         array $runePassives,
         float $xpMultiplier,
         int $effectiveHpMax,
@@ -340,6 +460,7 @@ readonly class AttackService
         if ($runePassives === []) {
             return;
         }
+        $handSide = $hit->getHandSide();
 
         $vampirism = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::VAMPIRISM, $handSide);
         if ($vampirism > 0 && $this->random->chance($vampirism)) {
@@ -350,7 +471,8 @@ readonly class AttackService
 
             if ($actualHeal > 0) {
                 $result->log(BattleLogTranslator::format(
-                    '<p><b class="color-buff">🩸 Вампиризм руны восстанавливает вам %d HP!</b></p>',
+                    '<p><b class="color-buff">🩸 %s: вампиризм восстанавливает вам %d HP!</b></p>',
+                    $this->passiveSourceName($runePassives, CombatPassiveType::VAMPIRISM, $handSide),
                     $actualHeal
                 ));
             }
@@ -370,24 +492,67 @@ readonly class AttackService
 
         $doubleStrike = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::DOUBLE_STRIKE, $handSide);
         if ($doubleStrike > 0 && $locMonster->hp_now > 0 && $this->random->chance($doubleStrike)) {
-            $extraDamage = min($locMonster->hp_now, $damage);
-            $extraExp = $this->calculateExperience($player, $locMonster->monster, $extraDamage, $locMonster->hp_max, $xpMultiplier);
-
-            $this->monsterLootService->damage($locMonster, $damage, $player->user_id, $battle->id);
-            $this->awardMonsterExperience($player, $locMonster->monster, $extraExp);
-
-            $result->log(BattleLogTranslator::format(
-                '<p><b class="color-red">⚔ Двойной удар руны! Вы наносите ещё %d урона %s (опыт +%d)</b></p>',
-                $damage,
-                BattleLogTranslator::contentName($locMonster->monster),
-                $extraExp
-            ));
+            $source = $this->passiveSourceName($runePassives, CombatPassiveType::DOUBLE_STRIKE, $handSide);
+            $this->applyDoubleStrike($player, $locMonster, $battle, $hit, $isBoss, $source, $runePassives, $xpMultiplier, $effectiveHpMax, $result);
         }
 
         $chainAttack = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::CHAIN_ATTACK, $handSide);
         if ($chainAttack > 0 && $this->random->chance($chainAttack)) {
-            $this->applyChainAttack($player, $locMonster, $battle, $damage, $xpMultiplier, $result);
+            $source = $this->passiveSourceName($runePassives, CombatPassiveType::CHAIN_ATTACK, $handSide);
+            $this->applyChainAttack($player, $locMonster, $battle, $damage, $source, $xpMultiplier, $result);
         }
+    }
+
+    /**
+     * «Подвійний удар» руни — окремий новий удар тією ж зброєю: свій кидок урону, криту й ухилення,
+     * далі той самий шлях, що й звичайний удар (бонуси люті/варти, захист боса, відбиття монстра).
+     * Сам нічого не запускає: ні інших пасивок рун (ще один подвійний удар, оглушення, ланцюг,
+     * вампіризм), ні ефектів закляття — щоб не було ланцюжків спрацювань.
+     *
+     * @param  list<array{type: CombatPassiveType, value: int, runeName: string, itemName: string, handSide: ?string}>  $runePassives
+     */
+    private function applyDoubleStrike(
+        Player $player,
+        MonsterOnLocation $locMonster,
+        Battle $battle,
+        FightHitDTO $hit,
+        bool $isBoss,
+        string $source,
+        array $runePassives,
+        float $xpMultiplier,
+        int $effectiveHpMax,
+        AttackResultDTO $result,
+    ): void {
+        $second = $hit->reroll();
+        if ($second === null) {
+            return; // магія та інші неповторювані удари
+        }
+
+        $result->log(BattleLogTranslator::format('<p><b class="color-red">⚔ %s: двойной удар!</b></p>', $source));
+
+        if ($second->isDodge() || $second->getDamage() <= 0) {
+            $result->log($this->hitLog($second, $locMonster, miss: true));
+
+            return;
+        }
+
+        $damage = $this->applyRageBonus($player, $second->getDamage(), $runePassives, $effectiveHpMax);
+        $damage = $this->guardPerks->boostOutgoingDamage((int) $player->id, $damage);
+
+        if ($isBoss) {
+            $damage = $this->applyBossDefenses($battle, $locMonster, $player, $second, $damage, $result) ?? 0;
+            if ($damage <= 0) {
+                return;
+            }
+        }
+
+        $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max, $xpMultiplier);
+
+        $this->monsterLootService->damage($locMonster, $damage, $player->user_id, $battle->id);
+        $this->awardMonsterExperience($player, $locMonster->monster, $exp);
+        $this->applyMonsterReflectPassive($locMonster->monster, $player, $damage, $result);
+
+        $result->log($this->hitLog($second, $locMonster, damage: $damage, exp: $exp));
     }
 
     /**
@@ -429,6 +594,19 @@ readonly class AttackService
     }
 
     /**
+     * Название источника сработавшей пассивки для лога: руна («Руна Ярости») или, у премиум-оружия
+     * со встроенной пассивкой, само оружие («Лук Ветра») — чтобы лог не писал «руна» там, где её нет.
+     */
+    private function passiveSourceName(array $runePassives, CombatPassiveType $type, ?string $handSide): string
+    {
+        $source = $this->runePassiveService->pickSource($runePassives, $type, $handSide);
+
+        return $source !== null
+            ? BattleLogTranslator::contentName($source['source'])
+            : BattleLogTranslator::format('Руна');
+    }
+
+    /**
      * Цепная атака: находит другого живого моба в этом же бою (не текущую
      * цель) и наносит ему 50% урона этого хита.
      */
@@ -437,6 +615,7 @@ readonly class AttackService
         MonsterOnLocation $locMonster,
         Battle $battle,
         int $damage,
+        string $source,
         float $xpMultiplier,
         AttackResultDTO $result,
     ): void {
@@ -464,7 +643,8 @@ readonly class AttackService
         $this->awardMonsterExperience($player, $secondMonster->monster, $exp);
 
         $result->log(BattleLogTranslator::format(
-            '<p><b class="color-purple">🔗 Цепная атака руны поражает %s! <br>Повреждения: %d (ваш опыт +%d)</b></p>',
+            '<p><b class="color-purple">🔗 %s: цепная атака поражает %s! <br>Повреждения: %d (ваш опыт +%d)</b></p>',
+            $source,
             BattleLogTranslator::contentName($secondMonster->monster),
             $chainDamage,
             $exp
@@ -746,7 +926,10 @@ readonly class AttackService
         if ($locationMonster->monster->isBoss()) {
             $locationMonster->monster->scheduleRespawn();
 
-            $this->chatService->sendWorldBossDefeated(new LocalizedChatMessage('chat.world_boss_defeated', [
+            // 10 вариантов объявления (chat.world_boss_defeated, _2 … _10); ключ сохраняется в сообщении,
+            // поэтому все видят один и тот же вариант, каждый на своём языке.
+            $variant = $this->random->between(1, 10);
+            $this->chatService->sendWorldBossDefeated(new LocalizedChatMessage($variant === 1 ? 'chat.world_boss_defeated' : 'chat.world_boss_defeated_'.$variant, [
                 'member' => $this->bossDefeatMemberLabel($player),
                 'boss' => LocalizedChatMessage::contentName($locationMonster->monster),
             ]));

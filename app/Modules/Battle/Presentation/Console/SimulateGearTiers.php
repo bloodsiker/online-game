@@ -229,7 +229,7 @@ class SimulateGearTiers extends Command
      */
     private function gear(array $build, int $level, string $rarity): Collection
     {
-        $query = ShareItem::query()->with(['stats', 'requirements'])->where('rarity', $rarity)->whereIn('type', ['armor', 'shield']);
+        $query = ShareItem::query()->with(['stats', 'requirements'])->where('rarity', $rarity)->whereIn('type', [...ShareItemType::values(ShareItemType::armorTypes()), 'shield']);
         $query->where(function ($q) use ($build): void {
             foreach ($build['set'] as $pattern) {
                 $q->orWhere('name_legacy', 'like', '%'.$pattern.'%');

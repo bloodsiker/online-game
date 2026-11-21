@@ -52,10 +52,13 @@ enum InjuryBodyPart: string
         return match ($this) {
             self::HEAD => ['intuition', 'wisdom', 'intelligence'],
             self::SHOULDERS => ['strength', 'endurance'],
-            self::FOREARMS, self::LEFT_HAND, self::RIGHT_HAND => ['strength'],
-            self::TORSO, self::CHEST => ['endurance'],
+            self::FOREARMS => ['strength', 'intuition'],
+            self::LEFT_HAND => ['strength', 'agility'],
+            self::RIGHT_HAND => ['strength', 'intelligence'],
+            self::TORSO => ['endurance', 'agility'],
+            self::CHEST => ['endurance', 'wisdom', 'intelligence'],
             self::LEGS => ['agility', 'endurance'],
-            self::FEET => ['agility'],
+            self::FEET => ['agility', 'intuition'],
         };
     }
 

@@ -56,7 +56,10 @@ final class PremiumShopCartQuantityTest extends TestCase
         Schema::create('shop_carts', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('shop_item_id');
+            $table->string('type', 8)->default('buy');
+            $table->unsignedBigInteger('structure_id')->nullable();
+            $table->unsignedBigInteger('shop_item_id')->nullable();
+            $table->unsignedBigInteger('item_id')->nullable();
             $table->integer('quantity');
             $table->timestamps();
         });

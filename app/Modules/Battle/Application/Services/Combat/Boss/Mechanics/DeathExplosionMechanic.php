@@ -22,7 +22,7 @@ class DeathExplosionMechanic extends BaseBossMechanic
         $maxHp = $context->getBossMaxHp();
         $damage = (int) (($maxHp * $damagePercent) / 100);
 
-        $actualDamage = max(1, $damage - $context->getPlayer()->getArmor());
+        $actualDamage = $this->mitigateByPlayerArmor($context, $damage);
         $context->dealDamageToPlayer($actualDamage);
 
         $context->addLog(BattleLogTranslator::format(

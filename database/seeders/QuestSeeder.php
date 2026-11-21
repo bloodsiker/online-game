@@ -52,7 +52,7 @@ class QuestSeeder extends Seeder
 
         // Create second NPC "Вестник" at location_id=4 if not exists
         $npc2 = LocalizedContentSeederQuery::firstOrCreateFor(Npc::class,
-            ['name' => 'Воевода Гидвер'],
+            ['name' => 'Воевода Торвальд'],
             ['location_id' => 4, 'description' => 'Дока военного искусства, тактик и стратег, он посвятил свою жизнь развитию военного дела и обучению молодых солдат его премудростям.', 'image' => '/img/npc/voevoda.jpg']
         );
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Payments\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Payments\Application\Services\HeleketCheckout;
 use App\Modules\Payments\Application\Services\PaymentOrderService;
 use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +40,11 @@ final class PaymentOrderController extends Controller
             'credited_at' => $order->credited_at?->toIso8601String(), 'note' => $order->review_note,
             'money' => $request->user()->money, 'diamond' => $request->user()->diamond,
         ])->header('Cache-Control', 'no-store, private');
+    }
+
+    public function pay(Request $request, string $publicId, HeleketCheckout $checkout): RedirectResponse
+    {
+        return redirect()->away($checkout->paymentUrl($this->ownedOrder($request, $publicId)));
     }
 
     public function cancel(Request $request, string $publicId, PaymentOrderService $service): RedirectResponse
