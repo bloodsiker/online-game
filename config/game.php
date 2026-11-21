@@ -8,7 +8,7 @@ return [
     // Публичный Telegram-канал новостей игры.
     'telegram_channel' => env('TELEGRAM_CHANNEL_URL', 'https://t.me/eternum_rpg'),
 
-    'support_email' => env('SUPPORT_EMAIL', 'maldini2@ukr.net'),
+    'support_email' => env('SUPPORT_EMAIL', 'eternum.rpg.game@gmail.com'),
 
     'online_timeout_minutes' => (int) env('PLAYER_ONLINE_TIMEOUT_MINUTES', 30),
     /*
