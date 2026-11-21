@@ -4,7 +4,6 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/dd', [HomeController::class, 'gebug'])->name('gebug');
 Route::get('/map', [HomeController::class, 'map'])->name('map');
 Route::get('/map/{map}/monsters', [HomeController::class, 'publicMapMonsters'])->name('map.monsters');
 Route::get('/map/{map}/resources', [HomeController::class, 'publicMapResources'])->name('map.resources');
@@ -16,7 +15,6 @@ Route::get('/map5', [HomeController::class, 'map5'])->name('map5');
 Route::get('/map6', [HomeController::class, 'map6'])->name('map6');
 Route::get('/map7', [HomeController::class, 'map7'])->name('map7');
 Route::get('/map8', [HomeController::class, 'map8'])->name('map8');
-Route::get('/clear', [HomeController::class, 'clear'])->name('clear');
 
 // // ======== Ручная настройка верификации ======== //
 //
