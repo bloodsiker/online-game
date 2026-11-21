@@ -51,6 +51,7 @@ final class MonobankCheckout
                     'basketOrder' => [[
                         'name' => $title, 'qty' => 1, 'sum' => $charge, 'total' => $charge,
                         'unit' => 'шт.', 'code' => 'diamonds-'.$order->diamonds,
+                        'icon' => rtrim((string) config('app.url'), '/').'/main/images/data/bank_pack_picture/diamonds-3_200.png',
                     ]],
                 ],
                 'redirectUrl' => route('payments.orders.show', $order->public_id),

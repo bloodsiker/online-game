@@ -6,6 +6,7 @@ namespace App\Modules\Interface\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
+use App\Modules\Interface\Application\Services\PlayerOnlinePresenceService;
 use App\Modules\Interface\Application\UseCases\GetHeroPage;
 use App\Modules\Interface\Application\UseCases\GetOnMapPage;
 use App\Modules\Interface\Application\UseCases\GetWhoPage;
@@ -33,6 +34,7 @@ class InterfaceController extends Controller
         private readonly HeartbeatPlayer $heartbeatPlayer,
         private readonly GetMailbox $mailbox,
         private readonly GameSettingsService $gameSettings,
+        private readonly PlayerOnlinePresenceService $onlinePresence,
     ) {}
 
     public function index()
@@ -126,6 +128,13 @@ class InterfaceController extends Controller
 
         if (! $user instanceof User) {
             return redirect()->route('index');
+        }
+
+        // Отметка «онлайн» сразу при входе: иначе фреймы «Кто онлайн» и локации рендерятся
+        // по устаревшему last_online_at (сокет-присутствие обновляет его асинхронно, через очередь),
+        // и только что зашедший игрок видит себя офлайн и не попадает в список онлайна.
+        if ($user->player_id !== null) {
+            $this->onlinePresence->touch((int) $user->id, now());
         }
 
         $adminToolUsers = $user->is_admin

@@ -412,6 +412,7 @@ final class PaymentOrderTest extends TestCase
             && $request->header('X-Token')[0] === 'mono-token'
             && $request['amount'] === 2102100 && $request['ccy'] === 980
             && $request['merchantPaymInfo']['reference'] === $order->public_id
+            && str_ends_with($request['merchantPaymInfo']['basketOrder'][0]['icon'], '/main/images/data/bank_pack_picture/diamonds-3_200.png')
             && $request['webHookUrl'] === route('payments.monobank.webhook'));
         $fresh = $order->fresh();
         $this->assertSame('mono-inv-1', $fresh->provider_payment_id);
