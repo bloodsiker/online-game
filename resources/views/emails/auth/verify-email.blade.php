@@ -1,6 +1,8 @@
 @php($verificationExpiryMinutes = (int) config('auth.verification.expire', 1440))
 @php($verificationExpiry = $verificationExpiryMinutes % 60 === 0 ? ((int) ($verificationExpiryMinutes / 60)).' ч' : $verificationExpiryMinutes.' мин')
 @php($supportEmail = (string) config('game.support_email'))
+@php($logoPath = public_path('img/logo/logo-email.png'))
+@php($logoSrc = isset($message) && is_file($logoPath) ? $message->embed($logoPath) : rtrim((string) config('app.url'), '/').'/img/logo/logo-email.png')
 <!doctype html>
 <html lang="{{ app()->getLocale() }}">
 <head>
@@ -19,7 +21,7 @@
                 <tr>
                     <td align="center" style="padding:0 0 18px;">
                         <a href="{{ url('/') }}" style="text-decoration:none;">
-                            <img src="{{ asset('img/logo/logo-email.png') }}" width="330" height="110" alt="{{ __('auth.email_verification.game_title') }}" style="display:block;width:100%;max-width:330px;height:auto;border:0;color:#e8c27a;font-size:28px;font-weight:bold;">
+                            <img src="{{ $logoSrc }}" width="330" height="110" alt="{{ __('auth.email_verification.game_title') }}" style="display:block;width:100%;max-width:330px;height:auto;border:0;color:#e8c27a;font-size:28px;font-weight:bold;">
                         </a>
                     </td>
                 </tr>
