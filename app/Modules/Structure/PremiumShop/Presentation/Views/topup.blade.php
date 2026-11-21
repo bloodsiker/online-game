@@ -257,23 +257,14 @@
 
                                                 <br>
                                                 - Средства возврату не подлежат<br>
-                                                @if($paymentOnline)
-                                                - Оплата криптовалютой через Heleket (USDT, BTC, ETH, TON и др.)<br>
+                                                - Оплата криптовалютой (USDT, BTC, ETH, TON и др.)<br>
                                                 - Начисление автоматическое, круглосуточно — сразу после подтверждения сети<br>
                                                 - Сумма в USD конвертируется в выбранную криптовалюту по курсу на момент оплаты<br>
-                                                @else
-                                                - Начисление от 5 мин до 6 часов<br>в период с 09:00 по 23:00<br>
-                                                - Автоматическая конвертация из любой валюты в USD<br>
-                                                @endif
-                                                @if($paymentSettings?->minimum_amount_minor > 0)<b style="color:#fff200;">{{ __('payments.minimum', ['amount' => number_format($paymentSettings->minimum_amount_minor / 100, 2, '.', ' ')]) }}</b><br>@endif
+                                                @if($paymentSettings?->minimum_amount_minor > 0)<b style="color:#c0392b;">{{ __('payments.minimum', ['amount' => number_format($paymentSettings->minimum_amount_minor / 100, 2, '.', ' ')]) }}</b><br>@endif
                                                 <br><br>
-                                                @if($paymentOnline)
                                                 <b style="color:green;">Бриллианты начисляются на ваш аккаунт автоматически, обычно в течение нескольких минут.</b><br>
-                                                Счёт действует 1 час. Оплачивайте точную сумму, указанную на странице Heleket, в выбранной сети — иначе ордер уйдёт на ручную проверку.<br>
+                                                Счёт действует 1 час. Оплачивайте точную сумму, указанную на странице оплаты, в выбранной сети — иначе ордер уйдёт на ручную проверку.<br>
                                                 Если бриллианты не пришли — напишите администратору и укажите номер ордера.<br>
-                                                @else
-                                                <b style="color:red;">При желании вы можете пополнить счёт другому игроку, указав его ID</b><br><b style="color:green;">Начисление на баланс: от 5 мин до 6 часов<br>Рабочее время: с 09:00 по 23:00</b>, в другое время лучше не пополнять, если не хотите ждать до утра<br>
-                                                @endif
                                                 Администратор: @include('premium_shop::_administrator')
                                                 @if(!$paymentSettings?->is_enabled)<p>{{ __('payments.disabled') }}</p>@endif
                                                 @if($errors->any())<p style="color:#fffc00">{{ $errors->first() }}</p>@endif
