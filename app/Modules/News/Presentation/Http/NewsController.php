@@ -9,6 +9,7 @@ use App\Modules\Battle\Application\UseCases\GetHomepageBossBattles;
 use App\Modules\Forum\Application\UseCases\GetHotForumTopics;
 use App\Modules\Library\Presentation\Services\LibraryShortcodeRenderer;
 use App\Modules\News\Application\UseCases\GetNewsFeed;
+use App\Modules\News\Application\UseCases\GetPublicPricing;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsComment;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsPost;
 use App\Modules\Rating\Application\UseCases\GetHomepageRankings;
@@ -60,13 +61,43 @@ class NewsController extends Controller
 
     public function eula(GetHomepageRankings $rankings, GetHotForumTopics $forum, GetHomepageBossBattles $bossBattles): View
     {
+        return $this->infoPage('eula', $rankings, $forum, $bossBattles);
+    }
+
+    public function pricing(GetHomepageRankings $rankings, GetHotForumTopics $forum, GetHomepageBossBattles $bossBattles, GetPublicPricing $pricing, LibraryShortcodeRenderer $shortcodeRenderer): View
+    {
+        $data = $pricing->execute();
+        // Блоки предметов с картинкой и игровым тултипом — тем же рендером, что и [[item:ID]] в новостях.
+        $card = fn (object $item): string => '<div class="pricing-item">[[item:'.$item->id.']]'
+            .'<span class="pricing-item__name">'.e($item->name).'</span>'
+            .'<span class="pricing-item__price"><img src="'.e(asset('img/icon/m_dmd.gif')).'" width="11" height="11" alt=""> '.e(format_money($item->diamonds)).'</span></div>';
+        $cards = $data['categories']->map(fn (object $category): string => '<h3 class="pricing-category"><span>'.e($category->name).'</span></h3>'
+            .'<div class="pricing-items">'.$category->items->map($card)->implode('').'</div>')->implode('');
+
+        return $this->infoPage('pricing', $rankings, $forum, $bossBattles, [
+            'pricing' => $data,
+            'pricingItemsHtml' => $shortcodeRenderer->render($cards),
+            'newsItemTooltipScript' => $shortcodeRenderer->tooltipScript(),
+        ]);
+    }
+
+    public function contacts(GetHomepageRankings $rankings, GetHotForumTopics $forum, GetHomepageBossBattles $bossBattles): View
+    {
+        return $this->infoPage('contacts', $rankings, $forum, $bossBattles);
+    }
+
+    /** @param  array<string, mixed>  $extra */
+    private function infoPage(string $page, GetHomepageRankings $rankings, GetHotForumTopics $forum, GetHomepageBossBattles $bossBattles, array $extra = []): View
+    {
         return view('news::index', [
             ...$this->layoutData($rankings, $forum, $bossBattles),
             'newsPosts' => collect(),
             'selectedNews' => null,
             'isNewsArchive' => false,
-            'isEulaPage' => true,
+            'isEulaPage' => $page === 'eula',
+            'infoPage' => $page,
             'newsItemTooltipScript' => '',
+            ...$extra,
         ]);
     }
 

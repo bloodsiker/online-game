@@ -7,6 +7,7 @@
         $archiveListing = ($isNewsArchive ?? false) && !$selectedNews;
         $archivePage = $archiveListing ? $newsPosts->currentPage() : 1;
         $isEulaPage = $isEulaPage ?? false;
+        $infoPage = $infoPage ?? ($isEulaPage ? 'eula' : null);
     @endphp
     @include('partials.google-tag')
     @if($isEulaPage)
@@ -14,6 +15,18 @@
         'url' => route('eula'),
         'title' => __('homepage.license').' — '.__('homepage.game_name').' (Eternum)',
         'description' => __('homepage.eula_description'),
+    ])
+    @elseif($infoPage === 'pricing')
+    @include('partials.seo', [
+        'url' => route('pricing'),
+        'title' => 'Магазин и цены — '.__('homepage.game_name').' (Eternum)',
+        'description' => 'Цены на бриллианты, премиум-статус и товары премиум-магазина MMORPG «Вечность». Оплата криптовалютой, автоматическое зачисление.',
+    ])
+    @elseif($infoPage === 'contacts')
+    @include('partials.seo', [
+        'url' => route('contacts'),
+        'title' => 'Контакты и поддержка — '.__('homepage.game_name').' (Eternum)',
+        'description' => 'Служба поддержки MMORPG «Вечность»: email, Telegram, форум. Вопросы об игре, аккаунте и оплате.',
     ])
     @elseif($selectedNews)
     {{-- Отдельная новость (/?n=ID) — своя страница со своим canonical. --}}
@@ -62,6 +75,7 @@
 
 
     <style>
+        .b-footer { padding-top: 9px; }
         .homepage-heading { color: #edcb86; font: bold 16px/24px Tahoma, Arial, sans-serif; text-align: center; text-shadow: 1px 1px #281b10; }
         .homepage-heading--reference { position: relative; top: -2px; font: normal 18px/26px Cambria, Georgia, 'Times New Roman', serif; }
         .homepage-forum__content { padding: 6px 9px 9px; background: #211b15; border: 1px solid #554537; }
@@ -275,7 +289,7 @@
                 </li>
 
                 <li class="b-nav-lvl-1__menu-item">
-                    <a class="b-aside__impo-link" href="#homepage-support"
+                    <a class="b-aside__impo-link" href="{{ route('contacts') }}"
                        style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 11px;top: 8px;"><span>{{ __('homepage.contacts') }}</span></a>
                 </li>
 
@@ -437,7 +451,8 @@
                             <div class="b-aside__support-title">
                                 <div class="homepage-heading homepage-heading--reference">{{ __('homepage.support') }}</div>
                             </div>
-                            <x-protected-email :email="config('game.support_email')" class="b-aside__support-link" />
+                            <x-protected-email :email="config('game.support_email')" class="b-aside__support-link" /><br>
+                            <a href="{{ route('contacts') }}" class="b-aside__support-link">Все контакты »</a>
 
                         </div>
                     </div>
@@ -456,6 +471,10 @@
                     <div id="post-list">
                         @if($isEulaPage)
                             @include('news::partials.eula')
+                        @elseif($infoPage === 'pricing')
+                            @include('news::partials.pricing')
+                        @elseif($infoPage === 'contacts')
+                            @include('news::partials.contacts')
                         @endif
                         @if(isset($selectedNews) && $selectedNews)
                             <div class="b-news-item">
@@ -580,7 +599,7 @@
                             @endforeach
                         @endif
 
-                        @if(!$isEulaPage && !$selectedNews && $newsPosts->isEmpty())
+                        @if(!$infoPage && !$selectedNews && $newsPosts->isEmpty())
                             <p>{{ __('homepage.no_news') }}</p>
                         @endif
 
@@ -591,7 +610,7 @@
                 <div class="b-index__footer text-center u-style-bg-gradient">
 
 
-                    <a class="b-link b-link--default" href="{{ ($archiveListing || $isEulaPage) ? route('index') : route('news.index') }}">{{ ($archiveListing || $isEulaPage) ? __('homepage.home') : __('homepage.all_news') }}</a>
+                    <a class="b-link b-link--default" href="{{ ($archiveListing || $infoPage) ? route('index') : route('news.index') }}">{{ ($archiveListing || $infoPage) ? __('homepage.home') : __('homepage.all_news') }}</a>
                 </div>
             </div>
 
@@ -610,8 +629,10 @@
             <footer class="b-footer">
                 <div class="b-footer__content">
                     <a href="{{ route('eula') }}"><b>{{ __('homepage.license') }}</b></a>
+                    · <a href="{{ route('pricing') }}"><b>Магазин и цены</b></a>
+                    · <a href="{{ route('contacts') }}"><b>Контакты</b></a>
                     <a href="https://rpgtop.su/27314" title="Рейтинг Ролевых Ресурсов - RPG TOP" target="_blank" style="margin-left: 8px; vertical-align: middle;"><img src="//img.rpgtop.su/top8015_12.gif" alt="Рейтинг Ролевых Ресурсов - RPG TOP" border="0" width="80" height="15" style="vertical-align: middle;"></a><br>
-                    2024-{{ date('Y') }}
+                    2026
                 </div>
             </footer>
         </main>
@@ -630,10 +651,8 @@
                     </div>
                     <div>
                         <span style="position: relative;left: 33px;top: 3px;">
-                            <a href="#" class="b-aside__support-link">{{ __('homepage.payments_description') }}<br>Portmone / VISA / Mastercard</a>
-                            <img src="{{ asset('main/images/payment/apple-160.webp') }}" width="80" height="80" loading="lazy" decoding="async" alt="apple">
-                            <img src="{{ asset('main/images/payment/google-160.webp') }}" width="80" height="43" loading="lazy" decoding="async" alt="google"><br>
-                            <img src="{{ asset('main/images/payment/visa-160.webp') }}" width="80" height="72" loading="lazy" decoding="async" alt="visa">
+                            <a href="{{ route('pricing') }}" class="b-aside__support-link">{{ __('homepage.payments_description') }}<br>криптовалюту: USDT, BTC, ETH, TON</a><br>
+                            <a href="{{ route('pricing') }}" class="b-aside__support-link">Цены и порядок покупки »</a>
 						</span>
                     </div>
                 </div>

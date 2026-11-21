@@ -22,7 +22,7 @@ let showItemInfo = (obj, evnt, show) => {
     }
     var itemId = obj.dataset.id;
     if (!itemId) itemId = 'AA_' + obj.getAttribute('artifact_id');
-    var itemInfo = itemTooltipTopWindow().gebi('artifact_alt');
+    var itemInfo = itemTooltipTopWindow().document.getElementById('artifact_alt');
 
     if (!itemInfo) return;
 
@@ -64,9 +64,15 @@ let showItemInfo = (obj, evnt, show) => {
     var ex = evnt.clientX+coor.left;
     var ey = evnt.clientY+coor.top;
 
-    if (itemTooltipRootWindow().noIframeAlt) {
-        ex = evnt.clientX + itemTooltipRootWindow().document.body.scrollLeft;
-        ey = evnt.clientY + itemTooltipRootWindow().document.body.scrollTop;
+    var rootWin = itemTooltipRootWindow();
+    // Прокрутка окна: в стандартном режиме прокручивается <html>, а body.scrollTop всегда 0 —
+    // на прокрученной странице (главная, /pricing) тултип уезжал выше видимой области.
+    var rootScrollX = rootWin.pageXOffset || rootWin.document.documentElement.scrollLeft || rootWin.document.body.scrollLeft || 0;
+    var rootScrollY = rootWin.pageYOffset || rootWin.document.documentElement.scrollTop || rootWin.document.body.scrollTop || 0;
+
+    if (rootWin.noIframeAlt) {
+        ex = evnt.clientX + rootScrollX;
+        ey = evnt.clientY + rootScrollY;
     }
 
     if (act1 || act2 || act3) {
@@ -126,7 +132,9 @@ let showItemInfo = (obj, evnt, show) => {
     }
 
     var x = ex + itemInfo.offsetWidth > itemTooltipRootWindow().document.body.clientWidth - 20 ? ex - itemInfo.offsetWidth - 10 : ex + 10;
-    var y = ey + itemInfo.offsetHeight - itemTooltipRootWindow().document.body.scrollTop > itemTooltipRootWindow().document.body.clientHeight - 20 ? ey - itemInfo.offsetHeight - 10 : ey + 10;
+    var y = rootWin.noIframeAlt
+        ? (ey + itemInfo.offsetHeight - rootScrollY > rootWin.innerHeight - 20 ? Math.max(rootScrollY + 7, ey - itemInfo.offsetHeight - 10) : ey + 10)
+        : (ey + itemInfo.offsetHeight - itemTooltipRootWindow().document.body.scrollTop > itemTooltipRootWindow().document.body.clientHeight - 20 ? ey - itemInfo.offsetHeight - 10 : ey + 10);
 
     if (x < 0 ) {
         x = ex - itemInfo.offsetWidth / 2;
@@ -150,7 +158,7 @@ let showItemInfoOld = (obj, evnt, show) => {
     }
     var itemId = obj.dataset.id;
     if (!itemId) itemId = 'AA_' + obj.getAttribute('artifact_id');
-    var itemInfo = itemTooltipTopWindow().gebi('artifact_alt');
+    var itemInfo = itemTooltipTopWindow().document.getElementById('artifact_alt');
 
     if (!itemInfo) return;
 

@@ -10,6 +10,8 @@ Route::post('/news/{news}/comment', [NewsController::class, 'comment'])->name('n
 Route::get('/', [NewsController::class, 'index'])->name('index');
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/eula', [NewsController::class, 'eula'])->name('eula');
+Route::get('/pricing', [NewsController::class, 'pricing'])->name('pricing');
+Route::get('/contacts', [NewsController::class, 'contacts'])->name('contacts');
 Route::post('/homepage/language', [NewsController::class, 'language'])->name('homepage.language');
 Route::post('/homepage/launch-subscription', LaunchSubscriptionController::class)
     ->middleware('throttle:6,1')->name('homepage.launch-subscription');
