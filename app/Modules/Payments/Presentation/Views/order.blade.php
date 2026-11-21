@@ -26,7 +26,7 @@
         <div class="payment-actions">
             {{-- Страницы оплаты не открываются во фрейме игры — оплата в новой вкладке. --}}
             @foreach($providers as $provider)
-                <form method="post" action="{{ route('payments.orders.pay', $order->public_id) }}" target="_blank" data-order-pay @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>@csrf<input type="hidden" name="method" value="{{ $provider }}"><span class="butt1 pointer"><span><button class="butt1" type="submit">{{ $provider === 'monobank' ? __('payments.pay_card') : __('payments.pay_crypto') }}</button></span></span></form>
+                <form method="post" action="{{ route('payments.orders.pay', $order->public_id) }}" target="_blank" data-order-pay @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>@csrf<input type="hidden" name="method" value="{{ $provider }}"><span class="butt1 pointer"><span><button class="butt1" type="submit">{{ $provider === 'monobank' ? __('payments.pay_card') : __('payments.pay_crypto').(count(array_diff($providers, ['monobank'])) > 1 ? ' ('.ucfirst($provider).')' : '') }}</button></span></span></form>
             @endforeach
             <span class="butt1 pointer"><span><button class="butt1" type="button" data-order-check>{{ __('payments.check') }}</button></span></span>
             <form method="post" action="{{ route('payments.orders.cancel', $order->public_id) }}" data-order-cancel @if($order->status !== \App\Modules\Payments\Domain\Enums\PaymentOrderStatus::PENDING) hidden @endif>@csrf<span class="butt1 pointer"><span><button class="butt1" type="submit">{{ __('payments.cancel') }}</button></span></span></form>

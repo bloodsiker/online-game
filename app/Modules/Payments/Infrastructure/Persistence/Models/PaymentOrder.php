@@ -21,7 +21,7 @@ final class PaymentOrder extends Model
 
     public function isOnline(): bool
     {
-        return in_array($this->provider, ['heleket', 'monobank'], true);
+        return in_array($this->provider, ['heleket', 'monobank', 'trybit'], true);
     }
 
     public function user(): BelongsTo

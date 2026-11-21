@@ -124,6 +124,11 @@
 <body leftmargin="0" rightmargin="0" class="regblk">
 
 @include('premium_shop::_nav', ['activeMenu' => 'topup'])
+@if(in_array(request('payment'), ['success', 'fail'], true))
+    <p role="status" style="margin:8px 12px;padding:8px 12px;border:1px solid {{ request('payment') === 'success' ? '#2e7d32' : '#c0392b' }};background:{{ request('payment') === 'success' ? '#e8f5e9' : '#fdecea' }};color:{{ request('payment') === 'success' ? '#1b5e20' : '#8e2a12' }};font-weight:bold;">
+        {{ request('payment') === 'success' ? __('payments.return_success') : __('payments.return_fail') }}
+    </p>
+@endif
 
 <table class="coll w100 h100">
 <tr><td valign="top" height="100%">

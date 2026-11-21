@@ -8,6 +8,7 @@ use App\Modules\Payments\Presentation\Console\SyncNbuRate;
 use App\Modules\Payments\Presentation\Http\HeleketWebhookController;
 use App\Modules\Payments\Presentation\Http\MonobankWebhookController;
 use App\Modules\Payments\Presentation\Http\PaymentOrderController;
+use App\Modules\Payments\Presentation\Http\TrybitWebhookController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,5 +33,8 @@ final class PaymentsServiceProvider extends ServiceProvider
         // Вебхук plata by mono: доверие — по подписи X-Sign (ECDSA).
         Route::post('/payments/monobank/webhook', MonobankWebhookController::class)
             ->middleware('throttle:120,1')->name('payments.monobank.webhook');
+        // POSTBACK Trybit: доверие — по JWT (SECRET KEY) и перепроверке счёта через API.
+        Route::post('/payments/trybit/webhook', TrybitWebhookController::class)
+            ->middleware('throttle:120,1')->name('payments.trybit.webhook');
     }
 }

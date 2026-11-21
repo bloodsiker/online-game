@@ -45,6 +45,15 @@ return [
         'webhook_ips' => array_filter(explode(',', (string) env('HELEKET_WEBHOOK_IPS', '31.133.220.8'))),
     ],
 
+    // Trybit (https://docs.trybit.com/ru) — криптоплатежи. URL уведомлений в кабинете: /payments/trybit/webhook
+    'trybit' => [
+        'api_key' => env('TRYBIT_API_KEY'),
+        'shop_id' => env('TRYBIT_SHOP_ID'),
+        'secret_key' => env('TRYBIT_SECRET_KEY'),
+        'base_url' => env('TRYBIT_BASE_URL', 'https://api.trybit.com'),
+        'lifetime_minutes' => (int) env('TRYBIT_INVOICE_LIFETIME_MINUTES', 60),
+    ],
+
     // plata by mono (https://monobank.ua/api-docs/acquiring). Оплата картой в гривне.
     'monobank' => [
         'token' => env('MONOBANK_TOKEN'),

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Payments\Application\Services\HeleketCheckout;
 use App\Modules\Payments\Application\Services\MonobankCheckout;
 use App\Modules\Payments\Application\Services\PaymentOrderService;
+use App\Modules\Payments\Application\Services\TrybitCheckout;
 use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -46,7 +47,7 @@ final class PaymentOrderController extends Controller
         ])->header('Cache-Control', 'no-store, private');
     }
 
-    public function pay(Request $request, string $publicId, PaymentOrderService $service, HeleketCheckout $heleket, MonobankCheckout $monobank): RedirectResponse
+    public function pay(Request $request, string $publicId, PaymentOrderService $service, HeleketCheckout $heleket, MonobankCheckout $monobank, TrybitCheckout $trybit): RedirectResponse
     {
         $order = $this->ownedOrder($request, $publicId);
         $method = $request->input('method');
@@ -56,6 +57,7 @@ final class PaymentOrderController extends Controller
 
         $url = match ($order->provider) {
             'monobank' => $monobank->paymentUrl($order),
+            'trybit' => $trybit->paymentUrl($order),
             default => $heleket->paymentUrl($order),
         };
 

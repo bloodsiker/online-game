@@ -10,6 +10,7 @@ use App\Modules\Payments\Domain\Enums\PaymentOrderStatus;
 use App\Modules\Payments\Infrastructure\Heleket\HeleketClient;
 use App\Modules\Payments\Infrastructure\Monobank\MonobankClient;
 use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
+use App\Modules\Payments\Infrastructure\Trybit\TrybitClient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +21,7 @@ final class PaymentOrderService
         private readonly PlayerNotificationService $notifications,
         private readonly HeleketClient $heleket,
         private readonly MonobankClient $monobank,
+        private readonly TrybitClient $trybit,
     ) {}
 
     /** Онлайн-провайдер по умолчанию; игрок может сменить его на странице ордера до создания счёта. */
@@ -28,6 +30,7 @@ final class PaymentOrderService
         return match (true) {
             $this->heleket->isConfigured() => 'heleket',
             $this->monobank->isConfigured() => 'monobank',
+            $this->trybit->isConfigured() => 'trybit',
             default => 'manual',
         };
     }
@@ -38,6 +41,7 @@ final class PaymentOrderService
         return array_values(array_filter([
             $this->monobank->isConfigured() ? 'monobank' : null,
             $this->heleket->isConfigured() ? 'heleket' : null,
+            $this->trybit->isConfigured() ? 'trybit' : null,
         ]));
     }
 

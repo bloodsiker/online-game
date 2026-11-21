@@ -61,7 +61,7 @@ final class PaymentOrderTest extends TestCase
         (require database_path('migrations/2026_11_21_000001_add_payment_url_to_payment_orders.php'))->up();
         (require database_path('migrations/2026_11_22_000001_add_charge_amount_to_payment_orders.php'))->up();
         (require database_path('migrations/2026_11_22_000002_create_exchange_rates.php'))->up();
-        config(['services.monobank.token' => null]);
+        config(['services.monobank.token' => null, 'services.trybit.api_key' => null]);
         app(ManagePaymentSettings::class)->execute(['diamond_price' => '6.50', 'minimum_amount' => '500.00', 'is_enabled' => 1]);
     }
 
@@ -516,5 +516,85 @@ final class PaymentOrderTest extends TestCase
             ->assertRedirect(route('admin.payment_orders.index'))->assertSessionHas('message');
         $this->assertEquals(45.0532, DB::table('exchange_rates')->value('rate'));
         $this->get(route('admin.payment_orders.index'))->assertSee('Обновить курс НБУ сейчас');
+    }
+
+    private function enableTrybit(): void
+    {
+        config(['services.trybit' => ['api_key' => 'try-key', 'shop_id' => 'shop-1', 'secret_key' => 'try-secret', 'base_url' => 'https://api.trybit.test', 'lifetime_minutes' => 60]]);
+    }
+
+    /** @param  array<string, mixed>  $claims */
+    private function trybitJwt(array $claims = [], string $secret = 'try-secret'): string
+    {
+        $b64 = fn (string $v): string => rtrim(strtr(base64_encode($v), '+/', '-_'), '=');
+        $head = $b64((string) json_encode(['typ' => 'JWT', 'alg' => 'HS256']));
+        $body = $b64((string) json_encode($claims + ['id' => 1, 'exp' => time() + 300]));
+
+        return $head.'.'.$body.'.'.$b64(hash_hmac('sha256', $head.'.'.$body, $secret, true));
+    }
+
+    /** @param  array<string, mixed>  $info */
+    private function fakeTrybit(array $info): void
+    {
+        Http::fake([
+            'api.trybit.test/v2/invoice/create' => Http::response(['status' => 'success', 'result' => ['uuid' => 'INV-89UX09KA', 'link' => 'https://pay.trybit.com/89UX09KA']]),
+            'api.trybit.test/v2/invoice/merchant/info' => Http::response(['status' => 'success', 'result' => [$info + ['uuid' => 'INV-89UX09KA']]]),
+        ]);
+    }
+
+    public function test_trybit_invoice_created_and_paid_postback_verified_via_api(): void
+    {
+        $this->enableTrybit();
+        $order = $this->createOrder();
+        $this->assertSame('trybit', $order->provider);
+        $this->fakeTrybit(['status' => 'paid', 'invoice_status' => 'success', 'amount_in_fiat' => 500.5, 'fiat_currency' => 'USD', 'order_id' => $order->public_id]);
+
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id))->assertRedirect('https://pay.trybit.com/89UX09KA');
+        Http::assertSent(fn ($request): bool => $request->url() === 'https://api.trybit.test/v2/invoice/create'
+            && $request->header('Authorization')[0] === 'Token try-key' && $request['shop_id'] === 'shop-1'
+            && $request['amount'] === 500.5 && $request['currency'] === 'USD' && $request['order_id'] === $order->public_id);
+
+        $postback = ['status' => 'success', 'invoice_id' => '89UX09KA', 'amount_crypto' => 500.5, 'currency' => 'USDT_TRC20', 'order_id' => $order->public_id];
+        $this->postJson(route('payments.trybit.webhook'), $postback + ['token' => $this->trybitJwt([], 'wrong')])->assertStatus(401);
+        $this->postJson(route('payments.trybit.webhook'), $postback + ['token' => $this->trybitJwt(['exp' => time() - 120])])->assertStatus(401);
+        $this->assertSame(PaymentOrderStatus::PENDING, $order->fresh()->status);
+
+        $this->postJson(route('payments.trybit.webhook'), $postback + ['token' => $this->trybitJwt()])->assertOk();
+        $this->post(route('payments.trybit.webhook'), $postback + ['token' => $this->trybitJwt()])->assertOk(); // form-urlencoded, повтор
+
+        $this->assertSame(PaymentOrderStatus::PAID, $order->fresh()->status);
+        $this->assertEquals(87, DB::table('users')->where('id', 1)->value('diamond'));
+        Http::assertSent(fn ($request): bool => $request->url() === 'https://api.trybit.test/v2/invoice/merchant/info' && $request['uuids'] === ['INV-89UX09KA']);
+    }
+
+    public function test_trybit_postback_does_not_credit_partial_or_mismatched_invoice(): void
+    {
+        $this->enableTrybit();
+        $order = $this->createOrder();
+        $this->fakeTrybit(['status' => 'partially_paid', 'invoice_status' => 'created', 'amount_in_fiat' => 500.5, 'fiat_currency' => 'USD']);
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id));
+
+        $this->postJson(route('payments.trybit.webhook'), ['invoice_id' => '89UX09KA', 'token' => $this->trybitJwt()])->assertOk();
+        $this->assertSame(PaymentOrderStatus::PENDING, $order->fresh()->status);
+        $this->assertSame('partially_paid', $order->fresh()->provider_status);
+        $this->assertEquals(10, DB::table('users')->where('id', 1)->value('diamond'));
+    }
+
+    public function test_trybit_postback_rejects_lower_fiat_amount(): void
+    {
+        $this->enableTrybit();
+        $order = $this->createOrder();
+        $this->fakeTrybit(['status' => 'paid', 'invoice_status' => 'success', 'amount_in_fiat' => 1.0, 'fiat_currency' => 'USD']);
+        $this->loginAs(1)->post(route('payments.orders.pay', $order->public_id));
+
+        $this->postJson(route('payments.trybit.webhook'), ['invoice_id' => '89UX09KA', 'token' => $this->trybitJwt()])->assertOk();
+        $this->assertSame(PaymentOrderStatus::PENDING, $order->fresh()->status);
+        $this->assertSame('amount_mismatch', $order->fresh()->provider_status);
+    }
+
+    public function test_topup_shows_return_messages(): void
+    {
+        $this->loginAs(1)->get(route('premium.topup', ['payment' => 'success']))->assertOk()->assertSee(__('payments.return_success'));
+        $this->loginAs(1)->get(route('premium.topup', ['payment' => 'fail']))->assertOk()->assertSee(__('payments.return_fail'));
     }
 }
