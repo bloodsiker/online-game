@@ -249,6 +249,16 @@
                                 white-space: nowrap;
                             }
                             .char-stat-label { color: #6c5c51; }
+                            /* Знак вопроса с подсказкой — тот же тултип, что в настройках (js/settings-tooltips.js) */
+                            .char-stat-help-wrap { display: inline-block; vertical-align: 1px; margin-left: 3px; }
+                            .char-stat-help {
+                                display: inline-flex; align-items: center; justify-content: center;
+                                width: 13px; height: 13px; padding: 0; border: 1px solid #a47d55; border-radius: 50%;
+                                background: #f8e5a8; color: #8a5a3c; font: bold 9px/1 Tahoma, Arial, sans-serif; cursor: help;
+                            }
+                            .char-stat-help:hover, .char-stat-help:focus-visible { background: #a47d55; color: #fff2ce; outline: none; }
+                            .game-settings-tooltip { position: fixed; z-index: 1010; width: 350px; max-width: calc(100vw - 20px); box-sizing: border-box; padding: 6px 8px 7px; border: 1px solid #e3b360; background: #f8e5a8; color: #955c4a; font: 11px/1.4 Tahoma, Arial, sans-serif; box-shadow: 0 3px 3px 1px rgba(41,13,5,.4); pointer-events: none; overflow-wrap: anywhere; }
+                            .game-settings-tooltip[hidden] { display: none; }
 
                             /* ── строка навыка со своим баром ── */
                             .char-skill-row { padding: 5px 1px 6px; border-bottom: 1px solid #dfd2c1; }
@@ -406,17 +416,21 @@
                                         <a href="/b/use.php?bid=14" style="color:#563e2f;text-decoration:none;">{{ __('Основные характеристики') }}</a>
                                     </div>
                                     <div class="char-card-body">
+                                        {{-- Подсказки соответствуют PlayerStatFormulas / PlayerStatService --}}
                                         @foreach([
-                                            [__('Сила'),       $character->baseStrength,       $character->stats->getStrength()],
-                                            [__('Интуиция'),   $character->baseIntuition,      $character->stats->getInt()],
-                                            [__('Ловкость'),   $character->baseAgility,        $character->stats->getAgility()],
-                                            [__('Интеллект'),  $character->baseIntelligence,   $character->stats->getIntelligence()],
-                                            [__('Мудрость'),   $character->baseWisdom,         $character->stats->getMud()],
-                                            [__('Выносливость'), $character->baseEndurance,    $character->stats->getEndurance()],
-                                        ] as [$label, $base, $total])
+                                            [__('Сила'),       $character->baseStrength,       $character->stats->getStrength(),     __('Каждое очко даёт +1 к броне и увеличивает урон оружия в процентах. Основная характеристика класса «Танк».')],
+                                            [__('Интуиция'),   $character->baseIntuition,      $character->stats->getInt(),          __('Каждое очко даёт +1 к шансу критического удара и увеличивает силу крит. удара. Основная характеристика класса «Крит».')],
+                                            [__('Ловкость'),   $character->baseAgility,        $character->stats->getAgility(),      __('Каждое очко даёт +1 к увороту — шансу избежать удара. Основная характеристика класса «Уворот».')],
+                                            [__('Интеллект'),  $character->baseIntelligence,   $character->stats->getIntelligence(), __('Увеличивает силу заклинаний: урон и лечение магией.')],
+                                            [__('Мудрость'),   $character->baseWisdom,         $character->stats->getMud(),          __('Каждое очко даёт +3 к запасу маны и +1 к сопротивлению магии.')],
+                                            [__('Выносливость'), $character->baseEndurance,    $character->stats->getEndurance(),    __('Каждое очко даёт +3 к максимальному здоровью.')],
+                                        ] as [$label, $base, $total, $hint])
                                             @php $bonus = $total - $base; @endphp
                                             <div class="char-stat-row">
-                                                <span class="char-stat-label">{{ $label }}</span>
+                                                <span class="char-stat-label">
+                                                    {{ $label }}
+                                                    <span class="char-stat-help-wrap" data-setting-hint="{{ $hint }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => $label]) }}">?</button></span>
+                                                </span>
                                                 <span class="char-stat-val">
                                                     {{ $base }}
                                                     @if($bonus > 0)
@@ -450,13 +464,13 @@
                                             <div class="char-bar-fill char-bar-hp" style="width:{{ $hpPct }}%"></div>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">{{ __('Класс') }}</span>
+                                            <span class="char-stat-label">{{ __('Класс') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Определяется соотношением базовых Силы, Ловкости и Интуиции. Классы сильны друг против друга по кругу: Танк побеждает Уворот, Уворот — Крит, Крит — Танка.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Класс')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getDisplayCombatClassLabel() }}
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="{{ __('Урон оружия за раунд — по логике боя: одно оружие (включая дворучное) бьёт одной рукой, два оружия — суммарно') }}">
-                                            <span class="char-stat-label">{{ __('Урон') }}</span>
+                                        <div class="char-stat-row">
+                                            <span class="char-stat-label">{{ __('Урон') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Урон оружия за раунд: одно оружие (включая двуручное) бьёт одной рукой, два оружия — суммарно. Растёт от Силы.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Урон')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ format_money($character->weaponDamage['min']) }} – {{ format_money($character->weaponDamage['max']) }}
                                                 @php $dmgDebuffAvg = (int) round(($character->weaponDamageDebuff['min'] + $character->weaponDamageDebuff['max']) / 2); @endphp
@@ -466,7 +480,7 @@
                                             </span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">{{ __('Броня') }}</span>
+                                            <span class="char-stat-label">{{ __('Броня') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Снижает получаемый физический урон. Каждое следующее очко даёт чуть меньше, чем предыдущее. Растёт от Силы и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Броня')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getArmor() }}
                                                 @if($character->stats->getDebuffReduction('armor') > 0)
@@ -475,7 +489,7 @@
                                             </span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">{{ __('Крит') }}</span>
+                                            <span class="char-stat-label">{{ __('Крит') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Шанс нанести критический удар. Сравнивается с критом противника: чем больше перевес, тем выше шанс. Растёт от Интуиции и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Крит')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getCritical() }}
                                                 @if($character->stats->getDebuffReduction('critical') > 0)
@@ -483,12 +497,12 @@
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="{{ __('Множитель урона при физическом или магическом критическом ударе') }}">
-                                            <span class="char-stat-label">{{ __('Сила крит. удара') }}</span>
+                                        <div class="char-stat-row">
+                                            <span class="char-stat-label">{{ __('Сила крит. удара') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Во сколько процентов от обычного урона наносится физический критический удар. Растёт от Интуиции и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Сила крит. удара')]) }}">?</button></span></span>
                                             <span class="char-stat-val">{{ $character->stats->getCritDamage() }}%</span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">{{ __('Уворот') }}</span>
+                                            <span class="char-stat-label">{{ __('Уворот') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Шанс полностью избежать удара. Сравнивается с уворотом противника: чем больше перевес, тем выше шанс. Растёт от Ловкости и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Уворот')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getDodge() }}
                                                 @if($character->stats->getDebuffReduction('dodge') > 0)
@@ -496,16 +510,16 @@
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="{{ __('Вероятность срабатывания блока при экипированном щите') }}">
-                                            <span class="char-stat-label">{{ __('Шанс блока щитом') }}</span>
+                                        <div class="char-stat-row">
+                                            <span class="char-stat-label">{{ __('Шанс блока щитом') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Вероятность срабатывания блока при экипированном щите.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Шанс блока щитом')]) }}">?</button></span></span>
                                             <span class="char-stat-val">{{ $character->stats->getBlockChance() }}%</span>
                                         </div>
-                                        <div class="char-stat-row" title="{{ __('Фиксированная часть урона, которую блок поглощает и отражает атакующему') }}">
-                                            <span class="char-stat-label">{{ __('Блок щитом (фикс.)') }}</span>
+                                        <div class="char-stat-row">
+                                            <span class="char-stat-label">{{ __('Блок щитом (фикс.)') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Фиксированная часть урона, которую блок поглощает и отражает атакующему.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Блок щитом (фикс.)')]) }}">?</button></span></span>
                                             <span class="char-stat-val">{{ $character->stats->getBlockFlat() }}</span>
                                         </div>
-                                        <div class="char-stat-row" title="{{ __('Процент урона, который блок поглощает и отражает атакующему') }}">
-                                            <span class="char-stat-label">{{ __('Блок щитом') }}</span>
+                                        <div class="char-stat-row">
+                                            <span class="char-stat-label">{{ __('Блок щитом') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Процент урона, который блок поглощает и отражает атакующему.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Блок щитом')]) }}">?</button></span></span>
                                             <span class="char-stat-val">{{ $character->stats->getBlockPercent() }}%</span>
                                         </div>
                                     </div>
@@ -525,7 +539,7 @@
                                             <div class="char-bar-fill char-bar-mp" style="width:{{ $mpPct }}%"></div>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">{{ __('Магическая атака') }}</span>
+                                            <span class="char-stat-label">{{ __('Магическая атака') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Прибавляется к силе заклинаний вместе с Интеллектом: увеличивает урон и лечение магией. Даёт экипировка.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Магическая атака')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getMagicAttack() }}
                                                 @if($character->stats->getDebuffReduction('magic_attack') > 0)
@@ -533,8 +547,8 @@
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="{{ __('Снижает получаемый магический урон') }}">
-                                            <span class="char-stat-label">{{ __('Магическое сопротивление') }}</span>
+                                        <div class="char-stat-row">
+                                            <span class="char-stat-label">{{ __('Магическое сопротивление') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Снижает получаемый магический урон. Каждое следующее очко даёт чуть меньше, чем предыдущее. Растёт от Мудрости и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Магическое сопротивление')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getMagicResistance() }}
                                                 @if($character->stats->getDebuffReduction('magic_resistance') > 0)
@@ -542,8 +556,8 @@
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="{{ __('Вероятность критического срабатывания атакующего заклинания') }}">
-                                            <span class="char-stat-label">{{ __('Магический крит') }}</span>
+                                        <div class="char-stat-row">
+                                            <span class="char-stat-label">{{ __('Магический крит') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Вероятность критического срабатывания атакующего заклинания.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Магический крит')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getMagicCriticalChance() }}%
                                                 @if($character->stats->getDebuffReduction('magic_critical') > 0)
@@ -698,6 +712,7 @@
         });
     }
 </script>
+<script src="{{ asset('js/settings-tooltips.js') }}?v={{ filemtime(public_path('js/settings-tooltips.js')) }}" defer></script>
 
 </body>
 </html>
