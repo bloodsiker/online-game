@@ -634,8 +634,13 @@ readonly class AttackService
             return;
         }
 
+        // Боссов цепная атака не добивает: их смерть обрабатывается только ударом по цели.
+        $canKill = ! $secondMonster->monster->isBoss() && ! $secondMonster->isClanBoss();
         $chainDamage = max(1, (int) round($damage * 0.5));
-        $chainDamage = min($secondMonster->hp_now, $chainDamage);
+        $chainDamage = min(max(0, $secondMonster->hp_now - ($canKill ? 0 : 1)), $chainDamage);
+        if ($chainDamage <= 0) {
+            return;
+        }
         $exp = $this->calculateExperience($player, $secondMonster->monster, $chainDamage, $secondMonster->hp_max, $xpMultiplier);
 
         $this->monsterLootService->damage($secondMonster, $chainDamage, $player->user_id, $battle->id);
@@ -649,6 +654,11 @@ readonly class AttackService
             $chainDamage,
             $exp
         ));
+
+        // Без этого второй моб оставался «живым» с 0 HP: его нельзя атаковать, и бой не завершался.
+        if ($secondMonster->hp_now <= 0) {
+            $this->handleMonsterDeath($player, $secondMonster, $secondTarget, $result);
+        }
     }
 
     /**

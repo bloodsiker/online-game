@@ -8,14 +8,19 @@ use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\AttackService;
+use App\Modules\Battle\Application\Services\DropService;
 use App\Modules\Battle\Application\Services\MonsterLootService;
 use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Clan\Domain\Services\ClanExperienceService;
+use App\Modules\Dungeon\Application\Services\DungeonStageService;
+use App\Modules\Event\Domain\Services\EventActivityProgressService;
+use App\Modules\Event\Domain\Services\WorldEventKillService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Domain\Services\PlayerSkillService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
@@ -75,6 +80,20 @@ class ResidualRaceFixesTest extends TestCase
             $table->integer('lvl')->default(1);
         });
         Schema::table('players', fn (Blueprint $table) => $table->integer('lvl')->default(1));
+        if (! Schema::hasTable('player_active_effects')) {
+            Schema::create('player_active_effects', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedBigInteger('player_id');
+                $table->unsignedBigInteger('effect_id')->nullable();
+                $table->timestamp('expires_at')->nullable();
+            });
+        }
+        if (! Schema::hasTable('monster_active_effects')) {
+            Schema::create('monster_active_effects', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedBigInteger('location_monster_id');
+            });
+        }
         DB::table('battles')->insert(['id' => 1, 'location_id' => 1]);
         DB::table('monster_on_locations')->insert(['id' => 2, 'monster_id' => 1, 'location_id' => 1, 'hp_now' => $hp, 'active' => $active]);
         DB::table('battle_details')->insert([
@@ -87,7 +106,22 @@ class ResidualRaceFixesTest extends TestCase
         $clan->shouldReceive('awardForMonsterExperience');
         $reflection = new ReflectionClass(AttackService::class);
         $service = $reflection->newInstanceWithoutConstructor();
-        foreach (['experienceService' => $xp, 'clanExperienceService' => $clan, 'monsterLootService' => new MonsterLootService] as $property => $value) {
+        $quests = Mockery::mock(QuestProgressService::class);
+        $quests->shouldReceive('progressKillAndCollect')->andReturn([]);
+        // Final-классы: для монстра вне данжа и события оба метода выходят до обращения к зависимостям.
+        $dungeon = (new ReflectionClass(DungeonStageService::class))->newInstanceWithoutConstructor();
+        $worldEvents = (new ReflectionClass(WorldEventKillService::class))->newInstanceWithoutConstructor();
+        $deps = [
+            'experienceService' => $xp,
+            'clanExperienceService' => $clan,
+            'monsterLootService' => new MonsterLootService,
+            'questService' => $quests,
+            'eventActivityProgressService' => Mockery::mock(EventActivityProgressService::class)->shouldIgnoreMissing(),
+            'worldEventKillService' => $worldEvents,
+            'dropService' => Mockery::mock(DropService::class)->shouldIgnoreMissing(),
+            'dungeonStageService' => $dungeon,
+        ];
+        foreach ($deps as $property => $value) {
             $reflection->getProperty($property)->setValue($service, $value);
         }
 
@@ -97,7 +131,7 @@ class ResidualRaceFixesTest extends TestCase
     private function hitChain(AttackService $service): void
     {
         (new ReflectionMethod(AttackService::class, 'applyChainAttack'))->invoke($service,
-            Player::findOrFail(1), MonsterOnLocation::findOrFail(1), Battle::findOrFail(1), 20, 1.0, new AttackResultDTO);
+            Player::findOrFail(1), MonsterOnLocation::findOrFail(1), Battle::findOrFail(1), 20, 'Руна', 1.0, new AttackResultDTO);
     }
 
     public function test_chain_uses_secondary_hp_and_records_only_actual_damage(): void
@@ -105,7 +139,8 @@ class ResidualRaceFixesTest extends TestCase
         $service = $this->chain();
         DB::transaction(fn () => $this->hitChain($service));
         DB::transaction(fn () => $this->hitChain($service));
-        $this->assertDatabaseHas('monster_on_locations', ['id' => 2, 'hp_now' => 0]);
+        $this->assertDatabaseHas('monster_on_locations', ['id' => 2, 'hp_now' => 0, 'active' => 0]);
+        $this->assertDatabaseHas('battle_details', ['battle_id' => 1, 'location_monster_id' => 2, 'status' => 0]);
         $this->assertDatabaseHas('monster_on_locations', ['id' => 1, 'hp_now' => 20]);
         $this->assertDatabaseCount('battle_monster_damage', 1);
         $this->assertDatabaseHas('battle_monster_damage', ['location_monster_id' => 2, 'damage' => 4]);
