@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\Services\Battle;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Боси не підпорядковані загальній percent/count-механіці респауну —
@@ -35,23 +37,37 @@ readonly class BossRespawnService
             return;
         }
 
-        $aliveBossIds = MonsterOnLocation::query()
-            ->where('location_id', $location->id)
-            ->whereIn('monster_id', $bosses->pluck('id'))
-            ->where('active', 1)
-            ->when($dungeonSessionId !== null, fn ($query) => $query->where('dungeon_session_id', $dungeonSessionId))
-            ->when($dungeonSessionId === null, fn ($query) => $query->whereNull('dungeon_session_id'))
-            ->pluck('monster_id')
-            ->mapWithKeys(static fn (mixed $monsterId): array => [(int) $monsterId => true]);
+        // Блокируем строки боссов и перепроверяем respawn_at под блокировкой: два игрока,
+        // одновременно вошедшие на локацию, раньше оба видели «босса нет» и создавали
+        // по копии (две копии на локации → два объявления об убийстве).
+        DB::transaction(function () use ($bosses, $location, $dungeonSessionId): void {
+            $lockedBosses = Monster::query()
+                ->whereIn('id', $bosses->pluck('id'))
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->filter(static fn (Monster $boss): bool => $boss->canRespawnNow());
 
-        foreach ($bosses as $boss) {
-            if ($aliveBossIds->has((int) $boss->id)) {
-                continue;
+            if ($lockedBosses->isEmpty()) {
+                return;
             }
 
-            $this->monsterRepo->createMonsterOnLocation($boss, $location, $dungeonSessionId);
-            $aliveBossIds->put((int) $boss->id, true);
-            $boss->clearRespawn();
-        }
+            $aliveBossIds = MonsterOnLocation::query()
+                ->where('location_id', $location->id)
+                ->whereIn('monster_id', $lockedBosses->pluck('id'))
+                ->where('active', 1)
+                ->when($dungeonSessionId !== null, fn ($query) => $query->where('dungeon_session_id', $dungeonSessionId))
+                ->when($dungeonSessionId === null, fn ($query) => $query->whereNull('dungeon_session_id'))
+                ->pluck('monster_id')
+                ->mapWithKeys(static fn (mixed $monsterId): array => [(int) $monsterId => true]);
+
+            foreach ($lockedBosses as $boss) {
+                if (! $aliveBossIds->has((int) $boss->id)) {
+                    $this->monsterRepo->createMonsterOnLocation($boss, $location, $dungeonSessionId);
+                    $aliveBossIds->put((int) $boss->id, true);
+                }
+                $boss->clearRespawn();
+            }
+        });
     }
 }
