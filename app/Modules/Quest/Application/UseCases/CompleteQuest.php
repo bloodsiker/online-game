@@ -64,7 +64,11 @@ class CompleteQuest
 
                     return true;
                 }
-            } elseif (! $quest->hasStages()) {
+            } elseif ($quest->hasStages()) {
+                // Этапный квест без текущего этапа (этапы добавили после взятия и т.п.) —
+                // раньше сдавался без единой проверки и с полной наградой.
+                throw ValidationException::withMessages(['quest' => 'Состояние квеста изменилось. Откройте задание заново.']);
+            } else {
                 if (! $progress->isAllObjectivesComplete()) {
                     throw ValidationException::withMessages(['quest' => 'Не все задания квеста выполнены.']);
                 }
