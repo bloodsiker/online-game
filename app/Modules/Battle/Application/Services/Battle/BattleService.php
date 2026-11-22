@@ -143,12 +143,15 @@ class BattleService
                         $aggressionToUser = collect();
                         foreach ($monstersToAdd as $agrMonster) {
                             if ($agrMonster instanceof Monster) {
+                                // Агрессивность из настройки локации (location_has_monsters) важнее базовой монстра.
+                                $pivotAggression = $agrMonster->pivot?->aggression;
                                 $monsterOnLocation = $this->monsterOnLocationRepository->createMonsterOnLocation(
                                     $agrMonster,
                                     $location,
                                     $dungeonSessionId,
+                                    $pivotAggression !== null ? (int) $pivotAggression : null,
                                 );
-                                if (mt_rand(0, 100) < $agrMonster->aggression * $aggressionFactor) {
+                                if (mt_rand(0, 100) < $monsterOnLocation->getAggression() * $aggressionFactor) {
                                     $aggressionToUser->add($monsterOnLocation);
                                 }
                             }

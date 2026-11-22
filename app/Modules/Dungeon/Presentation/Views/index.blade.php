@@ -220,7 +220,7 @@
                                     @endif
                                 </td>
                                 <td class="brd2-top brd2-bt" align="center">
-                                    @if (! $page->activeSession)
+                                    @if (! $page->activeSession && (config('game.dungeons_entry_enabled') || auth()->user()?->is_admin))
                                         <form method="POST" action="{{ route('dungeon.enter', $dungeon->id) }}" style="margin:0 0 4px;">
                                             @csrf
                                             <b class="butt1 pointer"><b><input value="{{ __('Войти') }}" type="submit" style="width: 100px;" class="redd"></b></b>

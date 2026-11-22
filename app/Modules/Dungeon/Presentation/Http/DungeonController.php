@@ -38,6 +38,10 @@ class DungeonController extends Controller
 
     public function enter(int $id): RedirectResponse
     {
+        if (! config('game.dungeons_entry_enabled') && ! Auth::user()?->is_admin) {
+            return back()->withErrors(['dungeon' => __('Данжи пока закрыты.')]);
+        }
+
         try {
             $this->enterDungeon->execute(Auth::user(), $id);
 

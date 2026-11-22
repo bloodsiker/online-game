@@ -173,7 +173,7 @@
                             @csrf
                             <b class="butt1 pointer"><b><input value="{{ __('Покинуть') }}" type="submit" style="width: 100px;"></b></b>
                         </form>
-                    @elseif (! $page->activeSession)
+                    @elseif (! $page->activeSession && (config('game.dungeons_entry_enabled') || auth()->user()?->is_admin))
                         <form method="POST" action="{{ route('dungeon.enter', $page->dungeon->id) }}">
                             @csrf
                             <b class="butt1 pointer"><b><input value="{{ __('Войти') }}" type="submit" style="width: 100px;" class="redd"></b></b>
