@@ -10,10 +10,31 @@
         html {
             height: 100%;
             width: 100%;
+            /* Видимая прокрутка: при длинном списке игроков (macOS прячет overlay-скроллбар). */
+            --scrollbar-thumb: #a47d55;
+            --scrollbar-track: #f3d79c;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+        @supports not (scrollbar-color: auto) {
+            html::-webkit-scrollbar {
+                width: 8px;
+            }
+            html::-webkit-scrollbar-thumb {
+                background: var(--scrollbar-thumb);
+                border-radius: 4px;
+            }
+            html::-webkit-scrollbar-track {
+                background: var(--scrollbar-track);
+            }
         }
         body {
             height: 100%;
             margin: 0;
+            /* Место под закреплённую строку «Онлайн:», чтобы она не закрывала нижних игроков. */
+            box-sizing: border-box;
+            padding-bottom: 20px;
             background-color: #ffe4aa;
             color: #000;
             font-family: Tahoma;
@@ -193,7 +214,7 @@
         </td>
         <td width="1%" class="lgb-right" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
     </tr>
-    <tr style="position: absolute; bottom: 0; left: -3px">
+    <tr style="position: fixed; bottom: 0; left: -3px; right: 0; z-index: 2;">
         <td class="tbl-main_separator-v" width="3">
             <img src="{{ asset('img/bg/separator_v.gif') }}" width="3" height="1">
         </td>
