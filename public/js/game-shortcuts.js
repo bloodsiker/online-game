@@ -106,14 +106,30 @@
         event.stopImmediatePropagation();
     }
 
-    function bindDocument(targetDocument, routes, navigate, getActionDocument, openMap, useHotbarSlot) {
+    function bindDocument(targetDocument, routes, navigate, getActionDocument, openMap, useHotbarSlot, handleModalKey) {
         if (!targetDocument || targetDocument.documentElement.dataset.gameShortcutsBound === 'true') {
             return;
         }
 
         targetDocument.documentElement.dataset.gameShortcutsBound = 'true';
+        // Пробел, обработанный модалкой, не должен на keyup «нажать» кнопку под фокусом
+        // (например «Заточить» в кузне) — гасим и его.
+        let swallowSpaceKeyup = false;
         targetDocument.addEventListener('keydown', function (event) {
+            if (handleModalKey && !event.isComposing && handleModalKey(event) === true) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                if (event.key === ' ') swallowSpaceKeyup = true;
+                return;
+            }
             handleShortcut(event, routes, navigate, getActionDocument(), openMap, useHotbarSlot);
+        }, true);
+        targetDocument.addEventListener('keyup', function (event) {
+            if (event.key === ' ' && swallowSpaceKeyup) {
+                swallowSpaceKeyup = false;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
         }, true);
     }
 
@@ -131,7 +147,7 @@
             const bindFrame = function (frame) {
                 const bindFrameDocument = function () {
                     try {
-                        bindDocument(frame.contentDocument, options.routes, options.navigate, getActionDocument, options.openMap, options.useHotbarSlot);
+                        bindDocument(frame.contentDocument, options.routes, options.navigate, getActionDocument, options.openMap, options.useHotbarSlot, options.handleModalKey);
                         frame.contentDocument.querySelectorAll('iframe').forEach(bindFrame);
                     } catch (error) {
                         // Iframe может быть загружен с другого origin.
@@ -143,7 +159,7 @@
             };
 
             try {
-                bindDocument(document, options.routes, options.navigate, getActionDocument, options.openMap, options.useHotbarSlot);
+                bindDocument(document, options.routes, options.navigate, getActionDocument, options.openMap, options.useHotbarSlot, options.handleModalKey);
                 document.querySelectorAll('iframe').forEach(bindFrame);
             } catch (error) {
                 // Основной игровой iframe должен оставаться доступным в текущем origin.

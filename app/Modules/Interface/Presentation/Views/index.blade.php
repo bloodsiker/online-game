@@ -1288,6 +1288,7 @@
 <script>
     GameShortcuts.init({
         frameId: 'game-frame',
+        handleModalKey: function (event) { return handleGameModalKey(event); },
         routes: {
             backpack: '{{ route('backpack') }}',
             magicSkill: '{{ url('/magic-skill?group=magic_skill') }}',
@@ -3032,28 +3033,48 @@
         return document.getElementById('game-message-modal').style.display === 'block';
     }
 
-    // Пробел / Enter — нажать кнопку в фокусе (или первую), Esc — закрыть.
-    document.addEventListener('keydown', function (event) {
-        if (!isGameMessageModalOpen() || event.repeat) return;
-        if (event.key === 'Escape') {
-            event.preventDefault();
-            closeGameMessageModal();
-            return;
-        }
-        if (event.key !== ' ' && event.key !== 'Enter') return;
+    /**
+     * Клавиши для открытых окон (вызывается из GameShortcuts во всех фреймах игры):
+     * Esc — закрыть; пробел / Enter — нажать кнопку окна в фокусе (или первую),
+     * а окно сообщения (showErrorIframe: заточка, ошибки…) просто закрыть.
+     * Возвращает true, если клавиша обработана.
+     */
+    function handleGameModalKey(event) {
+        var key = event.key;
+        if (key !== ' ' && key !== 'Escape' && key !== 'Enter') return false;
 
-        var actions = document.getElementById('game-message-actions');
-        var button = actions.contains(document.activeElement) && document.activeElement.type === 'button'
-            ? document.activeElement
-            : actions.querySelector('input[type="button"]');
-        event.preventDefault();
-        event.stopPropagation();
-        if (button) {
-            button.click();
-        } else {
-            closeGameMessageModal();
+        var target = event.target;
+        var tag = target && target.tagName;
+        var typing = target && (target.isContentEditable || tag === 'TEXTAREA' || tag === 'SELECT'
+            || (tag === 'INPUT' && !/^(button|submit|reset|checkbox|radio|image)$/i.test(target.type || '')));
+        if (typing && key !== 'Escape') return false;
+
+        if (isGameMessageModalOpen()) {
+            if (event.repeat) return true;
+            if (key === 'Escape') {
+                closeGameMessageModal();
+                return true;
+            }
+            var actions = document.getElementById('game-message-actions');
+            var button = actions.contains(document.activeElement) && document.activeElement.type === 'button'
+                ? document.activeElement
+                : actions.querySelector('input[type="button"]');
+            if (button) {
+                button.click();
+            } else {
+                closeGameMessageModal();
+            }
+            return true;
         }
-    }, true);
+
+        var errorFrame = document.getElementById('error');
+        if (errorFrame && errorFrame.style.display === 'block') {
+            if (!event.repeat) hideErrorIframe();
+            return true;
+        }
+
+        return false;
+    }
 
     function openGameConfirmModal(data) {
         openGameMessageModal({
