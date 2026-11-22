@@ -3020,7 +3020,40 @@
         setGameMessageModalActions(data.actions || [{ label: gameTranslate('Закрыть'), onClick: closeGameMessageModal }]);
         document.getElementById('game-message-overlay').style.display = 'block';
         document.getElementById('game-message-modal').style.display = 'block';
+
+        // Фокус на первую кнопку: окно часто открывается кликом внутри фрейма
+        // (лечение у фонтана), и без этого пробел уходил бы во фрейм.
+        var firstButton = document.querySelector('#game-message-actions input[type="button"]');
+        try { window.focus(); } catch (e) {}
+        if (firstButton) firstButton.focus({ preventScroll: true });
     }
+
+    function isGameMessageModalOpen() {
+        return document.getElementById('game-message-modal').style.display === 'block';
+    }
+
+    // Пробел / Enter — нажать кнопку в фокусе (или первую), Esc — закрыть.
+    document.addEventListener('keydown', function (event) {
+        if (!isGameMessageModalOpen() || event.repeat) return;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeGameMessageModal();
+            return;
+        }
+        if (event.key !== ' ' && event.key !== 'Enter') return;
+
+        var actions = document.getElementById('game-message-actions');
+        var button = actions.contains(document.activeElement) && document.activeElement.type === 'button'
+            ? document.activeElement
+            : actions.querySelector('input[type="button"]');
+        event.preventDefault();
+        event.stopPropagation();
+        if (button) {
+            button.click();
+        } else {
+            closeGameMessageModal();
+        }
+    }, true);
 
     function openGameConfirmModal(data) {
         openGameMessageModal({

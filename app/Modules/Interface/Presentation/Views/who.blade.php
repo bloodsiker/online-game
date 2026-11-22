@@ -347,7 +347,9 @@
             if (el.dataset.whoLeaving === '1') return;
             el.dataset.whoLeaving = '1';
             el.dataset.whoLeaveTimer = String(setTimeout(function () {
-                if (el.dataset.whoLeaving === '1') el.remove();
+                if (el.dataset.whoLeaving !== '1') return;
+                el.remove();
+                if (container.id === 'online-users') updateOnlineCount();
             }, leaveGraceMs));
         });
 
@@ -404,14 +406,29 @@
         syncUsers(container, users);
     }
 
-    function renderOnlineUsers(users, count) {
+    var lastOnlineCount = 0;
+
+    // Счётчик считаем по видимым строкам: при переходе игрок на миг выходит из presence,
+    // и счётчик из снимка прыгал 4 → 3 → 4. Ушедший уменьшает его только после задержки.
+    function updateOnlineCount() {
         var container = document.getElementById('online-users');
+        var count = lastOnlineCount;
+        if (container) {
+            var pending = container.querySelectorAll(':scope > [data-who-leaving="1"]').length;
+            count = Math.max(lastOnlineCount, lastOnlineUsers.length) + pending;
+        }
         var globalCount = document.getElementById('global-online-count');
         var bottomCount = document.getElementById('chat_user_count');
-        lastOnlineUsers = users;
-        if (container) syncUsers(container, users, WHO_LEAVE_GRACE_MS);
         if (globalCount) globalCount.textContent = count;
         if (bottomCount) bottomCount.textContent = count;
+    }
+
+    function renderOnlineUsers(users, count) {
+        var container = document.getElementById('online-users');
+        lastOnlineUsers = users;
+        lastOnlineCount = count;
+        if (container) syncUsers(container, users, WHO_LEAVE_GRACE_MS);
+        updateOnlineCount();
     }
 
     window.addEventListener('message', function (e) {
