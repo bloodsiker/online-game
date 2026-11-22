@@ -320,21 +320,50 @@
      * Обновляет список по ключу (id игрока) вместо полной перерисовки innerHTML:
      * строки, которые не изменились, остаются теми же DOM-узлами — список не дёргается
      * при каждом переходе игроков, не сбрасываются наведение и картинки.
+     *
+     * leaveGraceMs: переход игрока = выход + вход в presence-канал. Ушедшую строку
+     * держим на месте это время — если игрок вернулся, она не исчезает и не появляется заново.
      */
-    function syncUsers(container, users) {
+    var WHO_LEAVE_GRACE_MS = 3000;
+
+    function syncUsers(container, users, leaveGraceMs) {
         var existing = {};
         Array.prototype.forEach.call(container.children, function (el) {
             if (el.dataset.whoUid) existing[el.dataset.whoUid] = el;
         });
 
         var tpl = document.createElement('template');
-        var cursor = container.firstElementChild;
         var seen = {};
+        users.forEach(function (u) { seen[String(Number(u.id))] = true; });
+
+        // Ушедшие игроки и строки серверного рендера без ключа — до расстановки,
+        // чтобы строки, ждущие удаления, не сдвигали остальные.
+        Array.prototype.slice.call(container.children).forEach(function (el) {
+            if (el.dataset.whoUid && seen[el.dataset.whoUid]) return;
+            if (!el.dataset.whoUid || !leaveGraceMs) {
+                el.remove();
+                return;
+            }
+            if (el.dataset.whoLeaving === '1') return;
+            el.dataset.whoLeaving = '1';
+            el.dataset.whoLeaveTimer = String(setTimeout(function () {
+                if (el.dataset.whoLeaving === '1') el.remove();
+            }, leaveGraceMs));
+        });
+
+        var cursor = container.firstElementChild;
+        var skipPending = function () {
+            while (cursor && cursor.dataset.whoLeaving === '1') cursor = cursor.nextElementSibling;
+        };
 
         users.forEach(function (u) {
             var uid = String(Number(u.id));
             var el = existing[uid];
-            seen[uid] = true;
+            if (el && el.dataset.whoLeaving === '1') {
+                clearTimeout(Number(el.dataset.whoLeaveTimer));
+                delete el.dataset.whoLeaving;
+                delete el.dataset.whoLeaveTimer;
+            }
             // При переходе игрок заново входит в presence-канал и получает новое время —
             // оставляем время уже показанной строки, чтобы переход не перерисовывал её.
             if (el && el.dataset.whoTime !== undefined) u = Object.assign({}, u, { time: el.dataset.whoTime });
@@ -346,21 +375,20 @@
                 fresh.dataset.whoUid = uid;
                 fresh.dataset.whoHtml = html;
                 fresh.dataset.whoTime = String(u.time || '');
-                if (el) el.replaceWith(fresh);
+                if (el) {
+                    if (el === cursor) cursor = fresh;
+                    el.replaceWith(fresh);
+                }
                 el = fresh;
             }
 
+            skipPending();
             // Узел уже на своём месте — не трогаем DOM вообще.
             if (el === cursor) {
                 cursor = cursor.nextElementSibling;
             } else {
                 container.insertBefore(el, cursor);
             }
-        });
-
-        // Ушедшие игроки и строки серверного рендера без ключа.
-        Array.prototype.slice.call(container.children).forEach(function (el) {
-            if (!el.dataset.whoUid || !seen[el.dataset.whoUid]) el.remove();
         });
     }
 
@@ -381,7 +409,7 @@
         var globalCount = document.getElementById('global-online-count');
         var bottomCount = document.getElementById('chat_user_count');
         lastOnlineUsers = users;
-        if (container) syncUsers(container, users);
+        if (container) syncUsers(container, users, WHO_LEAVE_GRACE_MS);
         if (globalCount) globalCount.textContent = count;
         if (bottomCount) bottomCount.textContent = count;
     }
@@ -405,7 +433,7 @@
             syncUsers(locationContainer, lastLocationUsers);
         }
         if (onlineContainer && lastOnlineUsers.length) {
-            syncUsers(onlineContainer, lastOnlineUsers);
+            syncUsers(onlineContainer, lastOnlineUsers, WHO_LEAVE_GRACE_MS);
         }
     }, 30000);
 
