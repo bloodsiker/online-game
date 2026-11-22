@@ -286,40 +286,82 @@
         return '<img class="chat-mute-icon" src="' + chatMuteIconSrc + '" title="' + escapeHtml(title) + '" alt="{{ __('Молчание') }}" data-mute-expires-at="' + escapeHtml(user.chat_mute_expires_at) + '">';
     }
 
-    function buildUsersHtml(users) {
-        var html = '';
+    function buildUserHtml(u) {
+        var name = String(u.name || '');
+        var safeName = escapeHtml(name);
+        var safeClanName = escapeHtml(u.clan_name || '');
+        var safeTime = escapeHtml(u.time || '');
+        var safeInfoUrl = escapeHtml(u.info_url || '');
+        var privateArgument = escapeHtml(JSON.stringify(name));
+        var offCls = u.is_online ? '' : ' user_offline';
+        var opacity = u.is_online ? '' : 'opacity:.6;';
 
-        users.forEach(function (u) {
-            var name = String(u.name || '');
-            var safeName = escapeHtml(name);
-            var safeClanName = escapeHtml(u.clan_name || '');
-            var safeTime = escapeHtml(u.time || '');
-            var safeInfoUrl = escapeHtml(u.info_url || '');
-            var privateArgument = escapeHtml(JSON.stringify(name));
-            var offCls = u.is_online ? '' : ' user_offline';
-            var opacity = u.is_online ? '' : 'opacity:.6;';
+        var clan = '';
+        if (u.clan_icon && u.clan_id) {
+            clan = '<a href="{{ url('/clan-info') }}/' + parseInt(u.clan_id, 10) + '" title="{{ __('Информация о клане') }}" onclick="whoOpenClanInfo(this.href); return false;">'
+                + '<img class="clan-icon" src="' + escapeHtml(u.clan_icon) + '" title="' + safeClanName + '" alt="' + safeClanName + '" style="' + opacity + '"></a>';
+        } else if (u.clan_name) {
+            clan = '<span class="clan-tag">[' + safeClanName + ']</span>';
+        }
 
-            var clan = '';
-            if (u.clan_icon && u.clan_id) {
-                clan = '<a href="{{ url('/clan-info') }}/' + parseInt(u.clan_id, 10) + '" title="{{ __('Информация о клане') }}" onclick="whoOpenClanInfo(this.href); return false;">'
-                    + '<img class="clan-icon" src="' + escapeHtml(u.clan_icon) + '" title="' + safeClanName + '" alt="' + safeClanName + '" style="' + opacity + '"></a>';
-            } else if (u.clan_name) {
-                clan = '<span class="clan-tag">[' + safeClanName + ']</span>';
-            }
+        return '<div class="info">'
+            +   '<span class="' + offCls.trim() + '">'
+            +     '<span class="time">' + safeTime + '</span> '
+            +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="{{ __('Написать в приват') }}" onclick="sendPrivate(' + privateArgument + ')" alt="Приват"> '
+            +     clan
+            +     '<a href="' + safeInfoUrl + '" target="_blank" class="pnick' + offCls + '" data-uid="' + Number(u.id) + '" data-name="' + safeName + '" title="{{ __('Информация о персонаже') }}"><b>' + safeName + ' [' + Number(u.lvl || 0) + ']</b></a>'
+            +     '<a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo(' + Number(u.id) + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
+            +     chatMuteIcon(u)
+            +   '</span>'
+            + '</div>';
+    }
 
-            html += '<div class="info">'
-                +   '<span class="' + offCls.trim() + '">'
-                +     '<span class="time">' + safeTime + '</span> '
-                +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="{{ __('Написать в приват') }}" onclick="sendPrivate(' + privateArgument + ')" alt="Приват"> '
-                +     clan
-                +     '<a href="' + safeInfoUrl + '" target="_blank" class="pnick' + offCls + '" data-uid="' + Number(u.id) + '" data-name="' + safeName + '" title="{{ __('Информация о персонаже') }}"><b>' + safeName + ' [' + Number(u.lvl || 0) + ']</b></a>'
-                +     '<a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo(' + Number(u.id) + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
-                +     chatMuteIcon(u)
-                +   '</span>'
-                + '</div>';
+    /**
+     * Обновляет список по ключу (id игрока) вместо полной перерисовки innerHTML:
+     * строки, которые не изменились, остаются теми же DOM-узлами — список не дёргается
+     * при каждом переходе игроков, не сбрасываются наведение и картинки.
+     */
+    function syncUsers(container, users) {
+        var existing = {};
+        Array.prototype.forEach.call(container.children, function (el) {
+            if (el.dataset.whoUid) existing[el.dataset.whoUid] = el;
         });
 
-        return html;
+        var tpl = document.createElement('template');
+        var cursor = container.firstElementChild;
+        var seen = {};
+
+        users.forEach(function (u) {
+            var uid = String(Number(u.id));
+            var el = existing[uid];
+            seen[uid] = true;
+            // При переходе игрок заново входит в presence-канал и получает новое время —
+            // оставляем время уже показанной строки, чтобы переход не перерисовывал её.
+            if (el && el.dataset.whoTime !== undefined) u = Object.assign({}, u, { time: el.dataset.whoTime });
+            var html = buildUserHtml(u);
+
+            if (!el || el.dataset.whoHtml !== html) {
+                tpl.innerHTML = html;
+                var fresh = tpl.content.firstElementChild;
+                fresh.dataset.whoUid = uid;
+                fresh.dataset.whoHtml = html;
+                fresh.dataset.whoTime = String(u.time || '');
+                if (el) el.replaceWith(fresh);
+                el = fresh;
+            }
+
+            // Узел уже на своём месте — не трогаем DOM вообще.
+            if (el === cursor) {
+                cursor = cursor.nextElementSibling;
+            } else {
+                container.insertBefore(el, cursor);
+            }
+        });
+
+        // Ушедшие игроки и строки серверного рендера без ключа.
+        Array.prototype.slice.call(container.children).forEach(function (el) {
+            if (!el.dataset.whoUid || !seen[el.dataset.whoUid]) el.remove();
+        });
     }
 
     function renderLocationUsers(users) {
@@ -331,7 +373,7 @@
         var online = users.filter(function (u) { return u.is_online; });
         if (countEl) countEl.textContent = online.length;
 
-        container.innerHTML = buildUsersHtml(users);
+        syncUsers(container, users);
     }
 
     function renderOnlineUsers(users, count) {
@@ -339,7 +381,7 @@
         var globalCount = document.getElementById('global-online-count');
         var bottomCount = document.getElementById('chat_user_count');
         lastOnlineUsers = users;
-        if (container) container.innerHTML = buildUsersHtml(users);
+        if (container) syncUsers(container, users);
         if (globalCount) globalCount.textContent = count;
         if (bottomCount) bottomCount.textContent = count;
     }
@@ -360,10 +402,10 @@
         var onlineContainer = document.getElementById('online-users');
 
         if (locationContainer && lastLocationUsers.length) {
-            locationContainer.innerHTML = buildUsersHtml(lastLocationUsers);
+            syncUsers(locationContainer, lastLocationUsers);
         }
         if (onlineContainer && lastOnlineUsers.length) {
-            onlineContainer.innerHTML = buildUsersHtml(lastOnlineUsers);
+            syncUsers(onlineContainer, lastOnlineUsers);
         }
     }, 30000);
 
