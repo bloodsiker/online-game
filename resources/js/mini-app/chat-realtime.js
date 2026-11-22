@@ -8,7 +8,7 @@ export function connectChat({ key, authUrl, initData, subscriptions, onChange, o
     const port = Number(location.port || (secure ? 443 : 80));
     const client = new Pusher(key, {
         cluster: 'mt1', wsHost: location.hostname, wsPort: port, wssPort: port,
-        forceTLS: secure, enabledTransports: [secure ? 'wss' : 'ws'], enableStats: false,
+        forceTLS: secure, enabledTransports: ['ws', 'wss'], enableStats: false,
         channelAuthorization: {
             customHandler: async (params, callback) => {
                 const controller = new AbortController();

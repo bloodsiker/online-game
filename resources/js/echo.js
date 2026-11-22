@@ -25,5 +25,5 @@ window.Echo = parentEcho() || new Echo({
     wsPort: currentPort,
     wssPort: currentPort,
     forceTLS: secure,
-    enabledTransports: [secure ? 'wss' : 'ws'],
+    enabledTransports: ['ws', 'wss'],
 });
