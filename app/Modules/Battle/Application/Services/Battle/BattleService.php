@@ -65,6 +65,11 @@ class BattleService
         $battle = $this->battleRepository->findActiveBattleOnLocation($location, $dungeonRunId, $dungeonSessionId, forUpdate: true);
         if ($battle instanceof Battle) {
             $battleDetails = BattleDetail::where(['user_id' => $user->id, 'battle_id' => $battle->id])->first();
+            // Тренировка на чучеле — личное дело того, кто начал: вход на локацию не втягивает в неё чужих игроков
+            // и не «возрождает» тех, кто тренировку закончил (у них статус DEATH означает выход, а не смерть).
+            if (($battleDetails === null || $battleDetails->status->isDeath()) && $this->isTrainingDummyBattle($battle)) {
+                return null;
+            }
             if (! $battleDetails instanceof BattleDetail) {
                 $this->battleRepository->createBattleDetails($battle, $user);
 
@@ -185,6 +190,13 @@ class BattleService
     private function handleSurvivalWave(DungeonSession $session, Location $location): void
     {
         $this->advanceSurvivalWave->execute($session, $location);
+    }
+
+    private function isTrainingDummyBattle(Battle $battle): bool
+    {
+        return BattleDetail::where('battle_id', $battle->id)
+            ->whereHas('locationMonster.monster', fn ($query) => $query->where('is_training_dummy', true))
+            ->exists();
     }
 
     public function attackMonster(Location $location, int $id): ?Battle
