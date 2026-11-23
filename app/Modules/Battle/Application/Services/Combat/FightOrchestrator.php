@@ -8,6 +8,7 @@ use App\Modules\Battle\Application\Services\Battle\BattleActionLocks;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossMechanicsService;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
+use App\Modules\Battle\Application\Services\TrainingDummyService;
 use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
@@ -16,6 +17,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRoundHit;
 use App\Modules\Dungeon\Application\Services\ClanBossService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Application\Services\FatigueService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Facades\Auth;
 
@@ -92,6 +94,9 @@ readonly class FightOrchestrator
             abort_if($locationMonster->hp_now <= 0 || ! $locationMonster->active, 409, __('Этот противник уже побеждён.'));
             $monster = $locationMonster->monster;
             $isBoss = $monster->isBoss();
+            $isDummy = $monster->isTrainingDummy();
+            // Спящий игрок не может сражаться (409 → сообщение в бою).
+            app(FatigueService::class)->assertAwake($player);
             $clanBossStage = null;
             if ($locationMonster->isClanBoss()) {
                 try {
@@ -119,6 +124,10 @@ readonly class FightOrchestrator
                 $attackLog = $this->attackService->execute($player, $locationMonster, $action, $battle, $xpMultiplier);
                 $playerLog->merge($attackLog);
 
+                if ($isDummy) {
+                    $playerLog->logSide(app(TrainingDummyService::class)->summaryTable($battle, $player));
+                }
+
                 if ($clanBossStage !== null) {
                     $this->clanBossService->recordHit(
                         $user,
@@ -135,7 +144,7 @@ readonly class FightOrchestrator
                 $this->bossMechanicsService->processMechanics($locationMonster, $battle, $player, $playerLog);
             }
 
-            if ($locationMonster->hp_now > 0 && ! $monsterIsStunned) {
+            if ($locationMonster->hp_now > 0 && ! $monsterIsStunned && ! $isDummy) {
                 if ($isBoss) {
                     $this->monsterAttackService->executeBossAttack($player, $locationMonster, $battle, $monsterLog);
                 } else {

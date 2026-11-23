@@ -12,6 +12,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Application\Services\FatigueService;
 use App\Modules\Player\Domain\Services\PlayerEquipmentLoader;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
@@ -34,6 +35,10 @@ final readonly class PlayerMovementService
     {
         if ($detentionMessage = $this->detentionService->blockLeaving($user)) {
             return MoveResultDTO::blocked($detentionMessage);
+        }
+
+        if ($sleepMessage = app(FatigueService::class)->sleepMessage($user->player)) {
+            return MoveResultDTO::blocked($sleepMessage);
         }
 
         $location = $user->currentLocation;

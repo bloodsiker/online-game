@@ -42,6 +42,11 @@
                                     <input type="checkbox" id="does-not-regenerate-hp" name="does_not_regenerate_hp" value="1" @checked(old('does_not_regenerate_hp', old('is_boss') === '1'))>
                                     <label for="does-not-regenerate-hp">Не восстанавливает HP</label>
                                 </div>
+                                <div class="checkbox-custom checkbox-primary mb-3">
+                                    <input type="hidden" name="is_training_dummy" value="0">
+                                    <input type="checkbox" id="is-training-dummy" name="is_training_dummy" value="1" @checked(old('is_training_dummy'))>
+                                    <label for="is-training-dummy">Тренировочное чучело (не умирает, не бьёт, без наград)</label>
+                                </div>
                             </div>
 
                             <div class="col-lg-4">

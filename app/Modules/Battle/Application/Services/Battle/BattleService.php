@@ -130,7 +130,7 @@ class BattleService
 
                     $maxAddableMonsters = $location->count_monster - $currentMonsterCount;
 
-                    $availableMonsterOnLocations = $location->monsters->reject(fn (Monster $monster) => $monster->isBoss());
+                    $availableMonsterOnLocations = $location->monsters->reject(fn (Monster $monster) => $monster->isBoss() || $monster->isTrainingDummy());
 
                     if ($maxAddableMonsters > 0 && $availableMonsterOnLocations->isNotEmpty()) {
                         $numberToAdd = mt_rand(1, $maxAddableMonsters);

@@ -14,9 +14,15 @@ class MonsterLootService
 {
     public function damage(MonsterOnLocation $monster, int $damage, ?int $userId, ?int $battleId = null, int $minimumHp = 0): void
     {
+        // Тренировочное чучело не умирает: всегда остаётся минимум 1 HP, а вклад в лут не пишем.
+        $isDummy = $monster->monster?->isTrainingDummy() === true;
+        if ($isDummy) {
+            $minimumHp = max($minimumHp, 1);
+        }
+
         $actualDamage = min(max(0, $monster->hp_now - $minimumHp), max(0, $damage));
         $monster->hp_now -= $actualDamage;
-        if ($actualDamage === 0 || $userId === null || $monster->isClanBoss()) {
+        if ($isDummy || $actualDamage === 0 || $userId === null || $monster->isClanBoss()) {
             return;
         }
 

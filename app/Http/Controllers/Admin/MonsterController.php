@@ -412,6 +412,7 @@ class MonsterController extends Controller
         $monster->max_money = (int) $request->input('max_money', 0);
         $monster->is_boss = (bool) $request->input('is_boss', false);
         $monster->does_not_regenerate_hp = $request->boolean('does_not_regenerate_hp', $monster->is_boss);
+        $monster->is_training_dummy = $request->boolean('is_training_dummy');
         $monster->respawn_min_minutes = $request->filled('respawn_min_minutes') ? (int) $request->input('respawn_min_minutes') : null;
         $monster->respawn_max_minutes = $request->filled('respawn_max_minutes') ? (int) $request->input('respawn_max_minutes') : null;
         $monster->respawn_at = $request->filled('respawn_at') ? $request->input('respawn_at') : null;

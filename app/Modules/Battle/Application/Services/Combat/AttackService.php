@@ -11,6 +11,7 @@ use App\Modules\Battle\Application\Services\BattlePhraseBook;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
 use App\Modules\Battle\Application\Services\DropService;
 use App\Modules\Battle\Application\Services\MonsterLootService;
+use App\Modules\Battle\Application\Services\TrainingDummyService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
@@ -90,6 +91,7 @@ readonly class AttackService
             }
 
             if ($hit->isDodge()) {
+                $this->trackDummyMiss($locMonster, $battle, $player);
                 $result->log($this->hitLog($hit, $locMonster, miss: true));
 
                 continue;
@@ -141,6 +143,7 @@ readonly class AttackService
             $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max, $xpMultiplier);
 
             $this->monsterLootService->damage($locMonster, $damage, $player->user_id, $battle->id);
+            $this->trackDummyHit($locMonster, $battle, $player, $damage, $hit->isCritical());
             $this->awardMonsterExperience($player, $locMonster->monster, $exp);
             $this->applyMonsterReflectPassive($locMonster->monster, $player, $damage, $result);
 
@@ -531,6 +534,7 @@ readonly class AttackService
         $result->log(BattleLogTranslator::format('<p><b class="color-red">⚔ %s: двойной удар!</b></p>', $source));
 
         if ($second->isDodge() || $second->getDamage() <= 0) {
+            $this->trackDummyMiss($locMonster, $battle, $player);
             $result->log($this->hitLog($second, $locMonster, miss: true));
 
             return;
@@ -549,6 +553,7 @@ readonly class AttackService
         $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max, $xpMultiplier);
 
         $this->monsterLootService->damage($locMonster, $damage, $player->user_id, $battle->id);
+        $this->trackDummyHit($locMonster, $battle, $player, $damage, $second->isCritical());
         $this->awardMonsterExperience($player, $locMonster->monster, $exp);
         $this->applyMonsterReflectPassive($locMonster->monster, $player, $damage, $result);
 
@@ -925,7 +930,7 @@ readonly class AttackService
     {
         // Юзер потрібен свіжим (нагороди пишуть гроші), але без глобального
         // каскаду player+race — ці сутності в бою вже завантажені.
-        $player->loadMissing(['user' => static fn ($query) => $query->without('player')->with('clanMembership.clan')]);
+        $player->loadMissing(['user' => static fn ($query) => $query->without('player')->with(['clanMembership.clan', 'profile'])]);
 
         $locationMonster->active = 0;
         $locationMonster->save();
@@ -939,7 +944,9 @@ readonly class AttackService
             // 10 вариантов объявления (chat.world_boss_defeated, _2 … _10); ключ сохраняется в сообщении,
             // поэтому все видят один и тот же вариант, каждый на своём языке.
             $variant = $this->random->between(1, 10);
-            $this->chatService->sendWorldBossDefeated(new LocalizedChatMessage($variant === 1 ? 'chat.world_boss_defeated' : 'chat.world_boss_defeated_'.$variant, [
+            // Для героини — женские формы (chat.world_boss_defeated_f, _f_2 … _f_10).
+            $prefix = $player->user->profile?->sex === 'female' ? 'chat.world_boss_defeated_f' : 'chat.world_boss_defeated';
+            $this->chatService->sendWorldBossDefeated(new LocalizedChatMessage($variant === 1 ? $prefix : $prefix.'_'.$variant, [
                 'member' => $this->bossDefeatMemberLabel($player),
                 'boss' => LocalizedChatMessage::contentName($locationMonster->monster),
             ]));
@@ -997,8 +1004,27 @@ readonly class AttackService
         });
     }
 
+    /** Тренировочное чучело: копим статистику удара и усталость игрока. */
+    private function trackDummyHit(MonsterOnLocation $locMonster, Battle $battle, Player $player, int $damage, bool $critical): void
+    {
+        if ($locMonster->monster->isTrainingDummy()) {
+            app(TrainingDummyService::class)->recordHit($battle, $player, $damage, $critical);
+        }
+    }
+
+    private function trackDummyMiss(MonsterOnLocation $locMonster, Battle $battle, Player $player): void
+    {
+        if ($locMonster->monster->isTrainingDummy()) {
+            app(TrainingDummyService::class)->recordMiss($battle, $player);
+        }
+    }
+
     private function calculateExperience(Player $player, Monster $monster, int $damage, int $monsterMaxHp, float $xpMultiplier = 1.0): int
     {
+        if ($monster->isTrainingDummy()) {
+            return 0;
+        }
+
         $takeExp = ($damage * $monster->exp) / $monsterMaxHp;
 
         $levelDifference = $player->lvl - $monster->lvl;
@@ -1013,6 +1039,10 @@ readonly class AttackService
 
     private function awardMonsterExperience(Player $player, Monster $monster, int $experience): void
     {
+        if ($monster->isTrainingDummy()) {
+            return;
+        }
+
         $player->exp += $experience;
         $this->clanExperienceService->awardForMonsterExperience($player, $monster, $experience);
     }

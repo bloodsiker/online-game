@@ -30,7 +30,7 @@ class Monster extends Model implements FightHitInterface
     protected $fillable = [
         'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression',
         'passive_type', 'passive_value', 'exp', 'min_money', 'max_money', 'attack_type', 'attack_style', 'magic_attack',
-        'magic_power_coefficient', 'magic_resistance', 'is_boss', 'does_not_regenerate_hp', 'respawn_min_minutes', 'respawn_max_minutes',
+        'magic_power_coefficient', 'magic_resistance', 'is_boss', 'does_not_regenerate_hp', 'is_training_dummy', 'respawn_min_minutes', 'respawn_max_minutes',
     ];
 
     protected $attributes = [
@@ -40,6 +40,7 @@ class Monster extends Model implements FightHitInterface
     protected $casts = [
         'is_boss' => 'boolean',
         'does_not_regenerate_hp' => 'boolean',
+        'is_training_dummy' => 'boolean',
         'attack_type' => MonsterAttackType::class,
         'attack_style' => MonsterAttackStyle::class,
         'passive_type' => CombatPassiveType::class,
@@ -96,6 +97,12 @@ class Monster extends Model implements FightHitInterface
     public function isBoss(): bool
     {
         return $this->is_boss;
+    }
+
+    /** Тренировочное чучело: не умирает, не бьёт в ответ, не даёт наград. */
+    public function isTrainingDummy(): bool
+    {
+        return (bool) $this->is_training_dummy;
     }
 
     /**

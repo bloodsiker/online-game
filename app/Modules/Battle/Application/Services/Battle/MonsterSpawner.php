@@ -71,7 +71,7 @@ readonly class MonsterSpawner
         }
 
         $toAdd = mt_rand(1, $maxAdd);
-        $available = $location->monsters->reject(fn (Monster $monster) => $monster->isBoss());
+        $available = $location->monsters->reject(fn (Monster $monster) => $monster->isBoss() || $monster->isTrainingDummy());
 
         if ($available->isEmpty()) {
             return collect();

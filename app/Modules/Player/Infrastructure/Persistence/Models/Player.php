@@ -28,6 +28,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $mp_max
  * @property int $reputation_rating
  * @property Carbon|null $last_regen_at
+ * @property int $fatigue
+ * @property Carbon|null $fatigue_updated_at
+ * @property Carbon|null $sleep_until
  * @property int|null $regen_hp_start
  * @property int|null $regen_mp_start
  * @property float $experience_multiplier
@@ -53,6 +56,9 @@ class Player extends Model
     protected $casts = [
         'experience_multiplier' => 'float',
         'last_regen_at' => 'datetime',
+        'fatigue' => 'integer',
+        'fatigue_updated_at' => 'datetime',
+        'sleep_until' => 'datetime',
         'regen_hp_start' => 'integer',
         'regen_mp_start' => 'integer',
         'reputation_rating' => 'integer',

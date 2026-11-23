@@ -337,7 +337,12 @@
                 @endif
             </div>
 
-            <div class="battle-col-log"></div>
+            <div class="battle-col-log">
+                @if(session('message'))
+                    <p class="color-debuff"><b>{{ session('message') }}</b></p>
+                @endif
+                {!! $dummyPanel ?? '' !!}
+            </div>
 
             <aside class="battle-col-participants">
                 @include('battle::partials.side_panel')

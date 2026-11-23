@@ -7,6 +7,7 @@ use App\Modules\Battle\Application\DTOs\FightDTO;
 use App\Modules\Battle\Application\Services\Battle\BattleOrchestrator;
 use App\Modules\Battle\Application\Services\Battle\BattleService;
 use App\Modules\Battle\Application\Services\Combat\FightOrchestrator;
+use App\Modules\Battle\Application\Services\TrainingDummyService;
 use App\Modules\Battle\Application\UseCases\LeaveClanBossBattle;
 use App\Modules\Battle\Application\UseCases\RunAway;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
@@ -14,6 +15,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
 use App\Modules\Dungeon\Application\Services\ClanBossService;
 use App\Modules\Dungeon\Application\UseCases\ExpireDungeonSession;
+use App\Modules\Player\Application\Services\FatigueService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Prison\Application\Services\DetentionService;
@@ -71,7 +73,18 @@ class FightController extends Controller
 
         $hitsLeft = $this->hitsLeftForClanBoss($randomAttackedMonster, $user);
 
-        return view('battle::index', compact('battle', 'randomAttackedMonster', 'lastRound', 'player', 'playerDecorator', 'hitsLeft'));
+        $dummyPanel = $battle->status->isActive() && $this->isTrainingDummyBattle($battle)
+            ? app(TrainingDummyService::class)->summaryTable($battle, $player)
+            : '';
+
+        return view('battle::index', compact('battle', 'randomAttackedMonster', 'lastRound', 'player', 'playerDecorator', 'hitsLeft', 'dummyPanel'));
+    }
+
+    private function isTrainingDummyBattle(Battle $battle): bool
+    {
+        return BattleDetail::where('battle_id', $battle->id)
+            ->whereHas('locationMonster.monster', fn ($query) => $query->where('is_training_dummy', true))
+            ->exists();
     }
 
     public function clanBoss(int $id): View|RedirectResponse
@@ -204,6 +217,9 @@ class FightController extends Controller
             return redirect()->route('location');
         }
         $player = $user->player;
+        if ($sleepMessage = app(FatigueService::class)->sleepMessage($player)) {
+            return redirect()->route('location')->with('message', $sleepMessage);
+        }
 
         //        $battle = $this->battleOrchestrator->handlePlayerAttack($user->currentLocation, $id);
         $battle = $this->battleService->attackMonster($user->currentLocation, $id);
@@ -271,7 +287,11 @@ class FightController extends Controller
             return view('battle::attack', compact('battle', 'round', 'randomAttackedMonster', 'player', 'playerDecorator', 'fightDTO'));
         }
 
-        return view('battle::run_away');
+        $trainingEnded = BattleDetail::where('battle_id', (int) $id)
+            ->whereHas('locationMonster.monster', fn ($query) => $query->where('is_training_dummy', true))
+            ->exists();
+
+        return view('battle::run_away', compact('trainingEnded'));
     }
 
     private function hitsLeftForClanBoss(?BattleDetail $randomAttackedMonster, User $user): ?int

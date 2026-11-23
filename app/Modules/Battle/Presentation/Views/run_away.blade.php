@@ -218,11 +218,17 @@
     <tbody>
     <tr valign="top">
         <td>
+            @if($trainingEnded ?? false)
+                <p>{{ __("Вы закончили тренировку.") }}</p>
+
+                <p><a href="{{ route('location') }}" id="finish-fight">{{ __("Далее") }}</a> »</p>
+            @else
             <p><u><b>{{ __("Раунд N") }} 1</b></u> - <a href="/info/?mid=491625111" target="_blank">Пещерная тварь</a> 1 (50/50)</p>
 
             <p>{{ __("Вы бежали на запад...") }}</p>
 
             <p><a href="{{ route('location') }}" id="finish-fight">{{ __("Сражение завершено... Далее") }}</a> »</p>
+            @endif
 
         </td>
     </tr>

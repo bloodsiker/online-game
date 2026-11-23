@@ -12,6 +12,7 @@ use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
+use App\Modules\Player\Application\Services\FatigueService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -34,15 +35,18 @@ class RunAway
                 || (int) $user->location_id !== (int) $battle->location_id || $player->hp_now <= 0, 409, __('Вы уже покинули этот бой.'));
             abort_if(BattleDetail::where('battle_id', $battleId)->whereHas('locationMonster', fn ($query) => $query->whereNotNull('clan_boss_stage_state_id'))->exists(),
                 409, __('Из боя с клановым боссом можно выйти безопасно через кнопку «Выйти из боя».'));
-            $success = $this->random->between(0, 100) > 50;
-            abort_if($success && $user->prev_location_id === null, 409, __('Некуда отступать.'));
+            app(FatigueService::class)->assertAwake($player);
+            // Тренировочное чучело не бьёт в ответ: «побег» — просто конец тренировки, всегда успешный, без перемещения.
+            $isDummyBattle = BattleDetail::where('battle_id', $battleId)->whereHas('locationMonster.monster', fn ($query) => $query->where('is_training_dummy', true))->exists();
+            $success = $isDummyBattle || $this->random->between(0, 100) > 50;
+            abort_if($success && ! $isDummyBattle && $user->prev_location_id === null, 409, __('Некуда отступать.'));
             $battle->increment('rounds');
             $monster = $success ? null : BattleDetail::with('locationMonster.monster')->where('battle_id', $battleId)
                 ->whereNotNull('location_monster_id')->where('status', BattleDetailStatus::LIFE)->orderBy('id')->first();
             $round = BattleRound::create([
                 'battle_id' => $battleId, 'round_number' => $battle->rounds, 'user_id' => $user->id,
                 'location_monster_id' => $monster?->location_monster_id,
-                'action' => $success ? '<p>Вы бежали на восток...</p>' : '<p>Вы попытались бежать... не получилось.</p>',
+                'action' => $isDummyBattle ? '<p>Вы закончили тренировку.</p>' : ($success ? '<p>Вы бежали на восток...</p>' : '<p>Вы попытались бежать... не получилось.</p>'),
             ]);
             if (! $success) {
                 return (new FightDTO)->setBattle($battle)->setBattleRound($round)->setPlayer($player)->setAttackedMonster($monster);
@@ -52,8 +56,10 @@ class RunAway
             if (! BattleDetail::where('battle_id', $battleId)->whereNotNull('user_id')->where('status', BattleDetailStatus::LIFE)->exists()) {
                 $battle->update(['status' => BattleStatus::FINISH]);
             }
-            [$user->location_id, $user->prev_location_id] = [$user->prev_location_id, $user->location_id];
-            $user->save();
+            if (! $isDummyBattle) {
+                [$user->location_id, $user->prev_location_id] = [$user->prev_location_id, $user->location_id];
+                $user->save();
+            }
 
             return null;
         });
