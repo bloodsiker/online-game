@@ -14,7 +14,7 @@ return [
     'regen_per_minute' => (float) env('FATIGUE_REGEN_PER_MINUTE', 3),
 
     // Сколько минут длится сон от переутомления.
-    'sleep_minutes' => (int) env('FATIGUE_SLEEP_MINUTES', 15),
+    'sleep_minutes' => (int) env('FATIGUE_SLEEP_MINUTES', 5),
 
     // Усталость после пробуждения (если была выше).
     'wake_fatigue' => (int) env('FATIGUE_WAKE', 50),

@@ -26,6 +26,7 @@ class GetGatheringPage
             locationImage: $location->image,
             mapId: (int) ($location->map_id ?? 0),
             mapName: (string) ($location->map?->name ?? 'Без карты'),
+            fieldImage: $location->map?->gathering_field_image,
             enabled: (bool) $state['enabled'],
             message: $state['message'],
             professions: $state['professions'],

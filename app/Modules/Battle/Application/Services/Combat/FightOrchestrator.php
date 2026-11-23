@@ -144,6 +144,11 @@ readonly class FightOrchestrator
                 $this->bossMechanicsService->processMechanics($locationMonster, $battle, $player, $playerLog);
             }
 
+            if ($isDummy && $locationMonster->hp_now > 0 && ! $monsterIsStunned
+                && $this->monsterAttackService->executeTrainingDummy($player, $locationMonster, $monsterLog)) {
+                app(TrainingDummyService::class)->recordDodge($battle, $player);
+            }
+
             if ($locationMonster->hp_now > 0 && ! $monsterIsStunned && ! $isDummy) {
                 if ($isBoss) {
                     $this->monsterAttackService->executeBossAttack($player, $locationMonster, $battle, $monsterLog);

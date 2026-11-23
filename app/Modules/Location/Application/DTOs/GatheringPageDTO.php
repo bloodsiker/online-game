@@ -13,6 +13,7 @@ final readonly class GatheringPageDTO
         public ?string $locationImage,
         public int $mapId,
         public string $mapName,
+        public ?string $fieldImage,
         public bool $enabled,
         public ?string $message,
         public array $professions,

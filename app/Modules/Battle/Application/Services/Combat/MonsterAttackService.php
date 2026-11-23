@@ -41,6 +41,32 @@ readonly class MonsterAttackService
         private CityGuardPerksService $guardPerks = new CityGuardPerksService,
     ) {}
 
+    /**
+     * Тренировочное чучело «атакует» с нулевым уроном: игрок может увернуться (это идёт в статистику),
+     * но здоровье не страдает, эффекты и контратака не применяются. Возвращает true при уклонении.
+     */
+    public function executeTrainingDummy(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): bool
+    {
+        $monster = $locationMonster->monster;
+        $hit = $this->hitCalc->hit($monster, $this->statService->resolve($player), 0, 0);
+
+        if ($hit->isDodge()) {
+            $result->log(BattleLogTranslator::format(
+                $this->phrases()->monsterMiss($monster->attack_style),
+                BattleLogTranslator::contentName($monster),
+            ));
+
+            return true;
+        }
+
+        $result->log(BattleLogTranslator::format(
+            '<p>%s задевает вас, но не причиняет вреда.</p>',
+            BattleLogTranslator::contentName($monster),
+        ));
+
+        return false;
+    }
+
     public function execute(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
     {
         // Защита считается по итоговым статам (шмот/баффы), а не по сырой модели

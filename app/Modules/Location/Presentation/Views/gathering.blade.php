@@ -102,7 +102,7 @@
                 <div class="gathering-notice" id="gathering-notice" role="status" aria-live="polite"></div>
                 <div class="gathering-empty" id="gathering-empty" hidden></div>
                 <div class="gathering-field" id="gathering-field" tabindex="0" aria-label="{{ __("Карта сбора ресурсов. Перемещайте её полосами прокрутки или перетаскиванием мышью.") }}">
-                    <div class="gathering-canvas" id="gathering-canvas" style="background-image:linear-gradient(to bottom,rgba(25,31,20,.08),rgba(25,31,20,.45)),url('{{ asset('prototypes/map.png') }}')">
+                    <div class="gathering-canvas" id="gathering-canvas" style="background-image:linear-gradient(to bottom,rgba(25,31,20,.08),rgba(25,31,20,.45)),url('{{ $page->fieldImage ?: asset('prototypes/map.png') }}')">
                         <div id="gathering-nodes"></div>
                     </div>
                 </div>

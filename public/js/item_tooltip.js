@@ -279,7 +279,7 @@ let renderItemInfo = (id) => {
     content += '<td class="aa-t aa-table-t" align="center" style="vertical-align:middle"><b style="color:' + a.color + '">' + a.title + '</b></td>';
     content += '<td width="14" class="aa-tr"><img src="/img/icon/d.gif" width="14" height="24"><br></td></tr>';
     content += '<tr><td class="aa-l" style="padding:0;"></td><td style="padding:0;">';
-    content += '<table width="275" style=" margin: 3px" border="0" cellspacing="0" cellpadding="0" class="aa-table-t"><tr>';
+    content += '<table width="266" style=" margin: 3px" border="0" cellspacing="0" cellpadding="0" class="aa-table-t"><tr>';
     content += '<td align="center" valign="top" width="72">';
     content += '<table width="72" height="71" cellpadding="0" cellspacing="0" border="0" style="margin:2px; background-image: url(/main/images/user-reward-frame.png), url(' + a.image + '); background-size: 72px 71px, 60px 60px; background-position: 0 0, 6px 5px; background-repeat: no-repeat;"><tr><td valign="bottom">';
     if (a.count && a.count !== undefined) {
@@ -615,11 +615,23 @@ function itemTooltipPosition(tooltip, pointerX, pointerY, rootWindow, scrollX, s
     const originY = isFixed ? 0 : scrollY;
     const padding = 8;
     const gap = 10;
+    const baseWidth = Number(tooltip.dataset.baseWidth || parseFloat(rootWindow.getComputedStyle(tooltip).width) || tooltip.offsetWidth);
 
+    tooltip.dataset.baseWidth = String(baseWidth);
+    tooltip.style.width = baseWidth + 'px';
     tooltip.style.maxWidth = Math.max(120, viewportWidth - padding * 2) + 'px';
     tooltip.style.maxHeight = Math.max(80, viewportHeight - padding * 2) + 'px';
-    tooltip.style.overflowX = 'auto';
+    tooltip.style.overflowX = 'hidden';
     tooltip.style.overflowY = 'auto';
+
+    // A vertical scrollbar takes horizontal space and can clip the tooltip's
+    // right frame cell. Reserve that space outside the 300px item frame.
+    if (tooltip.scrollHeight > tooltip.clientHeight) {
+        const scrollbarWidth = tooltip.offsetWidth - tooltip.clientWidth;
+        if (scrollbarWidth > 0) {
+            tooltip.style.width = (baseWidth + scrollbarWidth) + 'px';
+        }
+    }
 
     const width = tooltip.offsetWidth;
     const height = tooltip.offsetHeight;

@@ -65,4 +65,22 @@ class TrainingDummyTest extends TestCase
         $this->assertStringContainsString('>50%</td>', $line);    // крит
         $this->assertStringContainsString('<b>3/100</b>', $line);  // усталость: по 1 за каждое действие
     }
+
+    public function test_summary_counts_player_dodges(): void
+    {
+        Cache::flush();
+        $service = new TrainingDummyService(new FatigueService);
+        $battle = new Battle;
+        $battle->id = 78;
+        $player = new Player;
+        $player->id = 6;
+
+        $service->recordHit($battle, $player, 10, false);
+        $service->recordDodge($battle, $player);
+        $service->recordDodge($battle, $player);
+        $line = $service->summaryTable($battle, $player);
+
+        $this->assertStringContainsString('Увороты', $line);
+        $this->assertMatchesRegularExpression('/Увороты<\/td><td[^>]*>2<\/td>/u', $line);
+    }
 }

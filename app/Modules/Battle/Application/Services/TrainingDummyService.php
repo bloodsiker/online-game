@@ -44,6 +44,14 @@ final class TrainingDummyService
         $this->fallAsleepIfTired($player);
     }
 
+    /** Персонаж увернулся от «атаки» чучела (чучело бьёт с нулевым уроном). */
+    public function recordDodge(Battle $battle, Player $player): void
+    {
+        $stats = $this->stats($battle, $player);
+        $stats['dodges']++;
+        $this->save($battle, $player, $stats);
+    }
+
     private function fallAsleepIfTired(Player $player): void
     {
         if ($this->fatigue->add($player, self::SOURCE) && $player->sleep_until !== null) {
@@ -70,6 +78,7 @@ final class TrainingDummyService
             [__('Мин / макс'), ($stats['min'] ?? 0).' / '.$stats['max']],
             [__('Криты'), $this->number($critPercent).'%'],
             [__('Промахи'), (string) $stats['misses']],
+            [__('Увороты'), (string) $stats['dodges']],
         ];
 
         $cells = '';
@@ -107,13 +116,13 @@ final class TrainingDummyService
             .'</tbody></table>';
     }
 
-    /** @return array{hits:int,misses:int,crits:int,total:int,max:int,min:?int} */
+    /** @return array{hits:int,misses:int,crits:int,dodges:int,total:int,max:int,min:?int} */
     private function stats(Battle $battle, Player $player): array
     {
-        return Cache::get($this->key($battle, $player)) ?? ['hits' => 0, 'misses' => 0, 'crits' => 0, 'total' => 0, 'max' => 0, 'min' => null];
+        return (Cache::get($this->key($battle, $player)) ?? []) + ['hits' => 0, 'misses' => 0, 'crits' => 0, 'dodges' => 0, 'total' => 0, 'max' => 0, 'min' => null];
     }
 
-    /** @param  array{hits:int,misses:int,crits:int,total:int,max:int,min:?int}  $stats */
+    /** @param  array{hits:int,misses:int,crits:int,dodges:int,total:int,max:int,min:?int}  $stats */
     private function save(Battle $battle, Player $player, array $stats): void
     {
         Cache::put($this->key($battle, $player), $stats, self::TTL_SECONDS);
