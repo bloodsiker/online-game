@@ -129,6 +129,9 @@
         @if(!($gameSettings['show_item_tooltips'] ?? true))
         #hotbar .slot[data-entity-type="item"] .tooltip { display: none; }
         @endif
+        .hotbar-picker-dialog { padding: 0; border: 0; background: transparent; overflow: visible; max-width: 96vw; }
+        .hotbar-picker-dialog::backdrop { background: rgba(0, 0, 0, .45); overflow: hidden; overscroll-behavior: contain; }
+        .hotbar-picker-dialog iframe { display: block; width: min(880px, 96vw); height: min(600px, 90vh); border: 0; background: transparent; }
 
         .map-toggle-btn {
             position: absolute;
@@ -306,6 +309,10 @@
                             </div>
                         </div>
 
+                        <dialog id="hotbar-picker" class="hotbar-picker-dialog" closedby="any" aria-label="{{ __('Добавление') }}">
+                            <iframe id="hotbar-picker-frame" title="{{ __('Добавление') }}"></iframe>
+                        </dialog>
+
                         <script>
                             const hotbar = document.getElementById('hotbar');
                             const hotbarSlots = document.getElementById('hotbar-slots');
@@ -336,6 +343,7 @@
                                         ${icon}
                                         <span class="keybind">${slot.slot === 10 ? '0' : (slot.slot < 10 ? slot.slot : '')}</span>
                                         <div class="cooldown"></div>
+                                        ${empty ? '' : `<button type="button" class="slot-clear" data-slot="${slot.slot}" title="${gameTranslate('Убрать из панели')}" aria-label="${gameTranslate('Убрать из панели')}"></button>`}
                                         <div class="tooltip">
                                             <div class="name">${name}</div>
                                             ${countLine}
@@ -362,12 +370,61 @@
                             }
 
                             function bindSlotEvents() {
+                                hotbarSlots.querySelectorAll('.slot-clear').forEach(btn => {
+                                    btn.addEventListener('click', (event) => {
+                                        event.stopPropagation();
+                                        clearHotbarSlot(parseInt(btn.dataset.slot));
+                                    });
+                                });
                                 hotbarSlots.querySelectorAll('.slot').forEach(slot => {
                                     slot.addEventListener('click', () => {
-                                        useAbility(parseInt(slot.getAttribute('data-slot')));
+                                        const slotNumber = parseInt(slot.getAttribute('data-slot'));
+                                        if (slot.classList.contains('empty')) {
+                                            openHotbarPicker(slotNumber);
+                                            return;
+                                        }
+                                        useAbility(slotNumber);
                                     });
                                 });
                             }
+
+                            function clearHotbarSlot(slotNumber) {
+                                fetch(@json(url('/hotbar/clear')) + '/' + slotNumber, {
+                                    method: 'DELETE',
+                                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': hotbarCsrf },
+                                })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if (data.status === 'success') refreshHotbar();
+                                        else showHotbarMessage(data.message);
+                                    })
+                                    .catch(() => showHotbarMessage(gameTranslate('Не удалось убрать предмет.')));
+                            }
+
+                            const hotbarPicker = document.getElementById('hotbar-picker');
+                            const hotbarPickerFrame = document.getElementById('hotbar-picker-frame');
+
+                            function openHotbarPicker(slotNumber) {
+                                hotbarPickerFrame.src = @json(route('slots')) + '?group=slots&pick=' + slotNumber;
+                                hotbarPicker.showModal();
+                                // Модалка лежит в top layer — выше любого z-index, поэтому тултип предметов
+                                // переносим внутрь неё, иначе он остаётся под окном.
+                                const tip = document.getElementById('artifact_alt');
+                                if (tip) hotbarPicker.appendChild(tip);
+                            }
+
+                            function closeHotbarPicker() {
+                                if (hotbarPicker.open) hotbarPicker.close();
+                            }
+
+                            hotbarPicker.addEventListener('close', () => {
+                                hotbarPickerFrame.removeAttribute('src');
+                                const tip = document.getElementById('artifact_alt');
+                                if (tip) {
+                                    tip.style.display = 'none';
+                                    document.body.appendChild(tip);
+                                }
+                            });
 
                             const hotbarCsrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                             let hotbarCooldownTimers = {};

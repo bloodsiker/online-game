@@ -726,6 +726,7 @@
 
 <script>
     const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const PICK_SLOT = {{ (int) $pickSlot }};
     let activeSlotNumber = null;
 
     function moveHotbarSkillTooltip(event) {
@@ -779,10 +780,22 @@
         const popup = document.getElementById('artifactsPopup');
         if (popup) popup.style.display = 'none';
         activeSlotNumber = null;
+        if (PICK_SLOT > 0) window.parent?.closeHotbarPicker?.();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         const popup = document.getElementById('artifactsPopup');
+
+        // Режим модалки панели быстрого доступа: только попап выбора для нужного слота
+        if (PICK_SLOT > 0 && popup) {
+            Array.from(document.body.children).forEach(el => {
+                if (el !== popup && el.tagName !== 'SCRIPT') el.style.display = 'none';
+            });
+            document.body.appendChild(popup);
+            document.body.style.background = 'transparent';
+            activeSlotNumber = PICK_SLOT;
+            popup.style.display = 'block';
+        }
 
         // Открытие попапа при клике на пустой слот
         document.getElementById('hotbar-slot-list').addEventListener('click', (e) => {
@@ -848,8 +861,8 @@
                       style="position:absolute;top:0;right:0;background:#8b0000;color:#fff;font-size:10px;cursor:pointer;padding:1px 3px;line-height:1;z-index:10;">×</span>
                 <div style="position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#fff;background:rgba(0,0,0,.5);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${slotNumber}</div>
             `;
-            hideArtifacts();
             window.parent?.refreshHotbar?.();
+            hideArtifacts();
         });
     }
 

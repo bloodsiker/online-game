@@ -28,6 +28,7 @@ class SlotsController extends Controller
         $user = Auth::user();
         $player = $user->player;
         $group = $request->get('group', 'slots');
+        $pickSlot = max(0, (int) $request->query('pick', 0));
 
         $player->loadMissing('magicSkills.skillEffects');
 
@@ -50,6 +51,7 @@ class SlotsController extends Controller
             'user',
             'player',
             'group',
+            'pickSlot',
             'passiveSkills',
             'activeSkills',
             'hotbarData',
