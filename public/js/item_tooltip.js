@@ -70,7 +70,8 @@ let showItemInfo = (obj, evnt, show) => {
     var rootScrollX = rootWin.pageXOffset || rootWin.document.documentElement.scrollLeft || rootWin.document.body.scrollLeft || 0;
     var rootScrollY = rootWin.pageYOffset || rootWin.document.documentElement.scrollTop || rootWin.document.body.scrollTop || 0;
 
-    if (rootWin.noIframeAlt) {
+    const tooltipIsFixed = rootWin.getComputedStyle(itemInfo).position === 'fixed';
+    if (rootWin.noIframeAlt && !tooltipIsFixed) {
         ex = evnt.clientX + rootScrollX;
         ey = evnt.clientY + rootScrollY;
     }
@@ -131,23 +132,7 @@ let showItemInfo = (obj, evnt, show) => {
         }
     }
 
-    var x = ex + itemInfo.offsetWidth > itemTooltipRootWindow().document.body.clientWidth - 20 ? ex - itemInfo.offsetWidth - 10 : ex + 10;
-    var y = rootWin.noIframeAlt
-        ? (ey + itemInfo.offsetHeight - rootScrollY > rootWin.innerHeight - 20 ? Math.max(rootScrollY + 7, ey - itemInfo.offsetHeight - 10) : ey + 10)
-        : (ey + itemInfo.offsetHeight - itemTooltipRootWindow().document.body.scrollTop > itemTooltipRootWindow().document.body.clientHeight - 20 ? ey - itemInfo.offsetHeight - 10 : ey + 10);
-
-    if (x < 0 ) {
-        x = ex - itemInfo.offsetWidth / 2;
-    }
-    if (x < 7 ) {
-        x = 7;
-    }
-    if (x > itemTooltipRootWindow().document.body.clientWidth - itemInfo.offsetWidth - 20) {
-        x = itemTooltipRootWindow().document.body.clientWidth - itemInfo.offsetWidth - 20;
-    }
-
-    itemInfo.style.left = x + 'px';
-    itemInfo.style.top  = y + 'px';
+    itemTooltipPosition(itemInfo, ex, ey, rootWin, rootScrollX, rootScrollY);
 
 }
 
@@ -620,6 +605,36 @@ let itemTooltipIframeShift = () => {
         top: top,
         left: left
     };
+}
+
+function itemTooltipPosition(tooltip, pointerX, pointerY, rootWindow, scrollX, scrollY) {
+    const viewportWidth = rootWindow.innerWidth || rootWindow.document.documentElement.clientWidth;
+    const viewportHeight = rootWindow.innerHeight || rootWindow.document.documentElement.clientHeight;
+    const isFixed = rootWindow.getComputedStyle(tooltip).position === 'fixed';
+    const originX = isFixed ? 0 : scrollX;
+    const originY = isFixed ? 0 : scrollY;
+    const padding = 8;
+    const gap = 10;
+
+    tooltip.style.maxWidth = Math.max(120, viewportWidth - padding * 2) + 'px';
+    tooltip.style.maxHeight = Math.max(80, viewportHeight - padding * 2) + 'px';
+    tooltip.style.overflowX = 'auto';
+    tooltip.style.overflowY = 'auto';
+
+    const width = tooltip.offsetWidth;
+    const height = tooltip.offsetHeight;
+    const minX = originX + padding;
+    const minY = originY + padding;
+    const maxX = originX + viewportWidth - width - padding;
+    const maxY = originY + viewportHeight - height - padding;
+
+    let x = pointerX + gap;
+    if (x > maxX) x = pointerX - width - gap;
+    let y = pointerY + gap;
+    if (y > maxY) y = pointerY - height - gap;
+
+    tooltip.style.left = Math.max(minX, Math.min(x, maxX)) + 'px';
+    tooltip.style.top = Math.max(minY, Math.min(y, maxY)) + 'px';
 }
 function itemTooltipTranslate(text) {
     return typeof window.gameTranslate === 'function' ? window.gameTranslate(text) : text;

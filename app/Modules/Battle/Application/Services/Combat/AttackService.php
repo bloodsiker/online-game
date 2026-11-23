@@ -1028,7 +1028,8 @@ readonly class AttackService
         $takeExp = ($damage * $monster->exp) / $monsterMaxHp;
 
         $levelDifference = $player->lvl - $monster->lvl;
-        $levelMultiplier = min(2.0, max(0.01, 1 - 0.05 * $levelDifference));
+        // Бонус за монстров выше уровня ограничен (было ×2): иначе игроки качаются на монстрах на 10–20 уровней выше.
+        $levelMultiplier = min(1.25, max(0.01, 1 - 0.05 * $levelDifference));
 
         // «Охотничий эликсир»: +% опыта только с монстров.
         $hunterBonus = app(EffectBonusService::class)->percent((int) $player->id, EffectBonusService::MONSTER_EXPERIENCE);

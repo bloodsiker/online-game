@@ -126,7 +126,7 @@ class SimulateClanExperience extends Command
         $monsterLevel = max(1, $playerLevel + $levelOffset);
         $monsterExperience = MonsterStatFormulas::expReward($monsterLevel, 1.0);
         $levelDifference = $playerLevel - $monsterLevel;
-        $levelMultiplier = min(2.0, max(0.01, 1 - 0.05 * $levelDifference));
+        $levelMultiplier = min(1.25, max(0.01, 1 - 0.05 * $levelDifference));
         $baseExperience = (int) round(max(1, $monsterExperience * $levelMultiplier));
 
         return max(1, (int) round($baseExperience * $experienceMultiplier));

@@ -174,7 +174,7 @@ class MessageRenderer
             $url = route('info.user', ['id' => $user->id]);
 
             return '<a href="'.$url.'" class="chat-user" title="Информация о персонаже"'
-                .' onclick="window.open(\''.$url.'\', \'\', \'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no\'); return false;">'
+                .' onclick="window.open(\''.$url.'\', \'\', \'width=930,height=800,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no\'); return false;">'
                 .'<b>'.e($user->name).'</b></a>';
         }, $rendered);
 
