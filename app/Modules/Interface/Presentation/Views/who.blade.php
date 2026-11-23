@@ -50,6 +50,11 @@
             margin-bottom: 2px;
             color: #554848 !important;
         }
+        /* Отступ под фиксированной нижней строкой, чтобы она не закрывала последнего игрока. */
+        #online-users {
+            box-sizing: border-box;
+            padding-bottom: 24px;
+        }
         .rep-divider {
             position: relative;
             width: 88%;
