@@ -280,6 +280,7 @@
                 </div>
             @endif
 
+            <div id="location-dynamic" data-battle="{{ $page->hasBattle ? 1 : 0 }}" data-moves="{{ json_encode($page->hasBattle ? [] : array_values(array_keys(array_filter($page->moves, static fn ($move): bool => $move->available)))) }}">
             @if($page->hasBattle)
                 <div class="battle-description">
                     <p><span class="color-red"><b>{{ __("ВНИМАНИЕ!") }}</b></span> <b>{{ __("Вы атакованы!") }}</b></p>
@@ -414,6 +415,7 @@
                 </div>
             @endif
             </div>
+            </div>
         </td>
     </tr>
     </tbody>
@@ -464,27 +466,30 @@
         });
     }
 
-    document.querySelectorAll('.shop').forEach(function(button) {
-        button.addEventListener('click', function(event) {
-            const healUrl = this.getAttribute('data-heal-url');
+    // Делегирование: блок #location-dynamic подменяется целиком, когда босс приходит или уходит.
+    document.addEventListener('click', function(event) {
+        const shop = event.target.closest('.shop');
+        if (shop) {
+            const healUrl = shop.getAttribute('data-heal-url');
             if (healUrl) {
                 event.preventDefault();
-                healAtFountain(healUrl, this);
+                healAtFountain(healUrl, shop);
                 return;
             }
 
-            const href = this.getAttribute('data-href');
+            const href = shop.getAttribute('data-href');
             if (href) {
                 window.location.href = href;
             }
-        });
-    });
 
-    document.querySelectorAll('[data-heal-url].actions').forEach(function(action) {
-        action.addEventListener('click', function(event) {
+            return;
+        }
+
+        const action = event.target.closest('[data-heal-url].actions');
+        if (action) {
             event.preventDefault();
-            healAtFountain(this.getAttribute('data-heal-url'), this);
-        });
+            healAtFountain(action.getAttribute('data-heal-url'), action);
+        }
     });
 
     async function healAtFountain(url, trigger) {
@@ -524,7 +529,7 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    function equalizeShopButtons() {
         const buttons = document.querySelectorAll('.butt1.shop');
         const actions = document.querySelectorAll('.actions');
         let maxWidth = 0;
@@ -541,7 +546,9 @@
         buttons.forEach(function(button) {
             button.style.width = (maxWidth + 1) + 'px';
         });
-    });
+    }
+
+    document.addEventListener('DOMContentLoaded', equalizeShopButtons);
 
     let hp = { current: parseInt('{{ $page->playerFrame->hpCurrent }}'), max: parseInt('{{ $page->playerFrame->hpMax }}') };
     let mp = { current: parseInt('{{ $page->playerFrame->mpCurrent }}'), max: parseInt('{{ $page->playerFrame->mpMax }}') };
@@ -561,20 +568,10 @@
     @endif
 </script>
 <script>
-    // Босс пришёл на эту локацию или ушёл с неё: показываем сообщение и перезагружаем локацию.
-    // При перезагрузке сервер заново проверяет агрессивность — босс нападает, если проходит по шансу.
+    // Босс пришёл на эту локацию или ушёл с неё: показываем сообщение и без перезагрузки подменяем блок локации.
+    // Запрос страницы заново проверяет агрессивность на сервере — босс нападает, если проходит по шансу.
     (() => {
         const notice = document.getElementById('boss-notice');
-        const storageKey = 'boss_notice';
-        const read = () => { try { return JSON.parse(sessionStorage.getItem(storageKey) || 'null'); } catch (e) { return null; } };
-
-        const pending = read();
-        try { sessionStorage.removeItem(storageKey); } catch (e) {}
-        if (notice && pending && pending.text && Date.now() - pending.at < 30000) {
-            notice.textContent = pending.text;
-            notice.style.display = 'block';
-        }
-
         const from = { north: 'с севера', south: 'с юга', east: 'с востока', west: 'с запада', up: 'сверху', down: 'снизу' };
         const to = { north: 'на север', south: 'на юг', east: 'на восток', west: 'на запад', up: 'наверх', down: 'вниз' };
 
@@ -592,13 +589,47 @@
                 : gameTranslate(':name уходит', { name: name });
         }
 
+        let loading = false;
+        let again = false;
+
+        async function refreshLocation() {
+            if (loading) { again = true; return; }
+            loading = true;
+            try {
+                const response = await fetch(window.location.href, { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'text/html' } });
+                const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+                const fresh = doc.getElementById('location-dynamic');
+                const current = document.getElementById('location-dynamic');
+                if (!response.ok || !fresh || !current) { window.location.reload(); return; }
+
+                const wasBattle = current.dataset.battle === '1';
+                current.innerHTML = fresh.innerHTML;
+                current.dataset.battle = fresh.dataset.battle;
+                current.dataset.moves = fresh.dataset.moves;
+                window.availableMoves = JSON.parse(fresh.dataset.moves || '[]');
+                document.body.dataset.soundBattle = doc.body.dataset.soundBattle || '';
+                equalizeShopButtons();
+                if (!wasBattle && fresh.dataset.battle === '1') {
+                    try { (window.top.GameAudio || window.GameAudio)?.event('battle'); } catch (e) {}
+                }
+            } catch (e) {
+                window.location.reload();
+            } finally {
+                loading = false;
+                if (again) { again = false; refreshLocation(); }
+            }
+        }
+
         // Vite-модуль с Echo выполняется после инлайновых скриптов — подписываемся на DOMContentLoaded.
         document.addEventListener('DOMContentLoaded', () => {
             if (!window.Echo) return;
             const channelName = 'location.{{ $page->locationId }}';
             window.Echo.channel(channelName).listen('.boss.moved', event => {
-                try { sessionStorage.setItem(storageKey, JSON.stringify({ text: message(event), at: Date.now() })); } catch (e) {}
-                window.location.reload();
+                if (notice) {
+                    notice.textContent = message(event);
+                    notice.style.display = 'block';
+                }
+                refreshLocation();
             });
             window.addEventListener('pagehide', () => { if (window.Echo) window.Echo.leave(channelName); });
         });
