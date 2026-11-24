@@ -51,6 +51,9 @@ class Player extends Model
 
     public const FULL_REGEN_TIME = 900;
 
+    /** Секунд на полное восстановление маны (HP — FULL_REGEN_TIME). */
+    public const MP_FULL_REGEN_TIME = 300;
+
     private bool $savingRegenerationProgress = false;
 
     protected $casts = [
@@ -320,8 +323,9 @@ class Player extends Model
 
         $elapsedSeconds = max(0, (int) $this->last_regen_at->diffInSeconds($now, false));
         $regenerationSeconds = min(self::FULL_REGEN_TIME, $elapsedSeconds);
+        $mpRegenerationSeconds = min(self::MP_FULL_REGEN_TIME, $elapsedSeconds);
         $hpNow = min($hpMax, (int) $this->regen_hp_start + (int) floor($hpMax * $regenerationSeconds / self::FULL_REGEN_TIME));
-        $mpNow = min($mpMax, (int) $this->regen_mp_start + (int) floor($mpMax * $regenerationSeconds / self::FULL_REGEN_TIME));
+        $mpNow = min($mpMax, (int) $this->regen_mp_start + (int) floor($mpMax * $mpRegenerationSeconds / self::MP_FULL_REGEN_TIME));
 
         if (! $baselineInitialized && $hpNow === (int) $this->hp_now && $mpNow === (int) $this->mp_now) {
             return;
@@ -376,7 +380,7 @@ class Player extends Model
         }
 
         $this->hp_now = min($hpMax, (int) floor($this->hp_now + ($hpMax * $ticks * self::REGEN_INTERVAL / self::FULL_REGEN_TIME)));
-        $this->mp_now = min($mpMax, (int) floor($this->mp_now + ($mpMax * $ticks * self::REGEN_INTERVAL / self::FULL_REGEN_TIME)));
+        $this->mp_now = min($mpMax, (int) floor($this->mp_now + ($mpMax * $ticks * self::REGEN_INTERVAL / self::MP_FULL_REGEN_TIME)));
         $this->last_regen_at = $this->last_regen_at->addSeconds($ticks * self::REGEN_INTERVAL);
         $this->save();
     }
