@@ -32,7 +32,8 @@
             line-height: 1.4;
             word-break: break-word;
         }
-        .message.msg-message,
+        /* Обычные сообщения переносятся по словам; в одну строку остаются только приглашения на обмен (кнопка рядом с текстом). */
+        .message.msg-message { white-space: normal; overflow-wrap: anywhere; }
         .message.msg-player_trade_invite { white-space: nowrap; }
         .msg-player_trade_invite img { vertical-align: middle; }
         .chat-smile { vertical-align: middle; }
