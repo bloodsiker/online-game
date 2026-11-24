@@ -1886,7 +1886,14 @@
      * повторно: если на новой локации такого выхода нет — молча отменяем,
      * вместо перехода с ошибкой «невозможно перейти».
      */
+    // ВРЕМЕННО ВЫКЛЮЧЕНО: «догонка» перехода. Пока идёт кулдаун, нажатие (или зажатая клавиша)
+    // не откладывается и не срабатывает после его окончания — оно просто игнорируется.
+    // Чтобы вернуть прежнее поведение, поставьте true.
+    const MOVE_CATCH_UP_ENABLED = false;
+
     function queueMove(direction) {
+        if (!MOVE_CATCH_UP_ENABLED && parent.isCooldown) return;
+
         parent.queueAction(() => {
             whenGameFrameReady(() => {
                 if (!isMoveAvailable(direction)) return;
