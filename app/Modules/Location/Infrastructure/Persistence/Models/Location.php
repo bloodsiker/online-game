@@ -31,6 +31,23 @@ class Location extends Model
         ];
     }
 
+    /**
+     * Сколько мобов добавить при респауне, если на локации уже $currentCount.
+     * Диапазон «от min_monster до count_monster»: после респауна мобов станет не меньше минимума
+     * (но хотя бы на одного больше) и не больше максимума. При min_monster = 1 работает как прежде: 1..(max − текущие).
+     */
+    public function monstersToSpawn(int $currentCount): int
+    {
+        $max = max(0, (int) $this->count_monster);
+        if ($currentCount >= $max) {
+            return 0;
+        }
+
+        $min = min(max(1, (int) ($this->min_monster ?? 1)), $max);
+
+        return mt_rand(max(1, $min - $currentCount), $max - $currentCount);
+    }
+
     protected function image(): Attribute
     {
         return Attribute::make(get: fn (?string $value) => resolve_storage_image_url($value));

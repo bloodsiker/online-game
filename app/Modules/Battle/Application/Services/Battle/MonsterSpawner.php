@@ -65,12 +65,11 @@ readonly class MonsterSpawner
             ? $location->monstersOnLocation()->where('dungeon_session_id', $dungeonSessionId)->count()
             : $location->monstersOnLocation()->whereNull('dungeon_session_id')->count();
 
-        $maxAdd = $location->count_monster - $currentCount;
-        if ($maxAdd <= 0) {
+        $toAdd = $location->monstersToSpawn($currentCount);
+        if ($toAdd <= 0) {
             return collect();
         }
 
-        $toAdd = mt_rand(1, $maxAdd);
         $available = $location->monsters->reject(fn (Monster $monster) => $monster->isBoss() || $monster->isTrainingDummy());
 
         if ($available->isEmpty()) {

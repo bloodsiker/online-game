@@ -162,7 +162,8 @@ class LocationController extends Controller
         $location->west = $request->input('west') ?: null;
         $location->up = $request->input('up') ?: null;
         $location->down = $request->input('down') ?: null;
-        $location->count_monster = (int) $request->input('count_monster', 0);
+        $location->count_monster = max(0, (int) $request->input('count_monster', 0));
+        $location->min_monster = min(max(1, (int) $request->input('min_monster', 1)), max(1, $location->count_monster));
         $location->percent_respawn_monster = (int) $request->input('percent_respawn_monster', 0);
         $location->time_not_attack = (int) $request->input('time_not_attack', 0);
 

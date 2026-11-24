@@ -108,6 +108,11 @@
             $liveHidden = $liveMapName !== null && in_array((int) $liveMapId,
                 app(\App\Modules\User\Application\Services\GameSettingsService::class)->get((int) $liveViewer->id)['hidden_players_maps'] ?? [], true);
         @endphp
+        @php
+            // Публичная карта этой же карты — для кнопки «глаз» в оболочке (slug нужен для /map/{slug}).
+            $liveMapSlugId = $liveMapId ?? $liveViewer?->currentLocation?->map_id;
+            $liveMapSlug = $liveMapSlugId !== null ? \App\Modules\Location\Infrastructure\Persistence\Models\Map::query()->whereKey($liveMapSlugId)->value('slug') : null;
+        @endphp
         const liveMap = @json($liveMapName !== null ? ['id' => (int) $liveMapId, 'name' => $liveMapName] : null);
         let hideOthers = @json($liveHidden);
         @php $mapRelations = app(\App\Modules\Friend\Application\UseCases\GetMapRelations::class)->execute(auth()->user())->toArray(); @endphp
@@ -248,6 +253,7 @@
 
         // Какая карта открыта: оболочка читает это после загрузки фрейма (шестерёнка на боковой карте).
         window.liveMapInfo = liveMap ? { id: liveMap.id, name: liveMap.name, hidden: hideOthers } : null;
+        window.liveMapSlug = @json($liveMapSlug ?: null);
         if (window.frameElement && window.frameElement.id === 'map-frame') {
             window.top.postMessage({ type: 'mapPlayersInfo' }, origin);
         }

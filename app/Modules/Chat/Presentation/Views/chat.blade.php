@@ -75,6 +75,8 @@
         .msg-quest_item-icon       { font-weight: bold; }
         .msg-loot                  { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
         .msg-loot small            { color: #000; }
+        .msg-news                  { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
+        .msg-news small            { color: #000; }
         .prv-name         { color: #ff0000; font-weight: bold; }
         .msg-time-reply   { cursor: pointer; text-decoration: underline dotted #999; color: #ff0000; }
         .msg-time-reply:hover { opacity: 0.75; }
@@ -111,10 +113,36 @@
         .world-event-widget[hidden] { display: none; }
         .world-event-widget::-webkit-scrollbar { display: none; }
         .world-event-widget__heading {
+            display: block;
             padding-bottom: 4px;
             border-bottom: 1px solid rgba(255, 255, 255, .3);
             text-align: center;
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
         }
+        .world-event-widget__heading::-webkit-details-marker { display: none; }
+        .world-event-widget__heading::after {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            margin-left: 7px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: translateY(-2px) rotate(45deg);
+            transition: transform .15s;
+        }
+        .world-event-widget__heading:focus-visible { outline: 1px solid #ffd88a; outline-offset: 2px; }
+        .world-event-widget__panel:not([open]) > .world-event-widget__heading {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+        .world-event-widget__panel:not([open]) > .world-event-widget__heading::after {
+            transform: translateY(1px) rotate(-45deg);
+        }
+        .world-event-widget__count { display: none; color: #ffd88a; }
+        .world-event-widget__panel:not([open]) .world-event-widget__count { display: inline; }
         .world-event-widget__event {
             display: flex;
             align-items: center;
@@ -250,6 +278,9 @@
                         @elseif ($msg->type === 'loot')
                             {!! $msg->content !!}
 
+                        @elseif ($msg->type === 'news')
+                            {!! $msg->content !!}
+
                         @elseif ($msg->type === 'private')
                             @if ($msg->sender_clan_icon && $msg->sender_clan_id)
                                 <a href="{{ route('clan.public', ['clan' => $msg->sender_clan_id]) }}" title="{{ __('Информация о клане') }}" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>
@@ -317,6 +348,14 @@
         return false;
     }
 
+    function worldEventWidgetCollapsed() {
+        try { return window.localStorage.getItem('worldEventWidgetCollapsed') === '1'; } catch (error) { return false; }
+    }
+
+    function saveWorldEventWidgetCollapsed(collapsed) {
+        try { window.localStorage.setItem('worldEventWidgetCollapsed', collapsed ? '1' : '0'); } catch (error) {}
+    }
+
     function renderWorldEventWidget(events) {
         var widget = document.getElementById('world-event-widget');
         widget.innerHTML = '';
@@ -326,10 +365,21 @@
             return;
         }
 
-        var heading = document.createElement('div');
+        // Нативный details/summary: сворачивание работает с клавиатуры и читалками, состояние помним в localStorage.
+        var panel = document.createElement('details');
+        panel.className = 'world-event-widget__panel';
+        panel.open = !worldEventWidgetCollapsed();
+        panel.addEventListener('toggle', function () { saveWorldEventWidgetCollapsed(!panel.open); });
+
+        var heading = document.createElement('summary');
         heading.className = 'world-event-widget__heading';
-        heading.textContent = gameTranslate('Активные события');
-        widget.appendChild(heading);
+        heading.appendChild(document.createTextNode(gameTranslate('Активные события')));
+        var count = document.createElement('span');
+        count.className = 'world-event-widget__count';
+        count.textContent = ' (' + events.length + ')';
+        heading.appendChild(count);
+        panel.appendChild(heading);
+        widget.appendChild(panel);
 
         events.forEach(function (event) {
             var item = document.createElement('div');
@@ -368,7 +418,7 @@
             timer.appendChild(timerValue);
             item.appendChild(details);
             item.appendChild(timer);
-            widget.appendChild(item);
+            panel.appendChild(item);
         });
 
         widget.hidden = false;
@@ -513,6 +563,8 @@
         } else if (msg.type === 'quest_item') {
             html += '<span class="msg-quest_item-icon">✦</span> ' + msg.content;
         } else if (msg.type === 'loot') {
+            html += msg.content;
+        } else if (msg.type === 'news') {
             html += msg.content;
         } else if (msg.type === 'private') {
             html += clanIconHtml(msg)

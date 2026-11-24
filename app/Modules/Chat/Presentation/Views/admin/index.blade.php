@@ -12,6 +12,11 @@
         .chat-admin-editor__color { width: 36px; height: 30px; padding: 2px; border: 1px solid #bbb; border-radius: 3px; background: #fff; cursor: pointer; }
         .chat-admin-editor__content { min-height: 150px; max-height: 320px; overflow-y: auto; padding: 10px 12px; outline: none; white-space: pre-wrap; }
         .chat-admin-editor__content:empty::before { color: #999; content: attr(data-placeholder); pointer-events: none; }
+        .chat-admin-smiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 4px; max-height: 150px; overflow-y: auto; padding: 6px; border-bottom: 1px solid #ddd; background: #fffaf0; }
+        .chat-admin-smiles[hidden] { display: none; }
+        .chat-admin-smiles button { display: grid; place-items: center; min-width: 36px; height: 36px; padding: 2px; border: 1px solid transparent; border-radius: 3px; background: transparent; cursor: pointer; }
+        .chat-admin-smiles button:hover, .chat-admin-smiles button:focus-visible { border-color: #c59a42; background: #fff0c9; }
+        .chat-admin-smiles img { max-width: 30px; max-height: 30px; }
     </style>
 
     @if($errors->any())
@@ -42,12 +47,13 @@
                                         data-icon="{{ $messageType['icon'] }}"
                                         data-bold="{{ $messageType['bold'] ? '1' : '0' }}"
                                         data-italic="{{ $messageType['italic'] ? '1' : '0' }}"
+                                        data-lifetime="{{ $messageType['lifetime'] }}"
                                         @selected(old('type', 'system') === $messageType['type'])
                                     >{{ $messageType['title'] }} — {{ $messageType['appearance'] }}</option>
                                 @endforeach
                             </select>
-                            <small class="form-text text-muted">
-                                Тип меняет оформление. Из этой формы сообщение всегда увидят все игроки в течение 30 минут.
+                            <small id="system-chat-message-lifetime" class="form-text text-muted">
+                                Тип меняет оформление. Сообщение увидят все игроки; срок отображения зависит от выбранного типа.
                             </small>
                         </div>
 
@@ -64,10 +70,18 @@
                                     <button type="button" data-editor-command="strikeThrough" title="Зачёркнутый"><s>З</s></button>
                                     <button type="button" data-editor-command="removeFormat" title="Убрать форматирование">×</button>
                                     <span class="chat-admin-editor__separator"></span>
+                                    <button type="button" id="system-chat-smile-toggle" aria-expanded="false" aria-controls="system-chat-smiles" title="Вставить смайлик">☺</button>
                                     <label class="mb-0" title="Цвет выделенного текста">
                                         <span class="sr-only">Цвет текста</span>
                                         <input id="system-chat-message-color" class="chat-admin-editor__color" type="color" value="#ba0000">
                                     </label>
+                                </div>
+                                <div id="system-chat-smiles" class="chat-admin-smiles" role="group" aria-label="Смайлики" hidden>
+                                    @foreach($smiles as $code => $file)
+                                        <button type="button" data-smile-code="{{ $code }}" title="{{ $code }}" aria-label="{{ $code }}">
+                                            <img src="{{ asset('data/smiles/'.$file) }}" alt="{{ $code }}">
+                                        </button>
+                                    @endforeach
                                 </div>
                                 <div
                                     id="system-chat-message-editor"
@@ -142,6 +156,9 @@
             const preview = document.getElementById('system-chat-message-preview');
             const previewIcon = document.getElementById('system-chat-message-preview-icon');
             const previewText = document.getElementById('system-chat-message-preview-text');
+            const lifetimeHint = document.getElementById('system-chat-message-lifetime');
+            const smileToggle = document.getElementById('system-chat-smile-toggle');
+            const smilePicker = document.getElementById('system-chat-smiles');
 
             let savedSelection = null;
 
@@ -207,6 +224,7 @@
                 preview.style.fontStyle = option.dataset.italic === '1' ? 'italic' : 'normal';
                 previewIcon.textContent = icon;
                 previewIcon.style.display = icon ? 'inline' : 'none';
+                lifetimeHint.textContent = 'Тип меняет оформление. Сообщение увидят все игроки; срок отображения: ' + option.dataset.lifetime + '.';
                 previewText.innerHTML = messageInput.value.trim() || 'Так сообщение будет выглядеть в чате';
             }
 
@@ -227,6 +245,28 @@
                 });
                 button.addEventListener('click', function () {
                     runCommand(button.dataset.editorCommand);
+                });
+            });
+
+            smileToggle.addEventListener('mousedown', function (event) {
+                event.preventDefault();
+                saveSelection();
+            });
+            smileToggle.addEventListener('click', function () {
+                smilePicker.hidden = !smilePicker.hidden;
+                smileToggle.setAttribute('aria-expanded', smilePicker.hidden ? 'false' : 'true');
+            });
+            smilePicker.querySelectorAll('[data-smile-code]').forEach(function (button) {
+                button.addEventListener('mousedown', function (event) {
+                    event.preventDefault();
+                    saveSelection();
+                });
+                button.addEventListener('click', function () {
+                    messageEditor.focus();
+                    restoreSelection();
+                    document.execCommand('insertText', false, button.dataset.smileCode);
+                    saveSelection();
+                    syncMessage();
                 });
             });
 

@@ -31,7 +31,7 @@
                                     <td>{{ $location->id }}</td>
                                     <td><a href="{{ route('admin.location.info', $location->id) }}">{{ $location->name }}</a></td>
                                     <td>{{ $location->map?->name ?? '—' }}</td>
-                                    <td>{{ $location->count_monster }}</td>
+                                    <td>{{ ($location->min_monster ?? 1) < $location->count_monster ? ($location->min_monster ?? 1).'–'.$location->count_monster : $location->count_monster }}</td>
                                     <td>
                                         @if($location->is_locked)
                                             <span class="badge badge-danger">Да</span>

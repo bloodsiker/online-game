@@ -148,6 +148,18 @@ final class SystemMessageCatalog
                 'italic' => true,
                 'sendable' => true,
             ],
+            [
+                'type' => ChatMessageType::News->value,
+                'title' => 'Новости',
+                'color' => '#000000',
+                'appearance' => 'Чёрное, курсив (как «Добыча»)',
+                'audience' => 'Все игроки во всех каналах',
+                'lifetime' => 'Без автоматического удаления',
+                'icon' => '',
+                'bold' => false,
+                'italic' => true,
+                'sendable' => true,
+            ],
         ];
     }
 

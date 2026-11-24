@@ -58,9 +58,15 @@
                     <header class="card-header"><h2 class="card-title">Монстры</h2></header>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="col-form-label">Количество монстров</label>
+                                    <label class="col-form-label">Монстров: от</label>
+                                    <input type="number" class="form-control" name="min_monster" value="{{ $location->min_monster ?? 1 }}" min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">Монстров: до</label>
                                     <input type="number" class="form-control" name="count_monster" value="{{ $location->count_monster }}" min="0">
                                 </div>
                             </div>

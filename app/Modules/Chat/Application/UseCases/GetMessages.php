@@ -61,6 +61,7 @@ class GetMessages
             ChatMessageType::Quest,
             ChatMessageType::QuestItem,
             ChatMessageType::Loot,
+            ChatMessageType::News,
             ChatMessageType::WorldEvent,
             ChatMessageType::ClanBoss,
             ChatMessageType::ClanInvite,
@@ -104,7 +105,7 @@ class GetMessages
     {
         $expiresAt = match (true) {
             $message->channel === ChatChannel::Clan && $message->type === ChatMessageType::ClanBoss => $message->created_at->copy()->addMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES),
-            $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
+            $message->channel === ChatChannel::System && $message->type !== ChatMessageType::News => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
             $message->channel === ChatChannel::Private && $viewChannel !== ChatChannel::Private => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
             $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
             default => null,

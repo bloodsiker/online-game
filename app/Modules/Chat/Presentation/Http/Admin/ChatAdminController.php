@@ -9,6 +9,7 @@ use App\Modules\Chat\Application\Services\AdminChatMessageFormatter;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Application\Services\SystemMessageCatalog;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
+use App\Modules\Chat\Domain\Services\MessageRenderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -22,6 +23,7 @@ final class ChatAdminController extends Controller
         return view('chat::admin.index', [
             'systemMessageTypes' => $catalog->entries(),
             'sendableMessageTypes' => $catalog->sendableEntries(),
+            'smiles' => MessageRenderer::SMILES,
         ]);
     }
 

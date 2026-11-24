@@ -133,13 +133,11 @@ class BattleService
                         ? MonsterOnLocation::where('location_id', $location->id)->where('dungeon_session_id', $dungeonSessionId)->count()
                         : $location->monstersOnLocation()->count();
 
-                    $maxAddableMonsters = $location->count_monster - $currentMonsterCount;
+                    $numberToAdd = $location->monstersToSpawn($currentMonsterCount);
 
                     $availableMonsterOnLocations = $location->monsters->reject(fn (Monster $monster) => $monster->isBoss() || $monster->isTrainingDummy());
 
-                    if ($maxAddableMonsters > 0 && $availableMonsterOnLocations->isNotEmpty()) {
-                        $numberToAdd = mt_rand(1, $maxAddableMonsters);
-
+                    if ($numberToAdd > 0 && $availableMonsterOnLocations->isNotEmpty()) {
                         $monstersToAdd = collect();
                         for ($i = 1; $i <= $numberToAdd; $i++) {
                             $monstersToAdd->add($availableMonsterOnLocations->random());

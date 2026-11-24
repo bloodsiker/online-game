@@ -37,7 +37,7 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
     {
         $expiresAt = match (true) {
             $message->channel === ChatChannel::Clan && $message->type === ChatMessageType::ClanBoss => $message->created_at->copy()->addMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES),
-            $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
+            $message->channel === ChatChannel::System && $message->type !== ChatMessageType::News => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
             $message->channel === ChatChannel::Private => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
             $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
             default => null,
@@ -119,7 +119,9 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
         };
 
         $systemClause = fn ($q) => $q->where('channel', ChatChannel::System->value)
-            ->where('created_at', '>=', $thirtyMinutesAgo);
+            ->where(fn ($systemQuery) => $systemQuery
+                ->where('created_at', '>=', $thirtyMinutesAgo)
+                ->orWhere('type', ChatMessageType::News->value));
         $activeClanId = $user->clanMembership?->clan?->hasPaidTax() === true ? $user->clanMembership->clan_id : null;
         $clanNoticeClause = fn ($q) => $q
             ->where('clan_id', $activeClanId)
