@@ -20,6 +20,7 @@ use App\Modules\Share\Application\UseCases\Admin\ReorderRecipeIngredients;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Domain\Enums\ItemBuffReapplyPolicy;
+use App\Modules\Share\Domain\Enums\ItemEffectGroup;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ItemRarity;
@@ -45,6 +46,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ItemController extends Controller
@@ -394,6 +396,17 @@ class ItemController extends Controller
         $buff->delete();
 
         return redirect()->back()->with('success', 'Бафф удалён.');
+    }
+
+    public function updateEffectGroup(Request $request, ShareItem $item): RedirectResponse
+    {
+        $data = $request->validate([
+            'effect_group' => ['nullable', 'string', Rule::in(array_column(ItemEffectGroup::cases(), 'value'))],
+        ]);
+
+        $item->forceFill(['effect_group' => $data['effect_group'] ?: null])->save();
+
+        return redirect()->back()->with('success', 'Группа эффектов сохранена.');
     }
 
     public function updateUseLimit(Request $request, ShareItem $item): RedirectResponse

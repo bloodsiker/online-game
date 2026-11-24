@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Monster extends Model implements FightHitInterface
 {
@@ -84,6 +85,11 @@ class Monster extends Model implements FightHitInterface
     public function summonPool(): HasMany
     {
         return $this->hasMany(MonsterSummonPool::class, 'monster_id')->with('minionMonster');
+    }
+
+    public function movement(): HasOne
+    {
+        return $this->hasOne(MonsterMovement::class);
     }
 
     public function getActiveMechanics(): Collection

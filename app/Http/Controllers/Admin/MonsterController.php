@@ -9,6 +9,8 @@ use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Monster\Application\Services\MonsterMovementService;
 use App\Modules\Monster\Domain\Enums\MonsterAttackStyle;
 use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Monster\Domain\Services\MapMonstersCache;
@@ -93,7 +95,11 @@ class MonsterController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $monster->load(['items', 'locations.map', 'effects']);
+        $monster->load(['items', 'locations.map', 'effects', 'movement.map']);
+        $movementLocationIds = old('location_ids', $monster->movement?->location_ids ?? []);
+        $movementLocationIds = is_array($movementLocationIds) ? $movementLocationIds : [];
+        $movementLocations = Location::query()->whereIn('id', $movementLocationIds)->get();
+        $movementMap = Map::query()->find((int) old('map_id', $monster->movement?->map_id));
         if ($monster->is_boss) {
             $monster->load(['phases', 'mechanics', 'summonPool']);
         }
@@ -109,7 +115,14 @@ class MonsterController extends Controller
             ->orderBy('name->ru')
             ->get();
 
-        return view('admin.monster.info', compact('monster', 'mechanicTypes', 'allMonsters', 'availableEffects'));
+        return view('admin.monster.info', compact('monster', 'mechanicTypes', 'allMonsters', 'availableEffects', 'movementLocations', 'movementMap'));
+    }
+
+    public function saveMovement(Request $request, Monster $monster, MonsterMovementService $movement): RedirectResponse
+    {
+        $movement->configure($monster, $request->only(['enabled', 'mode', 'map_id', 'location_ids', 'interval_minutes']));
+
+        return redirect()->route('admin.monster.info', $monster->id)->with('success', 'Настройки перемещения босса сохранены.');
     }
 
     public function infoDrop(Request $request, Monster $monster): RedirectResponse

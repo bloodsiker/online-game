@@ -12,6 +12,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
+use App\Modules\Share\Domain\Enums\ItemEffectGroup;
 use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
@@ -165,6 +166,7 @@ class ShareItem extends Model
         'rune_stat_pool' => 'array',
         'innate_passive_type' => CombatPassiveType::class,
         'rarity' => ItemRarity::class,
+        'effect_group' => ItemEffectGroup::class,
         'gathering_time_seconds' => 'integer',
         'gathering_respawn_seconds' => 'integer',
         'gathering_speed_bonus_percent' => 'integer',

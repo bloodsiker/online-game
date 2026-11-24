@@ -4,17 +4,58 @@ declare(strict_types=1);
 
 namespace App\Modules\Item\Domain\Services;
 
+use App\Modules\Item\Domain\Contracts\PlayerBattleStatus;
 use App\Modules\Item\Domain\Exceptions\ItemUseBlockedException;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerItemGroupCooldown;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerItemUseLimitState;
 use App\Modules\Share\Domain\Enums\ItemBuffReapplyPolicy;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Carbon;
 
 class ItemUsagePolicyService
 {
+    public function __construct(private readonly ?PlayerBattleStatus $battleStatus = null) {}
+
     public function cooldownUntil(Player $player, ShareItem $item): ?CarbonInterface
+    {
+        $own = $this->ownCooldownUntil($player, $item);
+        $group = $this->groupCooldownUntil($player, $item);
+
+        return match (true) {
+            $own === null => $group,
+            $group === null => $own,
+            default => $own->gt($group) ? $own : $group,
+        };
+    }
+
+    /**
+     * Общий откат группы эффектов действует только в бою: после боя
+     * у каждого предмета остаётся его собственный откат.
+     */
+    private function groupCooldownUntil(Player $player, ShareItem $item): ?CarbonInterface
+    {
+        if ($item->effect_group === null || ! $this->inBattle($player)) {
+            return null;
+        }
+
+        $availableAt = PlayerItemGroupCooldown::query()
+            ->where('player_id', $player->id)
+            ->where('effect_group', $item->effect_group->value)
+            ->value('available_at');
+        $availableAt = $availableAt === null ? null : Carbon::parse($availableAt);
+
+        return $availableAt?->isFuture() ? $availableAt : null;
+    }
+
+    private function inBattle(Player $player): bool
+    {
+        return ($this->battleStatus ?? app(PlayerBattleStatus::class))->isInBattle($player);
+    }
+
+    private function ownCooldownUntil(Player $player, ShareItem $item): ?CarbonInterface
     {
         $limit = $item->useLimit;
         if ($limit === null) {
@@ -41,6 +82,46 @@ class ItemUsagePolicyService
     {
         $this->ensureBuffCanBeReapplied($player, $item);
 
+        $inGroupCooldown = $item->effect_group !== null && $this->inBattle($player);
+        if ($inGroupCooldown) {
+            $this->ensureGroupAvailable($player, $item);
+        }
+
+        $this->reserveOwnLimit($player, $item);
+
+        if ($inGroupCooldown && $item->useLimit !== null) {
+            PlayerItemGroupCooldown::query()->updateOrCreate(
+                ['player_id' => $player->id, 'effect_group' => $item->effect_group->value],
+                ['available_at' => now()->addSeconds($item->useLimit->period_seconds)],
+            );
+        }
+    }
+
+    private function ensureGroupAvailable(Player $player, ShareItem $item): void
+    {
+        $row = PlayerItemGroupCooldown::query()
+            ->where('player_id', $player->id)
+            ->where('effect_group', $item->effect_group->value)
+            ->lockForUpdate()
+            ->first();
+
+        if ($row === null || ! $row->available_at->isFuture()) {
+            return;
+        }
+
+        throw new ItemUseBlockedException(
+            sprintf(
+                __('Группа эффектов «%s» на откате. Следующее использование будет доступно через %s.'),
+                $item->effect_group->label(),
+                $this->remainingTime($row->available_at),
+            ),
+            'ITEM_GROUP_COOLDOWN',
+            $row->available_at,
+        );
+    }
+
+    private function reserveOwnLimit(Player $player, ShareItem $item): void
+    {
         $limit = $item->useLimit;
         if ($limit === null) {
             return;

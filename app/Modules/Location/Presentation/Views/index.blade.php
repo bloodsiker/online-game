@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __("Игра") }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
+    @vite('resources/js/app.js')
     <style>
+        #boss-notice { display: none; margin: 8px auto; padding: 6px 10px; max-width: 420px; text-align: center; font-weight: bold; color: #8B0000; background: rgba(139,0,0,.08); border: 1px solid rgba(139,0,0,.35); border-radius: 4px; }
         body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 14px; }
         a { color: #000000; }
         a:hover { color: #353434 }
@@ -182,6 +184,8 @@
             <div class="center">
                 <b><a href="" class="location-name">{{ $page->name }}</a></b> <span>({{ $page->locationId }})</span>
             </div>
+
+            <div id="boss-notice" role="status" aria-live="polite"></div>
 
             @include('event::location-widget')
 
@@ -555,6 +559,50 @@
             @if(session()->has('wallet_diamond'))diamond: {{ (float) session('wallet_diamond') }},@endif
         });
     @endif
+</script>
+<script>
+    // Босс пришёл на эту локацию или ушёл с неё: показываем сообщение и перезагружаем локацию.
+    // При перезагрузке сервер заново проверяет агрессивность — босс нападает, если проходит по шансу.
+    (() => {
+        const notice = document.getElementById('boss-notice');
+        const storageKey = 'boss_notice';
+        const read = () => { try { return JSON.parse(sessionStorage.getItem(storageKey) || 'null'); } catch (e) { return null; } };
+
+        const pending = read();
+        try { sessionStorage.removeItem(storageKey); } catch (e) {}
+        if (notice && pending && pending.text && Date.now() - pending.at < 30000) {
+            notice.textContent = pending.text;
+            notice.style.display = 'block';
+        }
+
+        const from = { north: 'с севера', south: 'с юга', east: 'с востока', west: 'с запада', up: 'сверху', down: 'снизу' };
+        const to = { north: 'на север', south: 'на юг', east: 'на восток', west: 'на запад', up: 'наверх', down: 'вниз' };
+
+        function message(event) {
+            const lang = document.documentElement.lang || 'ru';
+            const name = (event.names && (event.names[lang] || event.names.ru)) || '';
+            if (event.type === 'arrived') {
+                return event.direction
+                    ? gameTranslate(':name приближается :from', { name: name, from: gameTranslate(from[event.direction]) })
+                    : gameTranslate(':name появляется', { name: name });
+            }
+
+            return event.direction
+                ? gameTranslate(':name уходит :to', { name: name, to: gameTranslate(to[event.direction]) })
+                : gameTranslate(':name уходит', { name: name });
+        }
+
+        // Vite-модуль с Echo выполняется после инлайновых скриптов — подписываемся на DOMContentLoaded.
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Echo) return;
+            const channelName = 'location.{{ $page->locationId }}';
+            window.Echo.channel(channelName).listen('.boss.moved', event => {
+                try { sessionStorage.setItem(storageKey, JSON.stringify({ text: message(event), at: Date.now() })); } catch (e) {}
+                window.location.reload();
+            });
+            window.addEventListener('pagehide', () => { if (window.Echo) window.Echo.leave(channelName); });
+        });
+    })();
 </script>
 </body>
 </html>

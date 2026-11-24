@@ -47,6 +47,9 @@
                                     Пул призыва <span class="badge badge-info">{{ $monster->summonPool?->count() ?? 0 }}</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-movement" href="#tab-movement" data-bs-toggle="tab">Перемещение</a>
+                            </li>
                             @endif
                         </ul>
 
@@ -605,6 +608,10 @@
                                         </table>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div id="tab-movement" class="tab-pane">
+                                @include('admin.monster.partials.movement')
                             </div>
 
                             @endif

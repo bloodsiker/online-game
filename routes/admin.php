@@ -130,6 +130,7 @@ Route::get('/item/{item}/effect/{effect}/delete', [ItemController::class, 'delet
 Route::post('/item/{item}/buff', [ItemController::class, 'addBuff'])->name('item.buff.add');
 Route::get('/item/{item}/buff/{buff}/delete', [ItemController::class, 'deleteBuff'])->name('item.buff.delete');
 Route::post('/item/{item}/use-limit', [ItemController::class, 'updateUseLimit'])->name('item.use_limit.update');
+Route::post('/item/{item}/effect-group', [ItemController::class, 'updateEffectGroup'])->name('item.effect_group.update');
 Route::post('/item/{item}/debuff', [ItemController::class, 'addDebuff'])->name('item.debuff.add');
 Route::get('/item/{item}/debuff/{debuff}/delete', [ItemController::class, 'deleteDebuff'])->name('item.debuff.delete');
 Route::post('/item/{item}/requirement', [ItemController::class, 'addRequirement'])->name('item.requirement.add');
@@ -144,6 +145,7 @@ Route::patch('/item/{item}/chest-content/{containedItem}', [ItemController::clas
 Route::delete('/item/{item}/chest-content/{containedItem}', [ItemController::class, 'deleteChestContent'])->name('item.chest_content.delete');
 
 Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'create'])->name('monster.create');
+Route::post('/monster/{monster}/movement', [MonsterController::class, 'saveMovement'])->name('monster.movement');
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');
 Route::post('/monster/{monster}/drop/{item}', [MonsterController::class, 'infoDropUpdate'])->name('monster.info.drop.update');
 Route::get('/monster/{monster}/drop/delete/{item}', [MonsterController::class, 'infoDropDeleteItem'])->name('monster.info.drop.delete_item');

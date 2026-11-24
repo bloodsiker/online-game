@@ -10,6 +10,7 @@ use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
 use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
 use App\Modules\Npc\Application\Services\NpcMovementService;
+use App\Modules\Monster\Application\Services\MonsterMovementService;
 use App\Modules\Payments\Infrastructure\Nbu\NbuExchangeRate;
 use App\Modules\Player\Application\UseCases\PruneExpiredPlayerInjuries;
 use App\Modules\Scheduler\Domain\DTOs\ScheduledTaskDefinition;
@@ -39,6 +40,8 @@ class ScheduledTaskRegistry
 
     public const MOVE_NPCS = 'npcs.move';
 
+    public const MOVE_MONSTERS = 'monsters.move';
+
     public const SYNC_NBU_RATE = 'payments.sync_nbu_rate';
 
     public function __construct(
@@ -51,6 +54,7 @@ class ScheduledTaskRegistry
         private readonly ProcessExpiredClanBossRuns $processExpiredClanBossRuns,
         private readonly DatabaseBackupService $databaseBackupService,
         private readonly NpcMovementService $npcMovementService,
+        private readonly MonsterMovementService $monsterMovementService,
         private readonly NbuExchangeRate $nbuExchangeRate,
     ) {}
 
@@ -62,6 +66,13 @@ class ScheduledTaskRegistry
                 key: self::MOVE_NPCS,
                 name: 'Автоматическое перемещение NPC',
                 description: 'Перемещает активных NPC по выбранной карте или списку локаций с индивидуальным интервалом.',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
+                allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
+            ),
+            self::MOVE_MONSTERS => new ScheduledTaskDefinition(
+                key: self::MOVE_MONSTERS,
+                name: 'Автоматическое перемещение боссов',
+                description: 'Перемещает активные мировые экземпляры боссов по соседним локациям выбранной карты или маршрута.',
                 defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
                 allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
             ),
@@ -170,6 +181,7 @@ class ScheduledTaskRegistry
     {
         return match ($key) {
             self::MOVE_NPCS => sprintf('Перемещено NPC: %d.', $this->npcMovementService->moveDue(now())),
+            self::MOVE_MONSTERS => sprintf('Перемещено боссов: %d.', $this->monsterMovementService->moveDue(now())),
             self::DELETE_EXPIRED_LOCATION_ITEMS => $this->deleteExpiredLocationItems(),
             self::PRUNE_EXPIRED_INJURIES => sprintf(
                 'Удалено истёкших травм: %d.',

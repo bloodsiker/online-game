@@ -40,6 +40,13 @@ final class ItemTooltipStatsBuilder
             ];
         }
 
+        if ($item->effect_group !== null) {
+            $stats[] = [
+                'title' => __('Группа эффектов'),
+                'value' => sprintf('<span style="color:%s">%s</span>', $item->effect_group->color(), e($item->effect_group->label())),
+            ];
+        }
+
         if ($item->type === ShareItemType::LOCKPICK && $item->lockpickConfig !== null) {
             $config = $item->lockpickConfig;
             $requiredSkill = $config->tier === 1 ? 1 : ($config->tier - 1) * 50;

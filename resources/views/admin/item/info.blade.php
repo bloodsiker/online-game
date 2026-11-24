@@ -946,6 +946,38 @@
         </div>
     </div>
 
+    {{-- ГРУППА ЭФФЕКТОВ --}}
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Группа эффектов</h2>
+                    <p class="card-subtitle text-muted">В бою использование любого предмета группы ставит откат (период ограничения использованного предмета) на все предметы этой же группы. Вне боя у каждого предмета свой откат.</p>
+                </header>
+                <div class="card-body">
+                    <form action="{{ route('admin.item.effect_group.update', $item->id) }}" method="post">
+                        {{ csrf_field() }}
+                        <div class="row align-items-end">
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <select name="effect_group" class="form-control">
+                                        <option value="">Нет</option>
+                                        @foreach(\App\Modules\Share\Domain\Enums\ItemEffectGroup::cases() as $group)
+                                            <option value="{{ $group->value }}" @selected($item->effect_group === $group)>{{ $group->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary btn-sm mb-2">Сохранить группу</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
     {{-- АКТИВНЫЕ ЭФФЕКТЫ --}}
     <div class="row">
         <div class="col-md-12">
