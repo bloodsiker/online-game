@@ -642,8 +642,53 @@
         div.setAttribute('data-id', String(msg.id));
         if (msg.expires_at) div.setAttribute('data-expires-at', msg.expires_at);
         div.innerHTML = buildMessageHtml(msg);
+        hydrateChatLinkTitles(div);
         return div;
     }
+
+    var chatPageTitleRequests = new Map();
+
+    function hydrateChatLinkTitles(root) {
+        var links = [];
+        if (root.matches && root.matches('a[data-chat-page-title]')) links.push(root);
+        if (root.querySelectorAll) links = links.concat(Array.from(root.querySelectorAll('a[data-chat-page-title]')));
+
+        links.forEach(function (link) {
+            var url;
+            try { url = new URL(link.href, window.location.href); } catch (error) { return; }
+            if (url.origin !== window.location.origin) return;
+
+            var key = url.href;
+            if (!chatPageTitleRequests.has(key)) {
+                var controller = new AbortController();
+                var timeout = window.setTimeout(function () { controller.abort(); }, 3000);
+                var request = fetch(key, {
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'text/html' },
+                    signal: controller.signal
+                }).then(function (response) {
+                    if (!response.ok || new URL(response.url).origin !== window.location.origin
+                        || !(response.headers.get('content-type') || '').includes('text/html')) return '';
+                    return response.text();
+                }).then(function (html) {
+                    if (!html) return '';
+                    var page = new DOMParser().parseFromString(html, 'text/html');
+                    return (page.querySelector('title')?.textContent || '').trim();
+                }).catch(function () {
+                    return '';
+                }).finally(function () {
+                    window.clearTimeout(timeout);
+                });
+                chatPageTitleRequests.set(key, request);
+            }
+
+            chatPageTitleRequests.get(key).then(function (title) {
+                if (title && link.isConnected) link.textContent = title;
+            });
+        });
+    }
+
+    hydrateChatLinkTitles(document);
 
     function getLastMessageId() {
         var lastId = 0;

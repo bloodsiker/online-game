@@ -110,6 +110,25 @@ class MessageRenderer
         // Trusted messages (system/information/quest) contain safe server-generated HTML
         $escaped = $trusted ? $message : e($message);
 
+        if (! $trusted) {
+            $escaped = preg_replace_callback(
+                '~(?<![\pL\pN_@="\'/])(?<url>https?://[^\s<>"\']+)~iu',
+                static function (array $matches): string {
+                    $url = $matches['url'];
+                    $trimmedUrl = rtrim($url, '.,!?;:)]}');
+                    $trailingText = substr($url, strlen($trimmedUrl));
+
+                    if ($trimmedUrl === '') {
+                        return $url;
+                    }
+
+                    return '<a class="chat-url-title" href="'.$trimmedUrl.'" target="_blank" rel="noopener noreferrer" data-chat-page-title>'
+                        .$trimmedUrl.'</a>'.$trailingText;
+                },
+                $escaped,
+            );
+        }
+
         // Replace [[item_ID]] shortcodes
         $rendered = preg_replace_callback('/\[\[item_(\d+)\]\]/', function ($matches) {
             /** @var Item|null $item */
