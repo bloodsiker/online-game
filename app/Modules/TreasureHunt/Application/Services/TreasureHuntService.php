@@ -16,6 +16,7 @@ use App\Modules\ItemAssembly\Application\Services\AssembleItem;
 use App\Modules\ItemAssembly\Domain\Enums\AssemblyResultMode;
 use App\Modules\ItemAssembly\Infrastructure\Persistence\Models\ItemAssembly;
 use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
 use App\Modules\Reputation\Application\Services\ReputationService;
@@ -54,6 +55,8 @@ final class TreasureHuntService
             $this->require($hunt !== null, 'treasure.unavailable');
             $this->require((int) $user->currentLocation?->map_id === (int) $hunt->target_map_id && $user->currentLocation?->dungeon_id === null, 'treasure.wrong_territory');
             $this->require((int) $hunt->user_id === (int) $user->id && $hunt->found_at === null, 'treasure.unavailable');
+            // Игрок на соседней с кладом локации — подсказываем, что клад уже рядом.
+            $this->require((int) $hunt->target_location_id === (int) $user->location_id || ! $this->isAdjacent($user->currentLocation, (int) $hunt->target_location_id), 'treasure.nearby');
             $this->require((int) $hunt->target_location_id === (int) $user->location_id, 'treasure.wrong_location');
             $hunt->activated_at ??= now();
             $hunt->save();
@@ -249,6 +252,22 @@ final class TreasureHuntService
     private function clearAttempt(TreasureHunt $hunt): void
     {
         $hunt->fill(['search_token' => null, 'started_at' => null, 'completes_at' => null, 'expires_at' => null, 'chance_snapshot' => null])->save();
+    }
+
+    /** Ведёт ли хотя бы один выход (север, юг, восток, запад, вверх, вниз) с локации на $targetId. */
+    public function isAdjacent(?Location $from, int $targetId): bool
+    {
+        if ($from === null) {
+            return false;
+        }
+
+        foreach (['north', 'south', 'east', 'west', 'up', 'down'] as $side) {
+            if ((int) $from->{$side} === $targetId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function require(bool $condition, string $key): void
