@@ -20,7 +20,7 @@ final class QuestTargetInfoService
 {
     /**
      * @param  Collection<int, QuestPlayer>  $questPlayers
-     * @return array{objectives: array<int, array{monsters: list<array{name: string, lvl: int, url: string}>, maps: list<array{name: string, url: string}>, npc: ?array{name: string, url: string, map: ?array{name: string, url: string}}}>, turnIn: array<int, ?array{name: string, url: string, map: ?array{name: string, url: string}}>}
+     * @return array{objectives: array<int, array{monsters: list<array{name: string, url: string, levels: list<array{lvl: int, url: string}>}>, maps: list<array{name: string, url: string}>, npc: ?array{name: string, url: string, map: ?array{name: string, url: string}}}>, turnIn: array<int, ?array{name: string, url: string, map: ?array{name: string, url: string}}>}
      */
     public function build(Collection $questPlayers): array
     {
@@ -67,11 +67,7 @@ final class QuestTargetInfoService
             $linked = $this->monsterIds($objective)->map(fn (int $id) => $monsters->get($id))->filter();
 
             $result['objectives'][$objective->id] = [
-                'monsters' => $linked->map(fn (Monster $m) => [
-                    'name' => (string) $m->name,
-                    'lvl' => (int) $m->lvl,
-                    'url' => route('info.monster.catalog', ['id' => $m->id]),
-                ])->values()->all(),
+                'monsters' => $this->monsterGroups($linked),
                 'maps' => $this->maps(
                     $linked,
                     $objective->map_id ? $objective->map : null,
@@ -101,6 +97,31 @@ final class QuestTargetInfoService
         $ids = ! empty($objective->target_ids) ? $objective->target_ids : [$objective->target_id];
 
         return collect($ids)->filter()->map(fn ($id) => (int) $id)->values();
+    }
+
+    /**
+     * @param  Collection<int, Monster>  $monsters
+     * @return list<array{name: string, url: string, levels: list<array{lvl: int, url: string}>}>
+     */
+    private function monsterGroups(Collection $monsters): array
+    {
+        return $monsters
+            ->groupBy(fn (Monster $monster) => (string) $monster->name)
+            ->map(function (Collection $variants): array {
+                $variants = $variants->sortBy('lvl')->values();
+                $firstVariant = $variants->first();
+
+                return [
+                    'name' => (string) $firstVariant->name,
+                    'url' => route('info.monster.catalog', ['id' => $firstVariant->id]),
+                    'levels' => $variants->map(fn (Monster $variant) => [
+                        'lvl' => (int) $variant->lvl,
+                        'url' => route('info.monster.catalog', ['id' => $variant->id]),
+                    ])->all(),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**

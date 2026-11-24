@@ -3,7 +3,8 @@
         <div class="quest-target-info">
             {{ __('Мобы:') }}
             @foreach($info['monsters'] as $m)
-                <a href="{{ $m['url'] }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $m['name'] }}</a> {{ $m['lvl'] }}{{ $loop->last ? '' : ',' }}
+                {{ $m['name'] }}
+                (<span>@foreach($m['levels'] as $level)<a href="{{ $level['url'] }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $level['lvl'] }}</a>{{ $loop->last ? '' : ', ' }}@endforeach</span>){{ $loop->last ? '' : ', ' }}
             @endforeach
         </div>
     @endif
