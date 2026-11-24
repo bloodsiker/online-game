@@ -47,6 +47,7 @@ return [
     'monster_auto_loot_money' => 'Автозбір: ви отримали :amount монет.',
     'gathering_resource' => '<b>:name</b> :count шт. (у рюкзаку :backpack_count шт.)',
     'gathering_bonus' => ' Додатково: :resources',
+    'rand_result' => 'Кинув випадкове число :number',
     'quest_started' => 'Для вас почався квест <b>«:title»</b>. Бажаємо успіху!',
     'clan_quest_started' => 'Для вашого клану почався квест <b>«:title»</b>. Успіху!',
     'quest_completed' => 'Квест <b>«:title»</b> завершено!:reward',

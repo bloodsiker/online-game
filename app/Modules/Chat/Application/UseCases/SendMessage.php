@@ -20,8 +20,8 @@ class SendMessage
 
     private const RAND_MAX = 100;
 
-    /** Без слов, чтобы одинаково читалось на любом языке игры. */
-    private const RAND_MESSAGE = '🎲 %d (0–100)';
+    /** Русский вариант для хранения; каждому игроку текст рисуется на его языке по ключу chat.rand_result. */
+    private const RAND_MESSAGE = 'Кинул случайное число %d';
 
     public function __construct(
         private readonly ChatMessageRepositoryInterface $repository,
@@ -47,8 +47,10 @@ class SendMessage
 
         // Команда /rand: вместо текста в канал уходит случайное число от 0 до 100 (видят все в этом канале).
         $isRand = preg_match('/^\/rand$/i', $raw) === 1;
+        $randNumber = null;
         if ($isRand) {
-            $raw = sprintf(self::RAND_MESSAGE, random_int(self::RAND_MIN, self::RAND_MAX));
+            $randNumber = random_int(self::RAND_MIN, self::RAND_MAX);
+            $raw = sprintf(self::RAND_MESSAGE, $randNumber);
         }
 
         // Private message: prv[NAME] - text  OR  prv[NAME] text
@@ -78,6 +80,11 @@ class SendMessage
             'message' => $raw,
             'type' => $type->value,
         ];
+
+        if ($randNumber !== null) {
+            $data['translation_key'] = 'chat.rand_result';
+            $data['translation_params'] = ['number' => $randNumber];
+        }
 
         if ($defaultChannel === ChatChannel::Location) {
             $data['map_id'] = $sender->currentLocation?->map_id;

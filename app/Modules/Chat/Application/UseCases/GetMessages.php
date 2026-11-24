@@ -69,7 +69,8 @@ class GetMessages
             ChatMessageType::BossDefeat,
         ]);
         $text = $msg->message;
-        if ($trusted && $msg->translation_key !== null) {
+        // Текст /rand переводится по ключу на язык зрителя, но выводится как обычный текст (не доверенная разметка).
+        if (($trusted || $msg->type === ChatMessageType::Rand) && $msg->translation_key !== null) {
             $text = $this->translator->render(new LocalizedChatMessage($msg->translation_key, $msg->translation_params ?? []), $locale) ?: $text;
         }
         $content = $this->renderer->render($text, $trusted);

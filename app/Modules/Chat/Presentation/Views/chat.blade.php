@@ -71,6 +71,9 @@
         .msg-clan_invite small { color: #000; }
         .msg-clan_invite .clan-invite-action { font-weight: bold; }
         .msg-clan_invite .clan-invite-clan { color: #000; font-weight: bold; white-space: nowrap; }
+        .msg-rand              { color: #0033cc; font-weight: bold; }
+        .msg-rand small,
+        .msg-rand a            { color: inherit; }
         .msg-quest             { border-left: 2px solid #000000; padding-left: 3px; color: #000000; font-style: italic; }
         .msg-quest small       { color: #000000; font-style: normal; }
         .msg-quest_item            { border-left: 2px solid #009900; padding-left: 3px; color: #009900; font-weight: bold; }

@@ -44,9 +44,11 @@ class RandCommandTest extends TestCase
         foreach ($this->created as $data) {
             $this->assertSame(ChatMessageType::Rand->value, $data['type']);
             $this->assertSame('main', $data['channel']);
-            $this->assertSame(1, preg_match('/^🎲 (\d{1,3}) \(0–100\)$/u', $data['message'], $match));
+            $this->assertSame(1, preg_match('/^Кинул случайное число (\d{1,3})$/u', $data['message'], $match));
             $this->assertGreaterThanOrEqual(0, (int) $match[1]);
             $this->assertLessThanOrEqual(100, (int) $match[1]);
+            $this->assertSame('chat.rand_result', $data['translation_key']);
+            $this->assertSame((int) $match[1], $data['translation_params']['number']);
         }
     }
 
