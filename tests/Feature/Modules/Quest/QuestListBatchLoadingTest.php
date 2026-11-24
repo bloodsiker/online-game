@@ -9,6 +9,7 @@ use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Clan\Domain\Services\ClanLogService;
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Quest\Application\Services\QuestTargetInfoService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Quest\Domain\Services\QuestStageRuntimeService;
 use App\Modules\Quest\Presentation\Http\QuestController;
@@ -47,13 +48,14 @@ class QuestListBatchLoadingTest extends TestCase
         Auth::setUser($user);
 
         $controller = new QuestController(
-            Mockery::mock(BackpackService::class),
-            Mockery::mock(ChatService::class),
-            Mockery::mock(ExperienceService::class),
-            Mockery::mock(ReputationService::class),
-            Mockery::mock(ClanLogService::class),
-            new QuestStageRuntimeService,
-            Mockery::mock(QuestProgressService::class),
+            backpackService: Mockery::mock(BackpackService::class),
+            chatService: Mockery::mock(ChatService::class),
+            experienceService: Mockery::mock(ExperienceService::class),
+            reputationService: Mockery::mock(ReputationService::class),
+            clanLogService: Mockery::mock(ClanLogService::class),
+            questStageRuntimeService: new QuestStageRuntimeService,
+            questProgressService: Mockery::mock(QuestProgressService::class),
+            questTargetInfoService: new QuestTargetInfoService,
         );
 
         $view = $controller->list(Request::create('/quests', 'GET', ['tab' => 'started']));

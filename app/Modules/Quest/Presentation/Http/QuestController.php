@@ -15,6 +15,7 @@ use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Quest\Application\Services\QuestActionTransaction;
+use App\Modules\Quest\Application\Services\QuestTargetInfoService;
 use App\Modules\Quest\Application\UseCases\CompleteQuest;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Domain\Enums\QuestType;
@@ -46,6 +47,7 @@ class QuestController extends Controller
         private readonly ClanLogService $clanLogService,
         private readonly QuestStageRuntimeService $questStageRuntimeService,
         private readonly QuestProgressService $questProgressService,
+        private readonly QuestTargetInfoService $questTargetInfoService,
         private readonly ?MapInfluenceRequirementService $influenceRequirements = null,
     ) {}
 
@@ -90,10 +92,13 @@ class QuestController extends Controller
                 ->whereHas('quest', fn ($q) => $q->whereNotIn('type', [QuestType::REPEATABLE, QuestType::CLAN]));
         }
 
-        $quests = $query->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues', 'currentStage')->paginate(20)->withQueryString();
+        $quests = $query->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.objectives.map', 'quest.dialogues', 'currentStage')->paginate(20)->withQueryString();
         $questIds = $quests->pluck('id')->implode(',');
+        $targetInfo = $tab === 'completed'
+            ? ['objectives' => [], 'turnIn' => []]
+            : $this->questTargetInfoService->build($quests->getCollection());
 
-        return view('quest::list', compact('quests', 'questIds', 'tab')
+        return view('quest::list', compact('quests', 'questIds', 'tab', 'targetInfo')
             + ['clanQuests' => collect(), 'clanQuestProgress' => null]);
     }
 

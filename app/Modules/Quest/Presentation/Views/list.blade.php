@@ -142,9 +142,14 @@
             color: #aaa;
             border-color: #e0c0a0;
         }
-
-
-
+        .quest-target-info {
+            margin-left: 10px;
+            color: #461C0B;
+            font-weight: normal;
+        }
+        .quest-turn-in {
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body class="regcolor">
@@ -165,6 +170,7 @@
         'clan'       => __('Клановые'),
     ];
 @endphp
+@inject('questRewardPresenter', 'App\\Modules\\Quest\\Presentation\\Services\\QuestRewardPresenter')
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
     <tbody>
@@ -235,19 +241,6 @@
                             <tr>
                                 <td class="tbl-shp-sides ls">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" align="left" style="padding: 6px 4px 6px 4px">
-                                    @php
-                                        function renderQuestReward($reward): string {
-                                            return match($reward->type) {
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::EXP             => '+' . $reward->amount . ' ' . __('опыта'),
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY           => '+' . $reward->amount . ' ' . __('монет'),
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? __('предмет')),
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::LOCATION_ACCESS => __('Открыт доступ:') . ' ' . ($reward->location?->name ?? __('локация')),
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS        => '+' . $reward->amount . ' ' . __('клановых очков'),
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::REPUTATION_POINTS  => '+' . $reward->amount . ' ' . __('очков репутации'),
-                                            };
-                                        }
-                                    @endphp
-
                                     @if($tab === 'clan')
                                         {{-- CLAN QUEST LIST --}}
                                         <table class="coll w100 p6h p2v brd2-all">
@@ -332,7 +325,7 @@
                                                                 @foreach($cp->quest->rewards as $reward)
                                                                     <tr class="b" style="color:#339900!important;">
                                                                         <td nowrap style="color:#339900!important;">{!! $loop->first ? __('Награда:') : '&nbsp;' !!}</td>
-                                                                        <td style="color:#339900!important;">{{ renderQuestReward($reward) }}</td>
+                                                                        <td style="color:#339900!important;">{{ $questRewardPresenter->format($reward) }}</td>
                                                                     </tr>
                                                                 @endforeach
                                                                 </tbody>
@@ -443,6 +436,7 @@
                                                                             @if($loop->first)<span>{{ __('Цель:') }}</span>@endif
                                                                             {{ $obj->questObjective->description }}
                                                                             ({{ $objDone }}/{{ $obj->questObjective->required_amount }})
+                                                                            @include('quest::partials.objective-targets', ['info' => $targetInfo['objectives'][$obj->quest_objective_id] ?? null])
                                                                         </div>
                                                                     @endforeach
                                                                 </div>
@@ -458,10 +452,21 @@
                                                                         @if($loop->first)<span>{{ __('Текущая цель:') }}</span>@endif
                                                                         {{ $obj->questObjective->description }}
                                                                         ({{ $objDone }}/{{ $obj->questObjective->required_amount }})
+                                                                        @include('quest::partials.objective-targets', ['info' => $targetInfo['objectives'][$obj->quest_objective_id] ?? null])
                                                                     </div>
                                                                 @endforeach
                                                             </div>
                                                         @endif
+                                                    @endif
+                                                    @php $turnIn = $targetInfo['turnIn'][$quest->id] ?? null; @endphp
+                                                    @if($turnIn && $quest->status->isProgress())
+                                                        <div class="quest-turn-in">
+                                                            <b>{{ __('Сдать:') }}</b>
+                                                            <a href="{{ $turnIn['url'] }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $turnIn['name'] }}</a>
+                                                            @if($turnIn['map'])
+                                                                (<a href="{{ $turnIn['map']['url'] }}" target="_blank">{{ $turnIn['map']['name'] }}</a>)
+                                                            @endif
+                                                        </div>
                                                     @endif
                                                     @if($quest->status->isCompleted() && $quest->quest->rewards->isNotEmpty())
                                                         <table class="coll" style="margin-top: 3px;">
@@ -469,7 +474,7 @@
                                                             @foreach($quest->quest->rewards as $reward)
                                                                 <tr class="b" style="color: #339900 !important;">
                                                                     <td nowrap="" style="color: #339900 !important;">{!! $loop->first ? __('Награда:') : '&nbsp;' !!}</td>
-                                                                    <td style="color: #339900 !important;">{{ renderQuestReward($reward) }}</td>
+                                                                    <td style="color: #339900 !important;">{{ $questRewardPresenter->format($reward) }}</td>
                                                                 </tr>
                                                             @endforeach
                                                             </tbody>
