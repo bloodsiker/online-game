@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\QuestController;
 use App\Http\Controllers\Admin\RaceController;
 use App\Http\Controllers\Admin\ReputationController;
 use App\Http\Controllers\Admin\ScheduledTaskController;
+use App\Http\Controllers\Admin\LoginHistoryController;
 use App\Http\Controllers\Admin\ShopPurchaseLogController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
@@ -94,6 +95,7 @@ Route::get('/api/maps', [ApiController::class, 'maps'])->name('api.maps');
 
 Route::get('/item-logs', [ItemActionLogController::class, 'list'])->name('item_logs');
 Route::get('/purchase-logs', [ShopPurchaseLogController::class, 'index'])->name('purchase_logs.index');
+Route::get('/login-history', [LoginHistoryController::class, 'index'])->name('login_history.index');
 
 Route::get('/injuries', [InjuryTypeController::class, 'index'])->name('injury_types');
 Route::get('/injury/create', [InjuryTypeController::class, 'create'])->name('injury_type.create');

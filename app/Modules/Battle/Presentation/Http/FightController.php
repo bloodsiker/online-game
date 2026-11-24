@@ -273,7 +273,8 @@ class FightController extends Controller
             return redirect()->route('fight', ['id' => $id]);
         }
         try {
-            $fightDTO = app(RunAway::class)->execute($user, (int) $id);
+            $runAway = app(RunAway::class);
+            $fightDTO = $runAway->execute($user, (int) $id);
         } catch (HttpException $exception) {
             return redirect()->route('fight', ['id' => $id])->with('message', $exception->getMessage());
         }
@@ -291,7 +292,9 @@ class FightController extends Controller
             ->whereHas('locationMonster.monster', fn ($query) => $query->where('is_training_dummy', true))
             ->exists();
 
-        return view('battle::run_away', compact('trainingEnded'));
+        $escapeMessage = $runAway->escapeMessage ?? 'Вы отступили...';
+
+        return view('battle::run_away', compact('trainingEnded', 'escapeMessage'));
     }
 
     private function hitsLeftForClanBoss(?BattleDetail $randomAttackedMonster, User $user): ?int

@@ -9,6 +9,7 @@
         "laravel/framework": "^12.0",
         "laravel/reverb": "^1.11",
         "laravel/tinker": "^2.10",
+        "maxmind-db/reader": "^1.15",
         "spatie/laravel-translatable": "^6.0"
     },
     "require-dev": {

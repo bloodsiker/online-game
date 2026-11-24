@@ -231,11 +231,8 @@
                                                     @endforeach
                                                     @foreach($skill->effects ?? [] as $entry)
                                                         @continue(! is_array($entry) || empty($entry['type']))
-                                                        @php
-                                                            $statLabel = \App\Modules\Share\Domain\Enums\PassiveBonusStatType::tryFrom($entry['type'])?->label() ?? $entry['type'];
-                                                            $sign = ((float) ($entry['value'] ?? 0)) >= 0 ? '+' : '';
-                                                        @endphp
-                                                        <div>{{ $statLabel }}: <b>{{ $sign }}{{ $entry['value'] ?? 0 }}{{ !empty($entry['is_percent']) ? '%' : '' }}</b></div>
+                                                        @php $bonus = \App\Modules\Share\Domain\Enums\PassiveBonusStatType::present($entry); @endphp
+                                                        <div>{{ $bonus['label'] }}: <b>{{ $bonus['value'] }}</b></div>
                                                     @endforeach
                                                     @if($skill->description)
                                                         <div class="grimoire__desc">{{ $skill->description }}</div>

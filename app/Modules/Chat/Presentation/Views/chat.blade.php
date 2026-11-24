@@ -40,6 +40,7 @@
         a { color: navy; text-decoration: none; }
         a:hover { text-decoration: underline; }
         a.n { text-decoration: none; }
+        a.chat-url-title { font-weight: 600; }
 
         /* Message type styles */
         .msg-message,

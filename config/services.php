@@ -65,6 +65,12 @@ return [
         'validity' => (int) env('MONOBANK_INVOICE_VALIDITY', 3600),
     ],
 
+    // Страна и город по IP: локальная база DB-IP Lite (MMDB), обновляется раз в месяц командой geoip:update.
+    'geoip' => [
+        'path' => env('GEOIP_DATABASE_PATH', storage_path('app/geoip/dbip-city-lite.mmdb')),
+        'download_url' => 'https://download.db-ip.com/free/dbip-city-lite-%s.mmdb.gz',
+    ],
+
     // Тег Google (GTM). Пустое значение — тег не выводится.
     'google_tag' => [
         'id' => env('GOOGLE_TAG_ID', 'GTM-M9R2VFHZ'),

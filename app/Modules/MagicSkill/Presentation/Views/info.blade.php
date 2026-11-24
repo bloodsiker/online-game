@@ -284,9 +284,10 @@
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                                 @foreach($skill->effects as $effect)
+                                                                                    @php $bonus = \App\Modules\Share\Domain\Enums\PassiveBonusStatType::present($effect); @endphp
                                                                                     <tr>
-                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="padding-left: 15px;"><b>{{ \App\Modules\Share\Domain\Enums\PassiveBonusStatType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? 'Бонус') }}</b></td>
-                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px;"><b class="tbl_red">+{{ $effect['value'] ?? 0 }}{{ !empty($effect['is_percent']) ? '%' : '' }}</b></td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="padding-left: 15px;"><b>{{ $bonus['label'] }}</b></td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px;"><b class="tbl_red">{{ $bonus['value'] }}</b></td>
                                                                                     </tr>
                                                                                     @php $light = ! $light; @endphp
                                                                                 @endforeach

@@ -7,6 +7,7 @@ namespace App\Modules\Scheduler\Application\Services;
 use App\Modules\Clan\Application\UseCases\ProcessExpiredClanTaxes;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredClanBossRuns;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
+use App\Modules\Auth\Infrastructure\GeoIp\GeoIpDatabaseUpdater;
 use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
 use App\Modules\Npc\Application\Services\NpcMovementService;
@@ -43,6 +44,8 @@ class ScheduledTaskRegistry
     public const MOVE_MONSTERS = 'monsters.move';
 
     public const SYNC_NBU_RATE = 'payments.sync_nbu_rate';
+
+    public const UPDATE_GEOIP = 'geoip.update';
 
     public function __construct(
         private readonly ConsoleKernel $console,
@@ -159,6 +162,16 @@ class ScheduledTaskRegistry
                 lockSeconds: 3600,
                 successHistoryIntervalSeconds: 3600,
             ),
+            self::UPDATE_GEOIP => new ScheduledTaskDefinition(
+                key: self::UPDATE_GEOIP,
+                name: 'База GeoIP (страна и город по IP)',
+                description: 'Раз в сутки проверяет, вышла ли новая ежемесячная база DB-IP Lite, и подменяет файл в storage/app/geoip. Если база за этот месяц уже есть, ничего не делает.',
+                defaultFrequency: ScheduledTaskFrequency::DAILY,
+                allowedFrequencies: [ScheduledTaskFrequency::DAILY],
+                settingsMutable: false,
+                lockSeconds: 900,
+                successHistoryIntervalSeconds: 3600,
+            ),
             self::SYNC_NBU_RATE => new ScheduledTaskDefinition(
                 key: self::SYNC_NBU_RATE,
                 name: 'Курс НБУ (USD/UAH)',
@@ -205,6 +218,7 @@ class ScheduledTaskRegistry
                 $this->processExpiredClanBossRuns->execute(now()),
             ),
             self::DATABASE_BACKUP => $this->createDatabaseBackup(),
+            self::UPDATE_GEOIP => app(GeoIpDatabaseUpdater::class)->updateIfOutdated(),
             self::SYNC_NBU_RATE => sprintf('Курс НБУ: %s грн за 1 USD.', number_format($this->nbuExchangeRate->sync(), 4, '.', '')),
             default => throw new InvalidArgumentException('Неизвестная задача планировщика.'),
         };

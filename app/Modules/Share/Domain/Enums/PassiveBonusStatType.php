@@ -29,6 +29,7 @@ enum PassiveBonusStatType: string
     case DEBUFF_DURATION_REDUCTION = 'debuff_duration_reduction';
     case LETHAL_SURVIVE_CHANCE = 'lethal_survive_chance';
 
+    /** Название для игроков. Подсказки для админки — в adminLabel(). */
     public function label(): string
     {
         return match ($this) {
@@ -42,9 +43,44 @@ enum PassiveBonusStatType: string
             self::ATTACK => __('Атака'),
             self::DEFENSE => __('Защита'),
             self::MAGIC_RESISTANCE => __('Магическое сопротивление'),
+            self::MAGIC_DAMAGE_PERCENT => __('Магический урон'),
+            self::DEBUFF_DURATION_REDUCTION => __('Сокращение длительности дебаффов'),
+            self::LETHAL_SURVIVE_CHANCE => __('Шанс выжить при смертельном ударе'),
+        };
+    }
+
+    /** Название с техническими подсказками — только для выпадающих списков админки. */
+    public function adminLabel(): string
+    {
+        return match ($this) {
             self::MAGIC_DAMAGE_PERCENT => __('Магический урон (%, значение = сам процент, is_percent не ставить)'),
             self::DEBUFF_DURATION_REDUCTION => __('Сокращение длительности дебаффов (%, боевой хук, не StatSheet)'),
             self::LETHAL_SURVIVE_CHANCE => __('Шанс выжить при смертельном ударе (%, боевой хук, не StatSheet)'),
+            default => $this->label(),
         };
+    }
+
+    /** Эти бонусы всегда в процентах, даже если в данных нет is_percent (у magic_damage_percent значение уже процент). */
+    public function isAlwaysPercent(): bool
+    {
+        return in_array($this, [self::MAGIC_DAMAGE_PERCENT, self::DEBUFF_DURATION_REDUCTION, self::LETHAL_SURVIVE_CHANCE], true);
+    }
+
+    /**
+     * Название и значение бонуса пассивки для показа игроку: «Магическое сопротивление» / «+5%».
+     *
+     * @param  array<string, mixed>  $effect  элемент magic_skills.effects: type, value, is_percent
+     * @return array{label: string, value: string}
+     */
+    public static function present(array $effect): array
+    {
+        $type = self::tryFrom((string) ($effect['type'] ?? ''));
+        $value = $effect['value'] ?? 0;
+        $percent = ! empty($effect['is_percent']) || ($type?->isAlwaysPercent() ?? false);
+
+        return [
+            'label' => $type?->label() ?? (string) ($effect['type'] ?? __('Бонус')),
+            'value' => ((float) $value >= 0 ? '+' : '').$value.($percent ? '%' : ''),
+        ];
     }
 }

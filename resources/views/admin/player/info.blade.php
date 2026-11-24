@@ -39,6 +39,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-logins" href="#tab-logins" data-bs-toggle="tab">
+                                    Входы <span class="badge badge-primary">{{ $loginHistory->count() }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#tab-detention" href="#tab-detention" data-bs-toggle="tab">
                                     Темница
                                     @if($activeDetention)<span class="badge badge-danger">Заключён</span>@endif
@@ -436,6 +441,15 @@
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+
+                            {{-- ВХОДЫ --}}
+                            <div id="tab-logins" class="tab-pane">
+                                <div class="mt-3 mb-2">
+                                    Последние {{ $loginHistory->count() }} входов.
+                                    <a href="{{ route('admin.login_history.index', ['user' => $player->user_id]) }}">Вся история игрока</a>
+                                </div>
+                                @include('admin.login_history.partials.table', ['logs' => $loginHistory, 'showUser' => false])
                             </div>
 
                             <div id="tab-detention" class="tab-pane">

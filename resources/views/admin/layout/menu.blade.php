@@ -97,7 +97,7 @@
                             <i class="bx bx-layer" aria-hidden="true"></i><span>Сборки предметов</span>
                         </a>
                     </li>
-                    <li class="{{ request()->routeIs('admin.item_logs', 'admin.purchase_logs.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
+                    <li class="{{ request()->routeIs('admin.item_logs', 'admin.purchase_logs.*', 'admin.login_history.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
                         <a class="nav-link" href="#">
                             <i class="bx bx-history" aria-hidden="true"></i>
                             <span>Логи</span>
@@ -108,6 +108,9 @@
                             </li>
                             <li class="{{ request()->routeIs('admin.purchase_logs.*') ? 'nav-active' : '' }}">
                                 <a class="nav-link" href="{{ route('admin.purchase_logs.index') }}">Покупки</a>
+                            </li>
+                            <li class="{{ request()->routeIs('admin.login_history.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.login_history.index') }}">Входы</a>
                             </li>
                         </ul>
                     </li>

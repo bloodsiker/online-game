@@ -686,19 +686,6 @@
                         @if($page->passiveSkills->isEmpty())
                             <div class="empty-state">{{ __('Нет пассивных навыков') }}</div>
                         @else
-                            @php
-                                $effectLabels = [
-                                    'strength'     => __('Сила'),
-                                    'intuition'    => __('Интуиция'),
-                                    'agility'      => __('Ловкость'),
-                                    'intelligence' => __('Интеллект'),
-                                    'wisdom'       => __('Мудрость'),
-                                    'hp_max'       => __('Макс. HP'),
-                                    'mp_max'       => __('Макс. MP'),
-                                    'attack'       => __('Атака'),
-                                    'defense'      => __('Защита'),
-                                ];
-                            @endphp
                             <div class="passive-list">
                                 @foreach($page->passiveSkills as $skill)
                                     <div class="passive-card">
@@ -719,9 +706,10 @@
                                             @if(!empty($skill->effects))
                                                 <div class="passive-effects">
                                                     @foreach($skill->effects as $effect)
+                                                        @php $bonus = \App\Modules\Share\Domain\Enums\PassiveBonusStatType::present($effect); @endphp
                                                         <span class="effect-badge">
-                                                             {{ $effectLabels[$effect['type']] ?? $effect['type'] }}
-                                                            +{{ $effect['value'] }}{{ !empty($effect['is_percent']) ? '%' : '' }}
+                                                             {{ $bonus['label'] }}
+                                                            {{ $bonus['value'] }}
                                                         </span>
                                                     @endforeach
                                                 </div>

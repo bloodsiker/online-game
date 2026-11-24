@@ -6,12 +6,14 @@ namespace App\Modules\Battle\Application\UseCases;
 
 use App\Modules\Battle\Application\DTOs\FightDTO;
 use App\Modules\Battle\Application\Services\Battle\BattleActionLocks;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Player\Application\Services\FatigueService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -19,6 +21,22 @@ use Illuminate\Support\Facades\DB;
 
 class RunAway
 {
+    /** Куда убегает игрок: сторона, в которую ведёт предыдущая локация. */
+    private const ESCAPE_MESSAGES = [
+        'north' => 'Вы бежали на север...',
+        'south' => 'Вы бежали на юг...',
+        'east' => 'Вы бежали на восток...',
+        'west' => 'Вы бежали на запад...',
+        'up' => 'Вы бежали наверх...',
+        'down' => 'Вы бежали вниз...',
+    ];
+
+    /** Если предыдущая локация не соседняя (телепорт, врата) — направление неизвестно. */
+    private const ESCAPE_UNKNOWN_MESSAGE = 'Вы отступили...';
+
+    /** Текст удачного побега (без <p>) — заполняется после успешного execute() для страницы побега. */
+    public ?string $escapeMessage = null;
+
     public function __construct(private readonly BattleActionLocks $locks, private readonly RandomizerInterface $random) {}
 
     /** Null is a successful escape; a failed attempt returns its committed round. */
@@ -40,13 +58,17 @@ class RunAway
             $isDummyBattle = BattleDetail::where('battle_id', $battleId)->whereHas('locationMonster.monster', fn ($query) => $query->where('is_training_dummy', true))->exists();
             $success = $isDummyBattle || $this->random->between(0, 100) > 50;
             abort_if($success && ! $isDummyBattle && $user->prev_location_id === null, 409, __('Некуда отступать.'));
+            if ($success && ! $isDummyBattle) {
+                $direction = $this->escapeDirection((int) $user->location_id, (int) $user->prev_location_id);
+                $this->escapeMessage = $direction !== null ? self::ESCAPE_MESSAGES[$direction] : self::ESCAPE_UNKNOWN_MESSAGE;
+            }
             $battle->increment('rounds');
             $monster = $success ? null : BattleDetail::with('locationMonster.monster')->where('battle_id', $battleId)
                 ->whereNotNull('location_monster_id')->where('status', BattleDetailStatus::LIFE)->orderBy('id')->first();
             $round = BattleRound::create([
                 'battle_id' => $battleId, 'round_number' => $battle->rounds, 'user_id' => $user->id,
                 'location_monster_id' => $monster?->location_monster_id,
-                'action' => $isDummyBattle ? '<p>Вы закончили тренировку.</p>' : ($success ? '<p>Вы бежали на восток...</p>' : '<p>Вы попытались бежать... не получилось.</p>'),
+                'action' => $isDummyBattle ? '<p>Вы закончили тренировку.</p>' : ($success ? BattleLogTranslator::format('<p>'.$this->escapeMessage.'</p>') : '<p>Вы попытались бежать... не получилось.</p>'),
             ]);
             if (! $success) {
                 return (new FightDTO)->setBattle($battle)->setBattleRound($round)->setPlayer($player)->setAttackedMonster($monster);
@@ -63,5 +85,22 @@ class RunAway
 
             return null;
         });
+    }
+
+    /** В какую сторону от $fromId ведёт локация $toId (null — не соседняя). */
+    private function escapeDirection(int $fromId, int $toId): ?string
+    {
+        $from = Location::query()->find($fromId);
+        if ($from === null) {
+            return null;
+        }
+
+        foreach (array_keys(self::ESCAPE_MESSAGES) as $side) {
+            if ((int) $from->{$side} === $toId) {
+                return $side;
+            }
+        }
+
+        return null;
     }
 }

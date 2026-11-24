@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Auth\Infrastructure\Persistence\Models\LoginHistory;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Moderation\Application\Services\CommunicationMuteService;
@@ -110,7 +111,14 @@ class PlayerController extends Controller
             ->get();
         $activeDetention = $detentionHistory->first(fn (PlayerDetention $record): bool => $record->isActive());
 
+        $loginHistory = LoginHistory::query()
+            ->where('user_id', $player->user_id)
+            ->orderByDesc('id')
+            ->limit(20)
+            ->get();
+
         return view('admin.player.info', compact(
+            'loginHistory',
             'player',
             'backpack',
             'playerReputations',

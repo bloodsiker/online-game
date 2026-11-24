@@ -3256,5 +3256,63 @@
         document.addEventListener('DOMContentLoaded', () => showErrorIframe(@js(session('message'))));
     </script>
 @endif
+<script>
+    // Данные браузера для истории входов: один раз за вкладку, после загрузки игры и в простое — игру не тормозит.
+    (function () {
+        const flag = 'login_client_info_sent';
+        try { if (sessionStorage.getItem(flag)) return; } catch (e) {}
+
+        function collect() {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
+            const mode = ['standalone', 'fullscreen', 'minimal-ui'].find(m => window.matchMedia('(display-mode: ' + m + ')').matches) || 'browser';
+            const data = {
+                timezone: (Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || null,
+                language: navigator.language || null,
+                languages: (navigator.languages || []).slice(0, 5).join(',') || null,
+                screen_width: window.screen && screen.width || null,
+                screen_height: window.screen && screen.height || null,
+                viewport_width: window.innerWidth || null,
+                viewport_height: window.innerHeight || null,
+                pixel_ratio: window.devicePixelRatio || null,
+                touch_points: navigator.maxTouchPoints || 0,
+                color_scheme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+                display_mode: mode,
+                connection_type: connection.effectiveType || null,
+                connection_kind: connection.type || null,
+                downlink: typeof connection.downlink === 'number' ? connection.downlink : null,
+                rtt: typeof connection.rtt === 'number' ? connection.rtt : null,
+                save_data: typeof connection.saveData === 'boolean' ? connection.saveData : null,
+                device_memory: navigator.deviceMemory || null,
+                cpu_cores: navigator.hardwareConcurrency || null,
+            };
+            Object.keys(data).forEach(function (key) { if (data[key] === null) delete data[key]; });
+
+            return data;
+        }
+
+        function send() {
+            try { sessionStorage.setItem(flag, '1'); } catch (e) {}
+            fetch(@json(route('auth.session.client-info', [], false)), {
+                method: 'POST',
+                credentials: 'same-origin',
+                keepalive: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+                body: JSON.stringify(collect()),
+            }).catch(function () {});
+        }
+
+        window.addEventListener('load', function () {
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(send, { timeout: 5000 });
+            } else {
+                setTimeout(send, 3000);
+            }
+        });
+    })();
+</script>
 </body>
 </html>
