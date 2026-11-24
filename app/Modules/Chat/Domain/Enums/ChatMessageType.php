@@ -22,4 +22,5 @@ enum ChatMessageType: string
     case ClanInvite = 'clan_invite';
     case PlayerTradeInvite = 'player_trade_invite';
     case BossDefeat = 'boss_defeat';
+    case Rand = 'rand';
 }

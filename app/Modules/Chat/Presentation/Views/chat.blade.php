@@ -45,6 +45,7 @@
 
         /* Message type styles */
         .msg-message,
+        .msg-rand,
         .msg-player_trade_invite { border-left: 2px solid transparent; padding-left: 3px; }
         .msg-private   { border-left: 2px solid #cc6600; padding-left: 3px; }
         .msg-system    { border-left: 2px solid #006600; padding-left: 3px; }

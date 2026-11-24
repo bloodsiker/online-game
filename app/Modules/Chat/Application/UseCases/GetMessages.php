@@ -104,6 +104,7 @@ class GetMessages
     private function expirationTime(ChatMessage $message, ChatChannel $viewChannel): ?string
     {
         $expiresAt = match (true) {
+            $message->type === ChatMessageType::Rand => $message->created_at->copy()->addMinutes(ChatMessageLifetime::RAND_MINUTES),
             $message->channel === ChatChannel::Clan && $message->type === ChatMessageType::ClanBoss => $message->created_at->copy()->addMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES),
             $message->channel === ChatChannel::System && $message->type !== ChatMessageType::News => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
             $message->channel === ChatChannel::Private && $viewChannel !== ChatChannel::Private => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),

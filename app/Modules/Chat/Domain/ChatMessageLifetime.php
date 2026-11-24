@@ -11,4 +11,7 @@ final class ChatMessageLifetime
     public const CLAN_SYSTEM_MINUTES = 15;
 
     public const PERSONAL_MINUTES = 10;
+
+    /** Результат команды /rand живёт в чате 10 минут. */
+    public const RAND_MINUTES = 10;
 }

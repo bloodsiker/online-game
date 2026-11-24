@@ -36,6 +36,7 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
     private function scheduleExpirationBroadcast(ChatMessage $message): void
     {
         $expiresAt = match (true) {
+            $message->type === ChatMessageType::Rand => $message->created_at->copy()->addMinutes(ChatMessageLifetime::RAND_MINUTES),
             $message->channel === ChatChannel::Clan && $message->type === ChatMessageType::ClanBoss => $message->created_at->copy()->addMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES),
             $message->channel === ChatChannel::System && $message->type !== ChatMessageType::News => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
             $message->channel === ChatChannel::Private => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
@@ -208,6 +209,11 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 
             ChatChannel::System => $query->where('channel', ChatChannel::System->value),
         };
+
+        // Результат /rand не показываем старше 10 минут (и при подгрузке истории, и при проверке id на клиенте).
+        $query->where(fn ($q) => $q
+            ->where('type', '!=', ChatMessageType::Rand->value)
+            ->orWhere('created_at', '>=', Carbon::now()->subMinutes(ChatMessageLifetime::RAND_MINUTES)));
     }
 
     private function applyPartyChannelFilter(Builder $query, User $user): Builder

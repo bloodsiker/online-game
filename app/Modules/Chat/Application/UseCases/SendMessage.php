@@ -16,6 +16,13 @@ use RuntimeException;
 
 class SendMessage
 {
+    private const RAND_MIN = 0;
+
+    private const RAND_MAX = 100;
+
+    /** Без слов, чтобы одинаково читалось на любом языке игры. */
+    private const RAND_MESSAGE = '🎲 %d (0–100)';
+
     public function __construct(
         private readonly ChatMessageRepositoryInterface $repository,
         private readonly PartyRepositoryInterface $partyRepository,
@@ -30,12 +37,19 @@ class SendMessage
      *   to[NAME] - text    → public mention in current channel
      *   [[item_ID]]        → item shortcode
      *   [[share_item_ID]]  → shared item shortcode
+     *   /rand              → случайное число от 0 до 100 в текущий канал
      */
     public function execute(User $sender, string $raw, ChatChannel $defaultChannel): ChatMessage
     {
         $this->communicationMuteService->throwIfMuted($sender, CommunicationScope::Chat);
 
         $raw = trim($raw);
+
+        // Команда /rand: вместо текста в канал уходит случайное число от 0 до 100 (видят все в этом канале).
+        $isRand = preg_match('/^\/rand$/i', $raw) === 1;
+        if ($isRand) {
+            $raw = sprintf(self::RAND_MESSAGE, random_int(self::RAND_MIN, self::RAND_MAX));
+        }
 
         // Private message: prv[NAME] - text  OR  prv[NAME] text
         if (preg_match('/^prv\[([^\]]+)\]\s*-?\s*(.*)/is', $raw, $matches)) {
@@ -52,9 +66,11 @@ class SendMessage
             ]);
         }
 
-        $type = preg_match('/^to\[([^\]]+)\]/i', $raw)
-            ? ChatMessageType::Mention
-            : ChatMessageType::Message;
+        $type = match (true) {
+            $isRand => ChatMessageType::Rand,
+            preg_match('/^to\[([^\]]+)\]/i', $raw) === 1 => ChatMessageType::Mention,
+            default => ChatMessageType::Message,
+        };
 
         $data = [
             'user_id' => $sender->id,
