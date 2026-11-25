@@ -39,7 +39,8 @@ class DropService
 
     /**
      * Монеты с монстра делятся между всеми, кто его бил, пропорционально урону (см. MonsterLootService::moneyShares).
-     * Каждый получает личное сообщение в чат; убийца видит ещё и свою долю в строке гибели в логе боя.
+     * Личное сообщение в чат получают только за боссов (за обычных мобов не пишем, чтобы не раздувать таблицу чата);
+     * убийца видит свою долю в строке гибели в логе боя.
      */
     public function dropMoney(User $killer, MonsterOnLocation $locationMonster, AttackResultDTO $result, ?int $battleId = null): void
     {
@@ -68,11 +69,13 @@ class DropService
                 if ($user->id === $killer->id) {
                     $killerMoney = $money;
                 }
-                $this->chatService->sendLootToUser($user, new LocalizedChatMessage('chat.monster_money_share', [
-                    'amount' => format_money($money),
-                    'percent' => $share['percent'],
-                    'monster' => LocalizedChatMessage::contentName($monster),
-                ]));
+                if ($monster->isBoss()) {
+                    $this->chatService->sendLootToUser($user, new LocalizedChatMessage('chat.monster_money_share', [
+                        'amount' => format_money($money),
+                        'percent' => $share['percent'],
+                        'monster' => LocalizedChatMessage::contentName($monster),
+                    ]));
+                }
             }
         }
 
