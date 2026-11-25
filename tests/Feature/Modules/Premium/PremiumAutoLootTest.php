@@ -375,7 +375,7 @@ final class PremiumAutoLootTest extends TestCase
         $this->assertDatabaseCount('battle_monster_damage', 0);
     }
 
-    public function test_monster_coins_are_paid_once_to_the_top_damage_dealer(): void
+    public function test_monster_coins_are_split_between_damage_dealers_and_paid_once(): void
     {
         Schema::create('map_influences', function (Blueprint $table): void {
             $table->unsignedBigInteger('user_id');
@@ -397,18 +397,20 @@ final class PremiumAutoLootTest extends TestCase
             ['battle_id' => 1, 'location_monster_id' => 1, 'user_id' => 2, 'damage' => 90],
             ['battle_id' => 1, 'location_monster_id' => 1, 'user_id' => 1, 'damage' => 10],
         ]);
-        $recipient = app(MonsterLootService::class)->recipient(1, 1, User::without('player')->findOrFail(1));
+        $killer = User::without('player')->findOrFail(1);
         $monster = MonsterOnLocation::findOrFail(1);
         $monster->setRelation('monster', (new Monster)->forceFill(['name' => 'Тест', 'min_money' => 50, 'max_money' => 50]));
         $monster->setRelation('location', (new Location)->forceFill(['map_id' => 10]));
 
         $service = app(DropService::class);
         $result = new AttackResultDTO;
-        $service->dropMoney($recipient, $monster, $result);
-        $service->dropMoney($recipient, $monster, $result);
+        $before = (int) DB::table('users')->where('id', 1)->value('money');
+        $service->dropMoney($killer, $monster, $result, 1);
+        $service->dropMoney($killer, $monster, $result, 1);
 
-        $this->assertDatabaseHas('users', ['id' => 1, 'money' => 100]);
-        $this->assertDatabaseHas('users', ['id' => 2, 'money' => 50]);
+        // 50 монет делятся по урону 90/10: 45 тому, кто бил больше, и 5 убийце (повторная выдача ничего не меняет).
+        $this->assertDatabaseHas('users', ['id' => 2, 'money' => 45]);
+        $this->assertSame(5, (int) DB::table('users')->where('id', 1)->value('money') - $before);
     }
 
     private function checkbox(string $html): \DOMElement

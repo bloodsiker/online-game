@@ -6,6 +6,7 @@ namespace App\Modules\Item\Infrastructure\Persistence\Models;
 
 use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Party\Infrastructure\Persistence\Models\PartyMember;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,9 +43,19 @@ class ItemOnLocation extends Model
 
     public function isReservedForAnotherUser(int $userId): bool
     {
-        return $this->loot_owner_id !== null
-            && (int) $this->loot_owner_id !== $userId
-            && $this->loot_reserved_until?->isFuture();
+        if ($this->loot_owner_id === null
+            || (int) $this->loot_owner_id === $userId
+            || ! $this->loot_reserved_until?->isFuture()) {
+            return false;
+        }
+
+        // Лут группы закреплён за всеми её участниками, а не за одним игроком.
+        if ($this->loot_party_id !== null
+            && PartyMember::query()->where('party_id', $this->loot_party_id)->where('user_id', $userId)->exists()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function scopeVisible(Builder $query): Builder

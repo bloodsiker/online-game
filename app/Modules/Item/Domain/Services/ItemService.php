@@ -168,6 +168,7 @@ class ItemService
             $slot->interaction_type = LocationItemInteractionType::PICKUP;
             // A discarded item is public loot, including items previously reserved in battle.
             $slot->loot_owner_id = null;
+            $slot->loot_party_id = null;
             $slot->loot_reserved_until = null;
             if ($location->dungeon_id !== null) {
                 $slot->dungeon_session_id = DungeonSession::where('user_id', $user->id)->first()?->monsterSessionId();

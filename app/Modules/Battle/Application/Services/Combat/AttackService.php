@@ -954,8 +954,7 @@ readonly class AttackService
 
         MonsterActiveEffect::where('location_monster_id', $locationMonster->id)->delete();
 
-        $recipient = $this->monsterLootService->recipient($attackedMonster->battle_id, $locationMonster->id, $player->user);
-        $this->dropService->dropMoney($recipient, $locationMonster, $result);
+        $this->dropService->dropMoney($player->user, $locationMonster, $result, (int) $attackedMonster->battle_id);
         foreach ($this->questService->progressKillAndCollect($player, $locationMonster) as $message) {
             $result->logSide($message);
         }

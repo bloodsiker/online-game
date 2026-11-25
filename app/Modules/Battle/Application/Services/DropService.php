@@ -37,26 +37,46 @@ class DropService
         private readonly ?BattlePhraseBook $phraseBook = null,
     ) {}
 
-    public function dropMoney(User $user, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
+    /**
+     * Монеты с монстра делятся между всеми, кто его бил, пропорционально урону (см. MonsterLootService::moneyShares).
+     * Каждый получает личное сообщение в чат; убийца видит ещё и свою долю в строке гибели в логе боя.
+     */
+    public function dropMoney(User $killer, MonsterOnLocation $locationMonster, AttackResultDTO $result, ?int $battleId = null): void
     {
         if ($locationMonster->is_drop_money) {
             return;
         }
 
         $monster = $locationMonster->monster;
+        $killerMoney = null;
+
         if ($monster->min_money > 0 && $monster->max_money > 0) {
-            $money = mt_rand($monster->min_money, $monster->max_money);
-            $bonusPercent = $this->influenceBonusService
-                ->for($user->id, (int) $locationMonster->location->map_id)
-                ->monsterMoneyPercent;
-            $bonusPercent += $this->premiumBonusService
-                ->value($user->id, PremiumBonus::MONSTER_MONEY);
-            $money = max(1, (int) round($money * (1 + $bonusPercent / 100)));
-            $user->increment('money', $money);
-            $result->log($this->deathLog($monster, $money));
-        } else {
-            $result->log($this->deathLog($monster, null));
+            $total = mt_rand($monster->min_money, $monster->max_money);
+            $battleId ??= (int) BattleDetail::query()->where('location_monster_id', $locationMonster->id)->latest('id')->value('battle_id');
+            $mapId = (int) $locationMonster->location->map_id;
+
+            foreach ($this->monsterLootService->moneyShares($battleId, (int) $locationMonster->id, $total, (int) $killer->id) as $share) {
+                $user = $share['user_id'] === (int) $killer->id ? $killer : User::without('player')->find($share['user_id']);
+                if ($user === null) {
+                    continue;
+                }
+                $bonusPercent = $this->influenceBonusService->for($user->id, $mapId)->monsterMoneyPercent
+                    + $this->premiumBonusService->value($user->id, PremiumBonus::MONSTER_MONEY);
+                $money = max(1, (int) round($share['amount'] * (1 + $bonusPercent / 100)));
+                $user->increment('money', $money);
+
+                if ($user->id === $killer->id) {
+                    $killerMoney = $money;
+                }
+                $this->chatService->sendLootToUser($user, new LocalizedChatMessage('chat.monster_money_share', [
+                    'amount' => format_money($money),
+                    'percent' => $share['percent'],
+                    'monster' => LocalizedChatMessage::contentName($monster),
+                ]));
+            }
         }
+
+        $result->log($this->deathLog($monster, $killerMoney));
 
         $locationMonster->is_drop_money = 1;
         $locationMonster->save();
@@ -75,17 +95,19 @@ class DropService
                     continue;
                 }
 
-                $recipient = $this->monsterLootService->recipient($battle->id, $monster->location_monster_id, $dropRecipient);
+                $owner = $this->monsterLootService->lootOwner($battle->id, $monster->location_monster_id, $dropRecipient);
+                $recipient = $owner['user'];
                 $recipients[$recipient->id]['user'] ??= $recipient;
+                $recipients[$recipient->id]['party_id'] ??= $owner['party_id'];
                 $recipients[$recipient->id]['monsters'][] = $monster->locationMonster;
             }
             foreach ($recipients as $group) {
-                $this->dropMonsterItems($group['monsters'], $location, $group['user'], $dungeonSessionId);
+                $this->dropMonsterItems($group['monsters'], $location, $group['user'], $dungeonSessionId, $group['party_id'] ?? null);
             }
         }
     }
 
-    private function dropMonsterItems(array $monsters, Location $location, User $dropRecipient, ?int $dungeonSessionId): void
+    private function dropMonsterItems(array $monsters, Location $location, User $dropRecipient, ?int $dungeonSessionId, ?int $lootPartyId = null): void
     {
         $droppedItems = [];
         // «Эликсир удачи охотника»: +% к шансу дропа (кроме сундуков и предметов под эффект).
@@ -144,6 +166,7 @@ class DropService
             $pivotData = [
                 'count' => $dropItem['count'],
                 'loot_owner_id' => $dropRecipient->id,
+                'loot_party_id' => $lootPartyId,
                 'loot_reserved_until' => now()->addMinute(),
                 'interaction_type' => LocationItemInteractionType::PICKUP->value,
                 'expires_at' => $dropItem['item']->groundExpiresAt(),

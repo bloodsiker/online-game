@@ -44,6 +44,7 @@ return [
     'received_item' => ' Получен [[share_item_:item_id]] ×:count.',
     'gathering' => 'Вы получили вещь :resource:bonus',
     'monster_auto_loot' => 'Автосбор: вы получили [[share_item_:item_id]] ×:count.',
+    'monster_money_share' => 'Вы получили :amount монет за убийство «:monster» (:percent% нанесённого урона).',
     'monster_auto_loot_money' => 'Автосбор: вы получили :amount монет.',
     'gathering_resource' => '<b>:name</b> :count шт. (в рюкзаке :backpack_count шт.)',
     'gathering_bonus' => ' Дополнительно: :resources',
