@@ -105,10 +105,8 @@ class GemSeeder extends Seeder
                 ],
                 [
                     'description' => sprintf(
-                        'Разово устанавливается на предмет и открывает %d-%d сокет(ов). Стоимость установки у кузнеца: %d монет.',
-                        $min,
-                        $max,
-                        MountRarityConfig::openCost($rarity)
+                        'Оправа с зазубренными краями. Открывает в предмете %s для самоцветов. Устанавливается один раз — и остаётся навсегда.',
+                        $min === $max ? $max.' гнезд(а)' : 'от '.$min.' до '.$max.' гнёзд'
                     ),
                     'image' => '/img/resource/sokets/'.self::MOUNT_IMAGES[$rarity->value],
                     'rarity' => $rarity->value,

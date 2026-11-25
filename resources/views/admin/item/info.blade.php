@@ -1498,10 +1498,29 @@
     @endif
 
     @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)
+    function formatChestContentItem(item) {
+        if (!item.id || !item.image) return item.text;
+
+        const icon = $('<img>', {
+            src: item.image,
+            width: 22,
+            height: 22,
+            alt: '',
+        }).css({
+            objectFit: 'contain',
+            marginRight: '6px',
+            verticalAlign: 'middle',
+        });
+
+        return $('<span>').append(icon, document.createTextNode(item.text));
+    }
+
     $('#sel-chest-content-item').select2({
         theme: 'bootstrap',
         placeholder: 'Выберите предмет',
         allowClear: true,
+        templateResult: formatChestContentItem,
+        templateSelection: formatChestContentItem,
         ajax: {
             url: '{{ route('admin.api.items') }}',
             dataType: 'json',
