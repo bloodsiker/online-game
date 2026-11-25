@@ -91,9 +91,39 @@ class SummonMinionsMechanic extends BaseBossMechanic
         $this->markAsTriggered($context);
     }
 
+    /** Общее описание для любого босса: количество за призыв, лимит живых и перезарядка — из config. */
     public function getDescription(): string
     {
-        return 'Чрево призывает подкрепление из глубин кургана';
+        $min = $this->getConfig('min_count');
+        $max = $this->getConfig('max_count');
+        [$from, $to] = $min !== null && $max !== null
+            ? [(int) $min, (int) $max]
+            : [(int) $this->getConfig('count', 2), (int) $this->getConfig('count', 2)];
+        $count = $from === $to ? (string) $to : $from.'–'.$to;
+
+        $details = [];
+        if (($maxActive = $this->getConfig('max_active')) !== null) {
+            $details[] = 'одновременно не больше '.(int) $maxActive;
+        }
+        if (($cooldown = (int) $this->getConfig('cooldown_turns', 0)) > 0) {
+            $details[] = 'не чаще раза в '.$cooldown.' '.self::plural($cooldown, 'ход', 'хода', 'ходов');
+        }
+
+        return 'Босс призывает на помощь '.$count.' '.self::plural($to, 'миньона', 'миньонов', 'миньонов')
+            .($details !== [] ? ' ('.implode(', ', $details).')' : '');
+    }
+
+    private static function plural(int $number, string $one, string $few, string $many): string
+    {
+        $mod100 = $number % 100;
+        $mod10 = $number % 10;
+
+        return match (true) {
+            $mod100 >= 11 && $mod100 <= 14 => $many,
+            $mod10 === 1 => $one,
+            $mod10 >= 2 && $mod10 <= 4 => $few,
+            default => $many,
+        };
     }
 
     private function rollCount(): int

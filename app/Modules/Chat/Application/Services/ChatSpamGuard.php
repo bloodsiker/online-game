@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Application\Services;
 
+use App\Modules\Chat\Domain\Events\ChatMessageExpired;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Moderation\Application\Services\CommunicationMuteService;
 use App\Modules\Moderation\Domain\Enums\CommunicationScope;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Collection;
 
 /**
  * Автоматическое молчание за спам в чате. Срабатывает после отправки сообщения игроком:
  *  - флуд: FLOOD_MESSAGES и больше сообщений за FLOOD_SECONDS секунд;
  *  - повтор: REPEAT_MESSAGES одинаковых сообщений за REPEAT_SECONDS секунд
  *    (сравниваются только буквы и цифры — приписки «+», «--», «*-*» не спасают).
+ * При срабатывании игроку накладывается молчание, а его сообщения за последние REPEAT_SECONDS секунд
+ * удаляются из чата (у открытых чатов они исчезают сразу, без перезагрузки).
  */
 final readonly class ChatSpamGuard
 {
@@ -43,7 +47,7 @@ final readonly class ChatSpamGuard
             ->where('created_at', '>=', now()->subSeconds(self::REPEAT_SECONDS))
             ->latest('id')
             ->limit(50)
-            ->get(['id', 'message', 'created_at']);
+            ->get();
 
         $flood = $recent->filter(fn (ChatMessage $message): bool => $message->created_at->gte(now()->subSeconds(self::FLOOD_SECONDS)))->count();
         $repeats = (int) ($recent
@@ -57,8 +61,18 @@ final readonly class ChatSpamGuard
         }
 
         $this->mutes->mute($sender, null, CommunicationScope::Chat, self::MUTE_MINUTES, self::REASON);
+        $this->removeSpam($recent);
 
         return true;
+    }
+
+    /** @param  Collection<int, ChatMessage>  $messages */
+    private function removeSpam(Collection $messages): void
+    {
+        foreach ($messages as $message) {
+            ChatMessageExpired::dispatch($message);
+            $message->delete();
+        }
     }
 
     /** Текст без регистра, пробелов и знаков: «Играйте с нами +» и «играйте с нами --» совпадут. */
