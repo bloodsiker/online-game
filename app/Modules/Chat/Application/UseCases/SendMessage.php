@@ -18,10 +18,14 @@ class SendMessage
 {
     private const RAND_MIN = 0;
 
-    private const RAND_MAX = 100;
+    /** Верхняя граница по умолчанию для /rand без числа. */
+    private const RAND_DEFAULT_MAX = 100;
 
-    /** Русский вариант для хранения; каждому игроку текст рисуется на его языке по ключу chat.rand_result. */
-    private const RAND_MESSAGE = 'Кинул случайное число %d';
+    /** Потолок, чтобы число в сообщении оставалось читаемым. */
+    private const RAND_LIMIT = 1_000_000;
+
+    /** Русский вариант для хранения; каждому игроку текст рисуется на его языке по ключу chat.rand_result_max. */
+    private const RAND_MESSAGE = 'Кинул случайное число %d из %d';
 
     public function __construct(
         private readonly ChatMessageRepositoryInterface $repository,
@@ -38,6 +42,7 @@ class SendMessage
      *   [[item_ID]]        → item shortcode
      *   [[share_item_ID]]  → shared item shortcode
      *   /rand              → случайное число от 0 до 100 в текущий канал
+     *   /rand N            → случайное число от 0 до N (1…1 000 000)
      */
     public function execute(User $sender, string $raw, ChatChannel $defaultChannel): ChatMessage
     {
@@ -45,12 +50,15 @@ class SendMessage
 
         $raw = trim($raw);
 
-        // Команда /rand: вместо текста в канал уходит случайное число от 0 до 100 (видят все в этом канале).
-        $isRand = preg_match('/^\/rand$/i', $raw) === 1;
+        // Команда /rand [N]: вместо текста в канал уходит случайное число от 0 до N (по умолчанию 100), его видят все в канале.
+        $isRand = preg_match('/^\/rand(?:\s+(\d{1,9}))?$/i', $raw, $randMatch) === 1
+            && (! isset($randMatch[1]) || (int) $randMatch[1] >= 1);
         $randNumber = null;
+        $randMax = self::RAND_DEFAULT_MAX;
         if ($isRand) {
-            $randNumber = random_int(self::RAND_MIN, self::RAND_MAX);
-            $raw = sprintf(self::RAND_MESSAGE, $randNumber);
+            $randMax = isset($randMatch[1]) ? min((int) $randMatch[1], self::RAND_LIMIT) : self::RAND_DEFAULT_MAX;
+            $randNumber = random_int(self::RAND_MIN, $randMax);
+            $raw = sprintf(self::RAND_MESSAGE, $randNumber, $randMax);
         }
 
         // Private message: prv[NAME] - text  OR  prv[NAME] text
@@ -82,8 +90,8 @@ class SendMessage
         ];
 
         if ($randNumber !== null) {
-            $data['translation_key'] = 'chat.rand_result';
-            $data['translation_params'] = ['number' => $randNumber];
+            $data['translation_key'] = 'chat.rand_result_max';
+            $data['translation_params'] = ['number' => $randNumber, 'max' => $randMax];
         }
 
         if ($defaultChannel === ChatChannel::Location) {

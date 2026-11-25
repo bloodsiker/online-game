@@ -49,6 +49,7 @@ return [
     'gathering_resource' => '<b>:name</b> :count шт. (в рюкзаке :backpack_count шт.)',
     'gathering_bonus' => ' Дополнительно: :resources',
     'rand_result' => 'Кинул случайное число :number',
+    'rand_result_max' => 'Кинул случайное число :number из :max',
     'quest_started' => 'Для Вас начался квест <b>«:title»</b>. Желаем удачи!',
     'clan_quest_started' => 'Для вашего клана начался квест <b>«:title»</b>. Удачи!',
     'quest_completed' => 'Квест <b>«:title»</b> завершён!:reward',

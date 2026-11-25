@@ -44,20 +44,47 @@ class RandCommandTest extends TestCase
         foreach ($this->created as $data) {
             $this->assertSame(ChatMessageType::Rand->value, $data['type']);
             $this->assertSame('main', $data['channel']);
-            $this->assertSame(1, preg_match('/^Кинул случайное число (\d{1,3})$/u', $data['message'], $match));
+            $this->assertSame(1, preg_match('/^Кинул случайное число (\d{1,3}) из 100$/u', $data['message'], $match));
             $this->assertGreaterThanOrEqual(0, (int) $match[1]);
             $this->assertLessThanOrEqual(100, (int) $match[1]);
-            $this->assertSame('chat.rand_result', $data['translation_key']);
+            $this->assertSame('chat.rand_result_max', $data['translation_key']);
             $this->assertSame((int) $match[1], $data['translation_params']['number']);
+            $this->assertSame(100, $data['translation_params']['max']);
         }
     }
 
-    public function test_rand_with_extra_text_is_a_normal_message(): void
+    public function test_rand_with_a_number_rolls_from_zero_to_that_number(): void
     {
-        $this->useCase()->execute((new User)->forceFill(['id' => 7]), '/rand 1000', ChatChannel::Main);
+        $sender = (new User)->forceFill(['id' => 7]);
 
-        $this->assertSame(ChatMessageType::Message->value, $this->created[0]['type']);
-        $this->assertSame('/rand 1000', $this->created[0]['message']);
+        for ($i = 0; $i < 30; $i++) {
+            $this->useCase()->execute($sender, '/rand 300', ChatChannel::Main);
+        }
+
+        foreach ($this->created as $data) {
+            $this->assertSame(ChatMessageType::Rand->value, $data['type']);
+            $this->assertSame(300, $data['translation_params']['max']);
+            $this->assertGreaterThanOrEqual(0, $data['translation_params']['number']);
+            $this->assertLessThanOrEqual(300, $data['translation_params']['number']);
+            $this->assertSame(
+                'Кинул случайное число '.$data['translation_params']['number'].' из 300',
+                $data['message'],
+            );
+        }
+    }
+
+    public function test_rand_number_is_capped_and_zero_or_garbage_is_a_normal_message(): void
+    {
+        $sender = (new User)->forceFill(['id' => 7]);
+        $this->useCase()->execute($sender, '/rand 999999999', ChatChannel::Main);
+        $this->assertSame(1_000_000, $this->created[0]['translation_params']['max']);
+
+        foreach (['/rand 0', '/rand abc', '/rand 5 6', '/rand -5'] as $input) {
+            $this->useCase()->execute($sender, $input, ChatChannel::Main);
+        }
+        foreach (array_slice($this->created, 1) as $data) {
+            $this->assertSame(ChatMessageType::Message->value, $data['type']);
+        }
     }
 
     public function test_rand_message_lives_ten_minutes(): void

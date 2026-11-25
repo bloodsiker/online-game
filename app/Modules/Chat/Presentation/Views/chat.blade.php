@@ -281,7 +281,7 @@
                         @elseif ($msg->type === 'quest_item')
                             <span class="msg-quest_item-icon">✦</span> {!! $msg->content !!}
 
-                        @elseif ($msg->type === 'loot')
+                        @elseif ($msg->type === 'loot' || $msg->type === 'rand')
                             {!! $msg->content !!}
 
                         @elseif ($msg->type === 'news')
@@ -575,7 +575,7 @@
             html += msg.content;
         } else if (msg.type === 'quest_item') {
             html += '<span class="msg-quest_item-icon">✦</span> ' + msg.content;
-        } else if (msg.type === 'loot') {
+        } else if (msg.type === 'loot' || msg.type === 'rand') {
             html += msg.content;
         } else if (msg.type === 'news') {
             html += msg.content;
