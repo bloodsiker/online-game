@@ -25,6 +25,9 @@ final class FightHitDTO
      */
     protected bool $blocked = false;
 
+    /** Сколько урона погасила броня цели (для строки лога); 0 — броня ничего не сняла */
+    protected int $armorAbsorbed = 0;
+
     protected bool $dodge = false;
 
     protected bool $critical = false;
@@ -89,6 +92,18 @@ final class FightHitDTO
     public function setReflectedDamage(int $reflectedDamage): self
     {
         $this->reflectedDamage = $reflectedDamage;
+
+        return $this;
+    }
+
+    public function getArmorAbsorbed(): int
+    {
+        return $this->armorAbsorbed;
+    }
+
+    public function setArmorAbsorbed(int $armorAbsorbed): self
+    {
+        $this->armorAbsorbed = $armorAbsorbed;
 
         return $this;
     }

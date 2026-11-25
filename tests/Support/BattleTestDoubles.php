@@ -66,4 +66,6 @@ readonly class FixedDamageAttack extends AttackService
     }
 
     public function checkLevelUp(Player $player, AttackResultDTO $result) {}
+
+    public function trySecondWind(Player $player, Battle $battle, AttackResultDTO $result): void {}
 }

@@ -62,7 +62,8 @@ final class MonsterStatFormulas
             return 0;
         }
 
-        $armorConstant = self::ARMOR_CONSTANT * self::levelScale($level);
+        // Броня масштабируется корнем уровня (см. HitCalculator::armorLevelScale), в отличие от шансов
+        $armorConstant = self::ARMOR_CONSTANT * max(1.0, sqrt($level / self::REFERENCE_LEVEL));
 
         return (int) round($armorConstant * $targetMitigation / (1 - $targetMitigation));
     }

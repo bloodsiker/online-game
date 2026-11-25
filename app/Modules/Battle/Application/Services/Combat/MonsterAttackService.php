@@ -98,7 +98,9 @@ readonly class MonsterAttackService
                 $this->phrases()->monsterHit($monster->attack_style, $hit->isCritical()),
                 BattleLogTranslator::contentName($monster),
                 $hit->getDamage(),
-                '',
+                $hit->getArmorAbsorbed() > 0
+                    ? sprintf(' <span style="color:#7a8696">(%s)</span>', __('броня поглотила :n', ['n' => $hit->getArmorAbsorbed()]))
+                    : '',
             );
 
         $result->log($msg);

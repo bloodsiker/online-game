@@ -71,9 +71,10 @@ readonly class HitCalculator
             $damage = (int) round($damage * $this->effectiveCritDamage($attacker) / 100);
         }
 
-        $armorConstant = self::ARMOR_CONSTANT * $this->levelScale($attacker, $defender);
+        $armorConstant = self::ARMOR_CONSTANT * self::armorLevelScale($attacker->getLevel(), $defender->getLevel());
         $final = $damage * ($armorConstant / ($armorConstant + $this->effectiveArmor($attacker, $defender, $isCrit)));
         $final = max(1, (int) round($final));
+        $dto->setArmorAbsorbed(max(0, $damage - $final));
 
         [$final, $reflected, $blocked] = $this->applyShieldBlock($defender, $final);
 
@@ -117,10 +118,26 @@ readonly class HitCalculator
      */
     public static function mitigateByArmor(int $damage, float $armor, int $attackerLevel, int $defenderLevel): int
     {
-        $levelScale = max(1.0, (($attackerLevel + $defenderLevel) / 2) / self::REFERENCE_LEVEL);
-        $armorConstant = self::ARMOR_CONSTANT * $levelScale;
+        $armorConstant = self::ARMOR_CONSTANT * self::armorLevelScale($attackerLevel, $defenderLevel);
 
         return max(1, (int) round($damage * ($armorConstant / ($armorConstant + max(0.0, $armor)))));
+    }
+
+    /**
+     * Масштаб константы брони от среднего уровня сторон. Растёт медленнее, чем у шансов уворота/крита
+     * (корень вместо линии), чтобы броня на высоких уровнях не обесценивалась.
+     */
+    public static function armorLevelScale(int $attackerLevel, int $defenderLevel): float
+    {
+        return max(1.0, sqrt((($attackerLevel + $defenderLevel) / 2) / self::REFERENCE_LEVEL));
+    }
+
+    /** Доля урона (0..1), которую броня гасит против атакующего заданного уровня; для подсказок в интерфейсе. */
+    public static function armorMitigation(float $armor, int $attackerLevel, int $defenderLevel): float
+    {
+        $armorConstant = self::ARMOR_CONSTANT * self::armorLevelScale($attackerLevel, $defenderLevel);
+
+        return max(0.0, $armor) / ($armorConstant + max(0.0, $armor));
     }
 
     private function levelScale(FightHitInterface $attacker, FightHitInterface $defender): float

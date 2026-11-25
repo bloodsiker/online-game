@@ -20,6 +20,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Application\Services\FatigueService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 readonly class FightOrchestrator
 {
@@ -40,7 +41,8 @@ readonly class FightOrchestrator
     {
         $userIds = app(BattleActionLocks::class)->userIds($id, Auth::id());
 
-        return \DB::transaction(function () use ($id, $monsterId, $action, $userIds) {
+        // При дедлоке внутри начисления кланового опыта MySQL откатывает весь раунд.
+        return DB::transaction(function () use ($id, $monsterId, $action, $userIds) {
             $user = app(BattleActionLocks::class)->users($userIds)->get(Auth::id());
             $player = Player::query()
                 ->whereKey($user->player->id)
@@ -243,7 +245,7 @@ readonly class FightOrchestrator
                 ->setPlayer($player->fresh())
                 ->setSideLog($fullLog->getSideLog())
                 ->setPlayerEffects($fullLog->getPlayerEffects());
-        });
+        }, attempts: 3);
     }
 
     private function createRound(Battle $battle, int $userId, int $monsterId): BattleRound

@@ -13,8 +13,11 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use Illuminate\Database\QueryException;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use PDOException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Support\BattleTestDoubles;
 use Tests\Support\CreatesBattleFixture;
@@ -30,6 +33,13 @@ class BattleTransactionsTest extends TestCase
         config(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:']);
         DB::purge('sqlite');
         $this->createBattleTables();
+        (require database_path('migrations/2026_11_23_000001_add_training_dummy_and_fatigue.php'))->up();
+        Schema::table('monsters', fn (Blueprint $table) => $table->unsignedBigInteger('required_active_effect_id')->nullable());
+        Schema::create('player_active_effects', function (Blueprint $table): void {
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('effect_id');
+            $table->timestamp('expires_at')->nullable();
+        });
         $this->seedBattleFixture();
         BattleTestDoubles::bind();
         Auth::setUser($this->economyUser());
@@ -108,6 +118,25 @@ class BattleTransactionsTest extends TestCase
         $this->assertDatabaseHas('monster_on_locations', ['id' => 1, 'hp_now' => 0, 'active' => 0]);
         $this->assertSame(20, (int) DB::table('battle_monster_damage')->sum('damage'));
         $this->assertDatabaseCount('battle_test_kills', 1);
+    }
+
+    public function test_deadlock_retries_the_round_without_duplicating_damage(): void
+    {
+        $id = $this->enter();
+        $attempts = 0;
+        DB::beforeExecuting(static function (string $query) use (&$attempts): void {
+            if (str_starts_with($query, 'insert into "battle_round_hits"') && ++$attempts === 1) {
+                throw new PDOException('Deadlock found when trying to get lock; try restarting transaction', 40001);
+            }
+        });
+
+        $result = app(FightOrchestrator::class)->attack($id, 1, 0);
+
+        $this->assertSame(2, $attempts);
+        $this->assertSame(2, (int) $result->getBattleRound()->round_number);
+        $this->assertDatabaseHas('monster_on_locations', ['id' => 1, 'hp_now' => 10]);
+        $this->assertSame(10, (int) DB::table('battle_monster_damage')->sum('damage'));
+        $this->assertDatabaseCount('battle_round_hits', 1);
     }
 
     public function test_stale_regeneration_does_not_restore_old_hp_or_resurrect_a_dead_spawn(): void
