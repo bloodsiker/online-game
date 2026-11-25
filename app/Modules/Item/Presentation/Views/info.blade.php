@@ -116,6 +116,7 @@
         <td align="center" valign="middle">
             <table width="610" border="0" cellspacing="0" cellpadding="0" align="center">
                 <tbody>
+                @include('partials.info-logo')
                 <tr>
                     <td>
                         <div class="common-block common-block__red">

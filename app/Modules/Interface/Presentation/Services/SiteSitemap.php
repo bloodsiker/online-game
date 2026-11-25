@@ -9,11 +9,11 @@ use App\Modules\Library\Presentation\Services\LibrarySitemap;
 
 final readonly class SiteSitemap
 {
-    public function __construct(private LibrarySitemap $library, private ForumSitemap $forum) {}
+    public function __construct(private LibrarySitemap $library, private ForumSitemap $forum, private GameContentSitemap $content) {}
 
     /** @return list<array{url: string, lastmod: ?string}> */
     public function entries(): array
     {
-        return [['url' => route('index'), 'lastmod' => null], ...$this->library->entries(), ...$this->forum->entries()];
+        return [['url' => route('index'), 'lastmod' => null], ...$this->library->entries(), ...$this->forum->entries(), ...$this->content->entries()];
     }
 }

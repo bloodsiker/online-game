@@ -94,7 +94,9 @@
 <tbody><tr><td align="center" valign="middle">
 
 <table width="680" border="0" cellspacing="0" cellpadding="0" align="center">
-<tbody><tr><td>
+<tbody>
+@include('partials.info-logo')
+<tr><td>
 <div class="common-block">
     <div class="corner-tl"></div><div class="corner-tr"></div>
     <div class="corner-bl"></div><div class="corner-br"></div>

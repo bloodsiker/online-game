@@ -115,6 +115,7 @@
     <tbody><tr><td align="center" valign="top">
         <table class="clan-public-shell" border="0" cellspacing="0" cellpadding="0" align="center">
             <tbody>
+            @include('partials.info-logo')
             <tr><td>
                 <div class="common-block common-block__red">
                     <div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>
