@@ -177,6 +177,7 @@ class ChatController extends Controller
         return response()->json([
             'has_party' => $this->partyRepository->findActiveByUser((int) auth()->id()) !== null,
             'has_clan' => $this->hasActiveClan(auth()->user()),
+            'server_time_ms' => now()->getTimestampMs(),
         ]);
     }
 

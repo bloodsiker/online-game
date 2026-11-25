@@ -218,16 +218,26 @@
                                             </thead>
                                             <tbody>
                                             @forelse($backpack as $slot)
+                                                @php
+                                                    $shareItem = $slot->item?->itemInfo;
+                                                    $itemUrl = $shareItem ? route('admin.item.info', ['item' => $shareItem->id]) : null;
+                                                @endphp
                                                 <tr style="vertical-align: middle" @if($slot->equipped) class="table-success" @endif>
                                                     <td>{{ $slot->id }}</td>
                                                     <td>
-                                                        @if($slot->item?->itemInfo?->image)
-                                                            <img src="{{ $slot->item->itemInfo->image }}" style="width:36px" alt="">
+                                                        @if($shareItem?->image)
+                                                            <a href="{{ $itemUrl }}" target="_blank" rel="noopener" aria-label="Открыть «{{ $shareItem->name }}» в новой вкладке">
+                                                                <img src="{{ $shareItem->image }}" style="width:36px" alt="">
+                                                            </a>
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        {{ $slot->item?->itemInfo?->name ?? '—' }}
-                                                        @if($slot->item?->itemInfo?->type === \App\Modules\Share\Domain\Enums\ShareItemType::TREASURE_MAP)
+                                                        @if($shareItem)
+                                                            <a href="{{ $itemUrl }}" target="_blank" rel="noopener">{{ $shareItem->name }}</a>
+                                                        @else
+                                                            —
+                                                        @endif
+                                                        @if($shareItem?->type === \App\Modules\Share\Domain\Enums\ShareItemType::TREASURE_MAP)
                                                             @if($slot->item->treasureHunt?->target_location_id)
                                                                 <span class="text-muted">[локация №{{ $slot->item->treasureHunt->target_location_id }}]</span>
                                                             @else
@@ -235,7 +245,7 @@
                                                             @endif
                                                         @endif
                                                     </td>
-                                                    <td>{{ $slot->item?->itemInfo?->type?->label() ?? '—' }}</td>
+                                                    <td>{{ $shareItem?->type?->label() ?? '—' }}</td>
                                                     <td>{{ $slot->count }}</td>
                                                     <td>
                                                         @if($slot->equipped)

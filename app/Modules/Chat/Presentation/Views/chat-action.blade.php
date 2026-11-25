@@ -56,7 +56,8 @@
             <td width="106" id="chat_clock_container"
                 style="background-image: url({{ asset('img/bg/chat/tbl-main_chat-clock-bg.gif') }})">
                 <img src="{{ asset('img/bg/chat/tbl-main_chat-clock-btn.gif') }}" style="cursor: pointer; position: relative; top: 12px;">
-                <span class="game-time" id="chat_clock">00:00:00</span>
+                @php($chatClockTime = now())
+                <span class="game-time" id="chat_clock">{{ $chatClockTime->format('H:i:s') }}</span>
             </td>
             <td>
                 <form id="chat-form" onsubmit="chatSend(); return false;">
@@ -292,18 +293,38 @@
 
     // ---- Clock ----
     (function () {
-        var ts = {{ now()->timestamp }};
+        var clock = gebi('chat_clock');
+        var serverTimeMs = @js($chatClockTime->getTimestampMs());
+        var clientTimeMs = performance.now();
+        var timer;
+        var formatter = new Intl.DateTimeFormat('en-GB', {
+            timeZone: @js($chatClockTime->getTimezone()->getName()),
+            hourCycle: 'h23',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        });
+
         function tick() {
-            var d = new Date(ts * 1000);
-            var h = String(d.getHours()).padStart(2, '0');
-            var m = String(d.getMinutes()).padStart(2, '0');
-            var s = String(d.getSeconds()).padStart(2, '0');
-            var el = gebi('chat_clock');
-            if (el) el.textContent = h + ':' + m + ':' + s;
-            ts++;
+            clearTimeout(timer);
+            var estimatedTimeMs = serverTimeMs + (performance.now() - clientTimeMs);
+            clock.textContent = formatter.format(estimatedTimeMs);
+            timer = setTimeout(tick, 1000 - estimatedTimeMs % 1000);
         }
+
+        window.addEventListener('message', function (event) {
+            if (event.origin !== window.location.origin || event.source !== window.parent
+                || event.data?.type !== 'syncChatClock' || !Number.isFinite(event.data.serverTimeMs)) return;
+
+            serverTimeMs = event.data.serverTimeMs;
+            clientTimeMs = performance.now();
+            tick();
+        });
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) tick();
+        });
+
         tick();
-        setInterval(tick, 1000);
     })();
 </script>
 

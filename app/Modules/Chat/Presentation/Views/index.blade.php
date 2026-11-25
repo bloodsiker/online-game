@@ -364,11 +364,22 @@
                                                     var chatHasParty = @json($hasParty);
                                                     var chatHasClan = @json($hasClan);
                                                     function refreshPartyChannelAvailability() {
-                                                        fetch('{{ route('chat.party-availability') }}')
-                                                            .then(function (response) { return response.json(); })
+                                                        var requestedAt = performance.now();
+                                                        fetch('{{ route('chat.party-availability') }}', { cache: 'no-store' })
+                                                            .then(function (response) { return response.ok ? response.json() : null; })
                                                             .then(function (data) {
+                                                                if (!data) return;
                                                                 if (Boolean(data.has_party) !== chatHasParty || Boolean(data.has_clan) !== chatHasClan) {
                                                                     window.location.reload();
+                                                                    return;
+                                                                }
+
+                                                                var bottomFrame = document.getElementById('bottom-frame');
+                                                                if (Number.isFinite(data.server_time_ms)) {
+                                                                    bottomFrame?.contentWindow?.postMessage({
+                                                                        type: 'syncChatClock',
+                                                                        serverTimeMs: data.server_time_ms + (performance.now() - requestedAt) / 2,
+                                                                    }, window.location.origin);
                                                                 }
                                                             })
                                                             .catch(function () {});
