@@ -6,9 +6,11 @@ use App\Modules\Battle\Presentation\Http\FightController;
 use App\Modules\Battle\Presentation\Http\FightListController;
 use Illuminate\Support\Facades\Route;
 
+// Лог боя публичный: ссылку на него можно давать любому игроку и гостю.
+Route::get('/fight/log/{id}', [FightController::class, 'log'])->whereNumber('id')->name('fight.log');
+
 Route::middleware(['auth', 'prison.context'])->group(function (): void {
     Route::get('/fights', [FightListController::class, 'index'])->name('fights');
-    Route::get('/fight/log/{id}', [FightController::class, 'log'])->name('fight.log');
     Route::get('/fight/{id}', [FightController::class, 'index'])->name('fight');
     Route::get('/clan-boss/battle/{id}', [FightController::class, 'clanBoss'])->name('fight.clan-boss');
     Route::get('/clan-boss/battle/{id}/attack/{monsterId}/{action}', [FightController::class, 'attackClanBoss'])

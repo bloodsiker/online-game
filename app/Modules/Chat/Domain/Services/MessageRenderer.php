@@ -8,6 +8,7 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class MessageRenderer
 {
@@ -211,22 +212,54 @@ class MessageRenderer
             );
         }
 
-        // Resolve a lightweight cached ID so mentions support the shared player context menu.
+        // Cache the mention target's compact public identity for the shared chat player UI.
         $rendered = preg_replace_callback(
             '/^to\[([^\]]+)\]\s*-?\s*/iu',
             static function (array $matches): string {
                 $nickname = html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
                 $name = e($nickname);
-                $userId = Cache::remember(
-                    'chat:mention:user-id:'.hash('sha256', $nickname),
+                $recipient = Cache::remember(
+                    'chat:mention:user:'.hash('sha256', $nickname),
                     now()->addMinute(),
-                    static fn (): ?int => User::query()->without('player')->where('name', $nickname)->value('id'),
+                    static function () use ($nickname): ?array {
+                        $user = User::query()
+                            ->with(['player', 'clanMembership.clan'])
+                            ->where('name', $nickname)
+                            ->first();
+
+                        if ($user === null) {
+                            return null;
+                        }
+
+                        $clan = $user->clanMembership?->clan;
+
+                        return [
+                            'id' => (int) $user->id,
+                            'level' => $user->player?->lvl === null ? null : (int) $user->player->lvl,
+                            'clan_id' => $clan?->id === null ? null : (int) $clan->id,
+                            'clan_icon' => $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
+                        ];
+                    },
                 );
+                $userId = $recipient['id'] ?? null;
                 $class = 'chat-to-recipient n'.($userId ? ' player-link' : '');
                 $idAttribute = $userId ? ' data-uid="'.(int) $userId.'"' : '';
+                $clanIcon = '';
+                if (! empty($recipient['clan_id']) && ! empty($recipient['clan_icon'])) {
+                    $clanUrl = route('clan.public', ['clan' => (int) $recipient['clan_id']]);
+                    $clanIcon = '<a href="'.$clanUrl.'" title="Информация о клане"'
+                        .' onclick="chatOpenClanInfo(this.href); return false;">'
+                        .'<img src="'.e($recipient['clan_icon']).'" class="chat-clan-icon" width="13" height="13" alt=""></a> ';
+                }
+                $level = ! empty($recipient['level']) ? ' <small class="chat-level">['.(int) $recipient['level'].']</small>' : '';
+                $info = $userId
+                    ? ' <a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo('.(int) $userId.'); return false;">'
+                        .'<img src="'.asset('main/images/player_info.gif').'" width="10" height="10" align="absmiddle" alt=""></a>'
+                    : '';
 
-                return '<span class="chat-to">» <a href="#" class="'.$class.'"'.$idAttribute.' data-name="'.$name.'"'
-                    .' onclick="chatPlayerClick(Number(this.dataset.uid || 0), this.dataset.name); return false;">'.$name.'</a></span> ';
+                return '<span class="chat-to">» '.$clanIcon.'<a href="#" class="'.$class.'"'.$idAttribute.' data-name="'.$name.'"'
+                    .' onclick="chatPlayerClick(Number(this.dataset.uid || 0), this.dataset.name); return false;">'.$name.'</a>'
+                    .$level.$info.'</span> ';
             },
             $rendered,
         );

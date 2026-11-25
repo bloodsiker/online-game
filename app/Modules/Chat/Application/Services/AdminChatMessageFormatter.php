@@ -37,7 +37,28 @@ final class AdminChatMessageFormatter
             $result .= $dom->saveHTML($child);
         }
 
-        return trim($result);
+        return $this->linkifyUrls(trim($result));
+    }
+
+    /** Простые адреса https://… в тексте превращаются в ссылки, чат подставит вместо них заголовок страницы. */
+    private function linkifyUrls(string $html): string
+    {
+        $parts = preg_split('/(<[^>]*>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return implode('', array_map(function (string $part): string {
+            if ($part[0] === '<') {
+                return $part;
+            }
+
+            return preg_replace_callback('~https?://[^\s<>"\']+~iu', static function (array $matches): string {
+                $url = rtrim($matches[0], '.,!?;:)]}');
+                $tail = substr($matches[0], strlen($url));
+
+                return $url === ''
+                    ? $matches[0]
+                    : '<a class="chat-url-title" href="'.$url.'" target="_blank" rel="noopener noreferrer" data-chat-page-title>'.$url.'</a>'.$tail;
+            }, $part) ?? $part;
+        }, $parts));
     }
 
     public function textLength(string $html): int
