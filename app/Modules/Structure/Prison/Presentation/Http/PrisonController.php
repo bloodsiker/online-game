@@ -32,8 +32,7 @@ class PrisonController extends Controller
         $detainees = PlayerDetention::query()
             ->with(['user.player', 'user.clanMembership.clan'])
             ->where('prison_structure_id', $structure->id)
-            ->whereNull('released_at')
-            ->where('release_at', '>', now())
+            ->active()
             ->latest('starts_at')
             ->get();
 

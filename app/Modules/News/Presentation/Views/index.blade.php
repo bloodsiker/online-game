@@ -299,6 +299,22 @@
         </div>
     </header>
 
+    @if(request()->routeIs('index') && !$selectedNews)
+        <div class="homepage-promo" data-homepage-promo>
+            <video
+                class="homepage-promo__video"
+                src="{{ asset('video/Promo.mp4') }}"
+                width="480"
+                height="270"
+                preload="none"
+                muted
+                loop
+                playsinline
+                aria-hidden="true"
+            ></video>
+        </div>
+    @endif
+
     <div class="homepage-logo">
         <a href="{{ route('index') }}" title="{{ __('homepage.game_name') }}">
             <img src="{{ asset('img/logo/Logoo330.webp') }}" srcset="{{ asset('img/logo/Logoo330.webp') }} 1x, {{ asset('img/logo/Logoo660.webp') }} 2x" width="330" height="110" alt="{{ __('homepage.game_name') }}" decoding="async" fetchpriority="high">

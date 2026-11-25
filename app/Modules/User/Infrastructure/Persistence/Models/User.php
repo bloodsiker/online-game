@@ -15,6 +15,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Premium\Application\Services\PremiumBonusService;
 use App\Modules\Premium\Domain\Enums\PremiumBonus;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
+use App\Modules\Structure\Prison\Infrastructure\Persistence\Models\PlayerDetention;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,6 +51,7 @@ use Illuminate\Notifications\Notifiable;
  * @property-read ClanMember|null $clanMembership
  * @property-read Collection|UserCommunicationMute[] $communicationMutes
  * @property-read UserCommunicationMute|null $activeChatMute
+ * @property-read PlayerDetention|null $activeDetention
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -145,6 +147,11 @@ class User extends Authenticatable implements MustVerifyEmail
             ->where('scope', CommunicationScope::Chat)
             ->active()
             ->latest('expires_at');
+    }
+
+    public function activeDetention(): HasOne
+    {
+        return $this->hasOne(PlayerDetention::class)->active()->latest('id');
     }
 
     public function getBagCount(): int

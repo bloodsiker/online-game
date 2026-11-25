@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Prison\Application\Services;
 
+use App\Modules\Interface\Domain\Events\OnlinePlayerStatusChanged;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\Structure\Prison\Domain\Events\PlayerDetained;
 use App\Modules\Structure\Prison\Infrastructure\Persistence\Models\PlayerDetention;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -18,17 +20,17 @@ class DetentionService
         return PlayerDetention::query()
             ->with('prison')
             ->where('user_id', $user->id)
-            ->whereNull('released_at')
-            ->where('release_at', '>', now())
+            ->active()
             ->latest('id')
             ->first();
     }
 
+    /** @param  int|null  $minutes  срок в минутах; null — бессрочно (освобождает только администратор) */
     public function impose(
         User $user,
         Structure $prison,
         User $admin,
-        int $minutes,
+        ?int $minutes,
         string $reason,
         int $fineMoney = 0,
         float $fineDiamond = 0.0,
@@ -45,14 +47,15 @@ class DetentionService
             $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $activeDetention = PlayerDetention::query()
                 ->where('user_id', $lockedUser->id)
-                ->whereNull('released_at')
-                ->where('release_at', '>', now())
+                ->active()
                 ->lockForUpdate()
                 ->first();
 
             if ($activeDetention !== null) {
                 throw ValidationException::withMessages([
-                    'player' => 'Игрок уже отбывает наказание до '.$activeDetention->release_at->format('d.m.Y H:i').'.',
+                    'player' => $activeDetention->isIndefinite()
+                        ? 'Игрок уже отбывает бессрочное наказание.'
+                        : 'Игрок уже отбывает наказание до '.$activeDetention->releaseLabel().'.',
                 ]);
             }
 
@@ -66,14 +69,22 @@ class DetentionService
                 'imposed_by_name' => $admin->name,
                 'previous_location_id' => $lockedUser->location_id,
                 'reason' => $reason,
-                'fine_money' => $fineMoney,
-                'fine_diamond' => $fineDiamond,
+                // У бессрочного заключения выкупа нет, поэтому штраф не сохраняем.
+                'fine_money' => $minutes === null ? 0 : $fineMoney,
+                'fine_diamond' => $minutes === null ? 0 : $fineDiamond,
                 'starts_at' => now(),
-                'release_at' => now()->addMinutes($minutes),
+                'release_at' => $minutes === null ? null : now()->addMinutes($minutes),
             ]);
 
             // Detention is a virtual structure context; keep the player's real location intact.
             Cache::forget('who:users_on_location:'.$detention->previous_location_id);
+            OnlinePlayerStatusChanged::dispatch((int) $lockedUser->id, [
+                'is_detained' => true,
+                'detention_release_at' => $detention->release_at?->toIso8601String(),
+            ]);
+
+            // Объявление в чате — только после фиксации транзакции.
+            DB::afterCommit(static fn () => PlayerDetained::dispatch((int) $lockedUser->id, $minutes, $reason));
 
             return $detention;
         });
@@ -91,28 +102,56 @@ class DetentionService
                 ->lockForUpdate()
                 ->first();
 
-            if ($detention === null || $detention->release_at->isFuture()) {
+            if ($detention === null || $detention->release_at === null || $detention->release_at->isFuture()) {
                 return false;
             }
 
-            $detention->released_at = now();
-            $detention->save();
-
-            // Restore legacy detainees who were physically moved to the prison location.
-            // New detentions never change location_id, so expiry leaves them where they were.
-            if ($detention->previous_location_id !== null
-                && (int) $lockedUser->location_id === (int) $detention->prison_location_id) {
-                $lockedUser->prev_location_id = $lockedUser->location_id;
-                $lockedUser->location_id = $detention->previous_location_id;
-                $lockedUser->save();
-                $user->location_id = $lockedUser->location_id;
-                $user->prev_location_id = $lockedUser->prev_location_id;
-                $user->unsetRelation('currentLocation');
-                $this->forgetLocationCaches((int) $detention->prison_location_id, (int) $detention->previous_location_id);
-            }
+            $this->release($detention, $lockedUser, $user);
 
             return true;
         });
+    }
+
+    /** Досрочное освобождение администратором (единственный выход из бессрочного заключения). */
+    public function releaseByAdmin(User $user): bool
+    {
+        return DB::transaction(function () use ($user): bool {
+            $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $detention = PlayerDetention::query()
+                ->where('user_id', $user->id)
+                ->active()
+                ->latest('id')
+                ->lockForUpdate()
+                ->first();
+
+            if ($detention === null) {
+                return false;
+            }
+
+            $this->release($detention, $lockedUser, $user);
+
+            return true;
+        });
+    }
+
+    private function release(PlayerDetention $detention, User $lockedUser, User $user): void
+    {
+        $detention->released_at = now();
+        $detention->save();
+        $this->publishRelease((int) $lockedUser->id);
+
+        // Restore legacy detainees who were physically moved to the prison location.
+        // New detentions never change location_id, so expiry leaves them where they were.
+        if ($detention->previous_location_id !== null
+            && (int) $lockedUser->location_id === (int) $detention->prison_location_id) {
+            $lockedUser->prev_location_id = $lockedUser->location_id;
+            $lockedUser->location_id = $detention->previous_location_id;
+            $lockedUser->save();
+            $user->location_id = $lockedUser->location_id;
+            $user->prev_location_id = $lockedUser->prev_location_id;
+            $user->unsetRelation('currentLocation');
+            $this->forgetLocationCaches((int) $detention->prison_location_id, (int) $detention->previous_location_id);
+        }
     }
 
     /** @return array{money:int, diamond:float} */
@@ -123,8 +162,7 @@ class DetentionService
             $detention = PlayerDetention::query()
                 ->where('user_id', $lockedUser->id)
                 ->where('prison_structure_id', $prisonStructureId)
-                ->whereNull('released_at')
-                ->where('release_at', '>', now())
+                ->active()
                 ->latest('id')
                 ->lockForUpdate()
                 ->first();
@@ -154,9 +192,18 @@ class DetentionService
             }
             $detention->released_at = now();
             $detention->save();
+            $this->publishRelease((int) $lockedUser->id);
 
             return $amounts;
         });
+    }
+
+    private function publishRelease(int $userId): void
+    {
+        OnlinePlayerStatusChanged::dispatch($userId, [
+            'is_detained' => false,
+            'detention_release_at' => null,
+        ]);
     }
 
     public function blockLeaving(User $user): ?string
@@ -167,7 +214,7 @@ class DetentionService
             return null;
         }
 
-        return 'Вы находитесь в Темнице. Освобождение: '.$detention->release_at->format('d.m.Y H:i').'.';
+        return 'Вы находитесь в Темнице. Освобождение: '.$detention->releaseLabel().'.';
     }
 
     private function forgetLocationCaches(int $oldLocationId, int $newLocationId): void

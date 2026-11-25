@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ItemActionLogController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LocationGateController;
+use App\Http\Controllers\Admin\LoginHistoryController;
 use App\Http\Controllers\Admin\MagicSkillController;
 use App\Http\Controllers\Admin\MapController;
 use App\Http\Controllers\Admin\MonsterController;
@@ -24,7 +25,6 @@ use App\Http\Controllers\Admin\QuestController;
 use App\Http\Controllers\Admin\RaceController;
 use App\Http\Controllers\Admin\ReputationController;
 use App\Http\Controllers\Admin\ScheduledTaskController;
-use App\Http\Controllers\Admin\LoginHistoryController;
 use App\Http\Controllers\Admin\ShopPurchaseLogController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Modules\ItemAssembly\Presentation\Http\Admin\ItemAssemblyController;
 use App\Modules\Payments\Presentation\Http\Admin\PaymentOrderController;
 use App\Modules\Premium\Presentation\Http\Admin\PremiumController;
+use App\Modules\SecretKnowledge\Presentation\Http\Admin\SecretKnowledgeAdminController;
 use App\Modules\TreasureHunt\Presentation\Http\Admin\TreasureMapController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,12 +50,18 @@ Route::post('/payment-orders/{publicId}/reject', [PaymentOrderController::class,
 Route::post('/payment-settings', [PaymentOrderController::class, 'settings'])->name('payment_orders.settings');
 Route::post('/payment-settings/sync-rate', [PaymentOrderController::class, 'syncRate'])->middleware('throttle:6,1')->name('payment_orders.sync_rate');
 Route::post('/premium', [PremiumController::class, 'save'])->name('premium.save');
+Route::get('/secret-knowledge', [SecretKnowledgeAdminController::class, 'index'])->name('secret_knowledge');
+Route::post('/secret-knowledge/settings', [SecretKnowledgeAdminController::class, 'saveSettings'])->name('secret_knowledge.settings');
+Route::post('/secret-knowledge/manuals', [SecretKnowledgeAdminController::class, 'saveManual'])->name('secret_knowledge.manuals.store');
+Route::post('/secret-knowledge/manuals/{manual}', [SecretKnowledgeAdminController::class, 'saveManual'])->name('secret_knowledge.manuals.update');
+Route::delete('/secret-knowledge/manuals/{manual}', [SecretKnowledgeAdminController::class, 'deleteManual'])->name('secret_knowledge.manuals.delete');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::post('/game-tools/teleport', [GameToolsController::class, 'teleport'])->name('game_tools.teleport');
 Route::post('/game-tools/mute', [GameToolsController::class, 'mute'])->name('game_tools.mute');
 Route::post('/game-tools/detain', [GameToolsController::class, 'detain'])->name('game_tools.detain');
+Route::post('/game-tools/pardon', [GameToolsController::class, 'pardon'])->name('game_tools.pardon');
 
 Route::get('/scheduled-tasks', [ScheduledTaskController::class, 'index'])->name('scheduled_tasks.index');
 Route::post('/scheduled-tasks/{task}', [ScheduledTaskController::class, 'update'])->name('scheduled_tasks.update');
@@ -303,3 +310,4 @@ Route::get('/player/{player}/backpack/{backpack}/delete', [PlayerController::cla
 Route::post('/player/{player}/mute', [PlayerController::class, 'mute'])->name('player.mute');
 Route::post('/player/{player}/mute/{mute}/revoke', [PlayerController::class, 'revokeMute'])->name('player.mute.revoke');
 Route::post('/player/{player}/detain', [PlayerController::class, 'detain'])->name('player.detain');
+Route::post('/player/{player}/release-detention', [PlayerController::class, 'releaseDetention'])->name('player.release_detention');

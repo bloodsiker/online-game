@@ -74,6 +74,9 @@ class GetMessages
             $text = $this->translator->render(new LocalizedChatMessage($msg->translation_key, $msg->translation_params ?? []), $locale) ?: $text;
         }
         $content = $this->renderer->render($text, $trusted);
+        if ($msg->type === ChatMessageType::Rand) {
+            $content = '<span class="msg-rand-text">'.$content.'</span>';
+        }
         $isOwn = $msg->user_id === $user->id;
 
         $replyTo = null;

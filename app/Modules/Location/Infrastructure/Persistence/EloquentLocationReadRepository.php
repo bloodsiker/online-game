@@ -63,8 +63,7 @@ class EloquentLocationReadRepository implements LocationReadRepository
                     ->whereNotIn('id', PlayerDetention::query()
                         ->select('user_id')
                         ->whereNotNull('user_id')
-                        ->whereNull('released_at')
-                        ->where('release_at', '>', now()));
+                        ->active());
 
                 if ($runId !== null) {
                     $query->whereIn('id', DungeonSession::query()->where('dungeon_run_id', $runId)->select('user_id'));

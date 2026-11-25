@@ -40,9 +40,10 @@ class CommunicationMuteService
         }
     }
 
+    /** @param  User|null  $moderator  null — наказание наложено автоматически (антиспам). */
     public function mute(
         User $user,
-        User $moderator,
+        ?User $moderator,
         CommunicationScope $scope,
         int $durationMinutes,
         ?string $reason = null,
@@ -56,13 +57,13 @@ class CommunicationMuteService
                 ->active()
                 ->update([
                     'revoked_at' => now(),
-                    'revoked_by_user_id' => $moderator->id,
+                    'revoked_by_user_id' => $moderator?->id,
                     'updated_at' => now(),
                 ]);
 
             $mute = UserCommunicationMute::query()->create([
                 'user_id' => $user->id,
-                'imposed_by_user_id' => $moderator->id,
+                'imposed_by_user_id' => $moderator?->id,
                 'scope' => $scope,
                 'reason' => filled($reason) ? trim((string) $reason) : null,
                 'starts_at' => now(),

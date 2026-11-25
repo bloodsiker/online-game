@@ -7,7 +7,9 @@ namespace App\Modules\Interface;
 use App\Modules\Interface\Application\Listeners\BroadcastOnlineCountFromSocket;
 use App\Modules\Interface\Application\Listeners\UpdatePlayerPresenceFromSocket;
 use App\Modules\Interface\Domain\Contracts\InterfaceReadRepository;
+use App\Modules\Interface\Domain\Events\OnlinePlayerStatusChanged;
 use App\Modules\Interface\Infrastructure\Persistence\EloquentInterfaceReadRepository;
+use App\Modules\Player\Domain\Events\PlayerInjured;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -26,6 +28,11 @@ class InterfaceServiceProvider extends ServiceProvider
         Event::listen(MessageReceived::class, UpdatePlayerPresenceFromSocket::class);
         Event::listen(MessageReceived::class, BroadcastOnlineCountFromSocket::class);
         Event::listen(ChannelRemoved::class, BroadcastOnlineCountFromSocket::class);
+        Event::listen(PlayerInjured::class, static function (PlayerInjured $event): void {
+            OnlinePlayerStatusChanged::dispatch((int) $event->player->user_id, [
+                'injury_expires_at' => $event->injury->expires_at->toIso8601String(),
+            ]);
+        });
 
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'interface');
 

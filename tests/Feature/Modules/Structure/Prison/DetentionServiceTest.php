@@ -6,10 +6,12 @@ namespace Tests\Feature\Modules\Structure\Prison;
 
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Prison\Application\Services\DetentionService;
+use App\Modules\Structure\Prison\Domain\Events\PlayerDetained;
 use App\Modules\Structure\Prison\Infrastructure\Persistence\Models\PlayerDetention;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -18,6 +20,8 @@ class DetentionServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Event::fake([PlayerDetained::class]);
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite.database', ':memory:');
@@ -68,7 +72,7 @@ class DetentionServiceTest extends TestCase
             $table->unsignedBigInteger('fine_money')->default(0);
             $table->decimal('fine_diamond', 12, 2)->default(0);
             $table->timestamp('starts_at');
-            $table->timestamp('release_at');
+            $table->timestamp('release_at')->nullable();
             $table->timestamp('released_at')->nullable();
             $table->timestamps();
         });
@@ -91,6 +95,7 @@ class DetentionServiceTest extends TestCase
         $service = new DetentionService;
 
         $detention = $service->impose($user, $prison, $admin, 60, 'Тестовое наказание');
+        Event::assertDispatched(PlayerDetained::class, fn (PlayerDetained $event): bool => $event->userId === 10 && $event->durationMinutes === 60);
 
         $this->assertSame(5, (int) $user->fresh()->location_id);
         $this->assertSame('Player', $detention->user_name);
@@ -131,5 +136,36 @@ class DetentionServiceTest extends TestCase
         $this->assertSame(7.0, (float) $user->fresh()->diamond);
         $this->assertNotNull($detention->fresh()->released_at);
         $this->assertNull($service->activeFor($user));
+    }
+
+    public function test_indefinite_detention_never_expires_has_no_buyout_and_is_released_by_admin(): void
+    {
+        DB::table('users')->insert([
+            ['id' => 10, 'name' => 'Player', 'player_id' => 10, 'location_id' => 5, 'money' => 1000, 'diamond' => 10, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 20, 'name' => 'Admin', 'player_id' => 20, 'location_id' => 1, 'money' => 0, 'diamond' => 0, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        DB::table('players')->insert([['id' => 10, 'race_id' => 1], ['id' => 20, 'race_id' => 1]]);
+        DB::table('races')->insert(['id' => 1, 'name' => 'Race']);
+        DB::table('locations')->insert(['id' => 2, 'name' => 'Prison']);
+        DB::table('structures')->insert(['id' => 7, 'location_id' => 2, 'type' => Structure::TYPE_PRISON, 'name' => 'Темница']);
+
+        $user = User::query()->findOrFail(10);
+        $service = new DetentionService;
+        $detention = $service->impose($user, Structure::query()->findOrFail(7), User::query()->findOrFail(20), null, 'Спам', 600, 6);
+
+        Event::assertDispatched(PlayerDetained::class, fn (PlayerDetained $event): bool => $event->userId === 10 && $event->durationMinutes === null && $event->reason === 'Спам');
+        $this->assertTrue($detention->isIndefinite());
+        $this->assertSame('бессрочно', $detention->releaseLabel());
+        $this->assertSame(0, (int) $detention->fresh()->fine_money, 'у бессрочного наказания нет штрафа и выкупа');
+        $this->assertSame(['money' => 0, 'diamond' => 0.0], $detention->fresh()->currentBuyoutAmounts());
+
+        $this->travel(5)->years();
+        $this->assertFalse($service->releaseIfExpired($user));
+        $this->assertNotNull($service->activeFor($user));
+        $this->assertSame(1, PlayerDetention::query()->active()->count());
+
+        $this->assertTrue($service->releaseByAdmin($user));
+        $this->assertNull($service->activeFor($user));
+        $this->assertFalse($service->releaseByAdmin($user));
     }
 }

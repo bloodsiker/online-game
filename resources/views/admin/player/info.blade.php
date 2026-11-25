@@ -424,7 +424,7 @@
                                                 <td>{{ $mute->starts_at->format('d.m.Y H:i') }}</td>
                                                 <td>{{ $mute->expires_at->format('d.m.Y H:i') }}</td>
                                                 <td>{{ $mute->reason ?: '—' }}</td>
-                                                <td>{{ $mute->imposedBy?->name ?? '—' }}</td>
+                                                <td>{{ $mute->imposedBy?->name ?? ($mute->imposed_by_user_id === null ? 'Автомодерация' : '—') }}</td>
                                                 <td>
                                                     @if($mute->isActive())
                                                         <span class="badge badge-danger">Активно</span>
@@ -471,8 +471,9 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <label>Срок, минут</label>
-                                                    <input type="number" name="duration_minutes" class="form-control" value="{{ old('duration_minutes', 60) }}" min="1" max="525600" required>
+                                                    <input type="number" name="duration_minutes" id="detain-duration" class="form-control" value="{{ old('duration_minutes', 60) }}" min="1" max="525600" @required(! old('indefinite'))>
                                                     <small class="form-text text-muted">60 — час, 1440 — сутки, 10080 — неделя.</small>
+                                                    <div class="checkbox mt-1"><label><input type="checkbox" name="indefinite" value="1" @checked(old('indefinite')) onchange="var d=document.getElementById('detain-duration');d.disabled=this.checked;d.required=!this.checked;"> Бессрочно (до освобождения администратором, без выкупа)</label></div>
                                                 </div>
                                                 <div class="form-group">
                                                     <label>Штраф за весь срок, монет</label>
@@ -496,10 +497,14 @@
                                         @if($activeDetention)
                                             <div class="alert alert-danger">
                                                 <strong>Находится в Темнице</strong> — {{ $activeDetention->prison?->name }}<br>
-                                                Освобождение: {{ $activeDetention->release_at->format('d.m.Y H:i') }}<br>
+                                                Освобождение: {{ $activeDetention->releaseLabel() }}<br>
                                                 Причина: {{ $activeDetention->reason }}<br>
                                                 Штраф за весь срок: {{ number_format((int) $activeDetention->fine_money, 0, '', ' ') }} монет, {{ number_format((float) $activeDetention->fine_diamond, 2, '.', ' ') }} бриллиантов.
                                             </div>
+                                            <form action="{{ route('admin.player.release_detention', $player->id) }}" method="post" onsubmit="return confirm('Освободить игрока из Темницы досрочно?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success">Освободить досрочно</button>
+                                            </form>
                                         @else
                                             <div class="alert alert-success">Игрок не отбывает наказание в Темнице.</div>
                                         @endif
@@ -515,7 +520,7 @@
                                                 <td>{{ $detention->prison?->name ?? $detention->prison_name }}</td>
                                                 <td>{{ $detention->reason }}</td>
                                                 <td>{{ $detention->starts_at->format('d.m.Y H:i') }}</td>
-                                                <td>{{ $detention->actualReleaseAt()->format('d.m.Y H:i') }}</td>
+                                                <td>{{ $detention->actualReleaseAt()?->format('d.m.Y H:i') ?? 'бессрочно' }}</td>
                                                 <td>{{ $detention->servedMinutes() }}</td>
                                                 <td>{{ $detention->imposedBy?->name ?? $detention->imposed_by_name ?? '—' }}</td>
                                                 <td>@if($detention->isActive())<span class="badge badge-danger">Активно</span>@elseif($detention->released_at)<span class="badge badge-success">Завершено</span>@else<span class="badge badge-default">Срок истёк</span>@endif</td>

@@ -12,6 +12,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -90,13 +91,15 @@ class ApiController extends Controller
     public function items(Request $request): JsonResponse
     {
         $search = $request->input('q', '');
+        $type = ShareItemType::tryFrom((string) $request->input('type', ''));
         $page = max(1, (int) $request->input('page', 1));
         $perPage = 20;
 
-        $query = ShareItem::when($search, function ($q) use ($search) {
-            $q->searchTranslations("%{$search}%")
-                ->orWhere('id', is_numeric($search) ? (int) $search : 0);
-        })
+        $query = ShareItem::when($type !== null, fn ($q) => $q->where('type', $type))
+            ->when($search, function ($q) use ($search) {
+                $q->searchTranslations("%{$search}%")
+                    ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+            })
             ->orderBy('name->ru');
 
         $total = $query->count();

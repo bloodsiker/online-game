@@ -6,6 +6,7 @@ namespace App\Modules\Structure\Prison\Infrastructure\Persistence\Models;
 
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -44,25 +45,48 @@ class PlayerDetention extends Model
         return $this->belongsTo(User::class, 'imposed_by_user_id');
     }
 
-    public function isActive(): bool
+    /** Не освобождён и срок не истёк (бессрочное заключение — release_at = NULL — активно всегда). */
+    public function scopeActive(Builder $query): Builder
     {
-        return $this->released_at === null && $this->release_at->isFuture();
+        return $query->whereNull('released_at')
+            ->where(fn (Builder $term) => $term->whereNull('release_at')->orWhere('release_at', '>', now()));
     }
 
-    public function actualReleaseAt(): Carbon
+    public function isIndefinite(): bool
+    {
+        return $this->release_at === null;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->released_at === null && ($this->release_at === null || $this->release_at->isFuture());
+    }
+
+    /** Дата освобождения для игрока и админки: «бессрочно» или d.m.Y H:i. */
+    public function releaseLabel(): string
+    {
+        return $this->release_at?->format('d.m.Y H:i') ?? 'бессрочно';
+    }
+
+    /** Фактическое освобождение; null — бессрочный срок ещё идёт. */
+    public function actualReleaseAt(): ?Carbon
     {
         return $this->released_at ?? $this->release_at;
     }
 
     public function servedMinutes(): int
     {
-        return (int) $this->starts_at->diffInMinutes($this->actualReleaseAt());
+        return (int) $this->starts_at->diffInMinutes($this->actualReleaseAt() ?? now());
     }
 
     /** @return array{money:int, diamond:float} */
     public function currentBuyoutAmounts(?Carbon $at = null): array
     {
         $at ??= now();
+        // Бессрочное заключение выкупить нельзя.
+        if ($this->release_at === null) {
+            return ['money' => 0, 'diamond' => 0.0];
+        }
         $totalSeconds = max(1, $this->release_at->getTimestamp() - $this->starts_at->getTimestamp());
         $remainingSeconds = max(0, $this->release_at->getTimestamp() - $at->getTimestamp());
         if ($remainingSeconds === 0) {

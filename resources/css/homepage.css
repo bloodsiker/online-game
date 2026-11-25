@@ -88,3 +88,44 @@ body.homepage-lightbox-open { overflow: hidden; }
 .homepage-logo { position: absolute; top: 72px; left: 50%; z-index: 1; transform: translateX(-50%); line-height: 0; }
 .homepage-logo a { display: inline-block; }
 .homepage-logo img { display: block; width: 330px; height: 110px; filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .65)); }
+
+.homepage-promo {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    width: min(480px, 100vw);
+    /* Центрируем без transform: transform ломает background-attachment: fixed у подложки ниже. */
+    margin-inline: auto;
+}
+.homepage-promo__video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+    /* Овальная растушёвка вместо прямоугольной: у видео нет «коробки», края тают в облаках. */
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, #0009 65%, #0003 85%, transparent 100%);
+    mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, #0009 65%, #0003 85%, transparent 100%);
+}
+/*
+ * Тёмный фон ролика растворяется в фоне сайта: под видео подкладываем ту же картинку,
+ * что у body (fixed, 50% 0 — совпадает пиксель в пиксель), и смешиваем hard-light —
+ * яркий логотип остаётся ярким, а тёмные участки пропускают облака.
+ * Только для десктопа: на мобильных background-attachment: fixed не поддерживается
+ * и подложка разъехалась бы с фоном — там остаётся простая овальная растушёвка.
+ */
+@media (hover: hover) and (pointer: fine) {
+    /* Старый GPU-хак translateZ(0) у шапки отключает fixed-фон у потомков; стек слоёв шапке и так даёт z-index: 0. */
+    .b-page--home .b-page__header { -webkit-transform: none; transform: none; }
+    .homepage-promo {
+        isolation: isolate;
+        background: url('/main/images/bg-main2.jpg') 50% 0 / auto no-repeat fixed;
+    }
+    .homepage-promo__video { mix-blend-mode: hard-light; }
+}
+.homepage-promo.has-video .homepage-promo__video { opacity: 1; }
+.homepage-promo.has-video + .homepage-logo { visibility: hidden; }

@@ -215,7 +215,8 @@ class PlayerController extends Controller
     ): RedirectResponse {
         $validated = $request->validate([
             'prison_structure_id' => ['required', 'integer', Rule::exists('structures', 'id')->where('type', Structure::TYPE_PRISON)->whereNotNull('location_id')],
-            'duration_minutes' => ['required', 'integer', 'min:1', 'max:525600'],
+            'indefinite' => ['nullable', 'boolean'],
+            'duration_minutes' => ['exclude_if:indefinite,1,true', 'required', 'integer', 'min:1', 'max:525600'],
             'reason' => ['required', 'string', 'max:1000'],
             'fine_money' => ['nullable', 'integer', 'min:0', 'max:1000000000000'],
             'fine_diamond' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:1000000000'],
@@ -226,12 +227,21 @@ class PlayerController extends Controller
             $player->user,
             $prison,
             $request->user(),
-            (int) $validated['duration_minutes'],
+            $request->boolean('indefinite') ? null : (int) $validated['duration_minutes'],
             $validated['reason'],
             (int) ($validated['fine_money'] ?? 0),
             (float) ($validated['fine_diamond'] ?? 0),
         );
 
-        return redirect()->back()->with('success', 'Игрок помещён в Темницу до '.$record->release_at->format('d.m.Y H:i').'.');
+        return redirect()->back()->with('success', $record->isIndefinite()
+            ? 'Игрок помещён в Темницу бессрочно.'
+            : 'Игрок помещён в Темницу до '.$record->releaseLabel().'.');
+    }
+
+    public function releaseDetention(Player $player, DetentionService $detentionService): RedirectResponse
+    {
+        return redirect()->back()->with('success', $detentionService->releaseByAdmin($player->user)
+            ? 'Игрок освобождён из Темницы.'
+            : 'Игрок не находится в Темнице.');
     }
 }

@@ -76,7 +76,11 @@
                                 <td width="12" class="common-inset-l"><img src="{{ asset('main/images/blank.gif') }}" width="12" alt=""></td>
                                 <td class="common-inset-bg">
                                     <div class="prison-buyout-content">
-                                        Вы отбываете наказание до <b class="prison-release">{{ $activeDetention->release_at->format('d.m.Y H:i') }}</b>.
+                                        @if($activeDetention->isIndefinite())
+                                            Вы отбываете <b class="prison-release">бессрочное</b> наказание. Освободить вас может только администрация.
+                                        @else
+                                            Вы отбываете наказание до <b class="prison-release">{{ $activeDetention->releaseLabel() }}</b>.
+                                        @endif
                                         До освобождения перемещение и игровые действия недоступны.
                                     </div>
                                 </td>
@@ -101,7 +105,7 @@
                                 <tr>
                                     <td width="12" class="common-inset-l"><img src="{{ asset('main/images/blank.gif') }}" width="12" alt=""></td>
                                     <td class="common-inset-bg">
-                                        <div class="prison-buyout-content" id="prison-buyout" data-starts-at="{{ $activeDetention->starts_at->timestamp }}" data-release-at="{{ $activeDetention->release_at->timestamp }}" data-fine-money="{{ (int) $activeDetention->fine_money }}" data-fine-diamond="{{ (float) $activeDetention->fine_diamond }}">
+                                        <div class="prison-buyout-content" id="prison-buyout" data-starts-at="{{ $activeDetention->starts_at->timestamp }}" data-release-at="{{ $activeDetention->release_at?->timestamp }}" data-fine-money="{{ (int) $activeDetention->fine_money }}" data-fine-diamond="{{ (float) $activeDetention->fine_diamond }}">
                                             <div>Вы можете выкупиться. Сумма уменьшается по мере отбытия срока:</div>
                                             <div style="margin: 7px 0">
                                                 <b id="prison-buyout-money" @if($buyoutAmounts['money'] <= 0) style="display:none" @endif><img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle" alt=""> <span>{{ number_format($buyoutAmounts['money'], 0, '', ' ') }}</span></b>
@@ -170,7 +174,7 @@
                                         @endif
                                     </td>
                                     <td>{{ $detention->reason }}</td>
-                                    <td class="prison-release">{{ $detention->release_at->format('d.m.Y H:i') }}</td>
+                                    <td class="prison-release">{{ $detention->releaseLabel() }}</td>
                                 </tr>
                             @endforeach
                             </tbody>

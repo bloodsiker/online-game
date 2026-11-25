@@ -71,9 +71,8 @@
         .msg-clan_invite small { color: #000; }
         .msg-clan_invite .clan-invite-action { font-weight: bold; }
         .msg-clan_invite .clan-invite-clan { color: #000; font-weight: bold; white-space: nowrap; }
-        .msg-rand              { color: #0033cc; font-weight: bold; }
-        .msg-rand small,
-        .msg-rand a            { color: inherit; }
+        /* Синим выделен только текст броска; ник игрока выводится как обычно. */
+        .msg-rand .msg-rand-text { color: #0033cc; font-weight: bold; font-style: italic; }
         .msg-quest             { border-left: 2px solid #000000; padding-left: 3px; color: #000000; font-style: italic; }
         .msg-quest small       { color: #000000; font-style: normal; }
         .msg-quest_item            { border-left: 2px solid #009900; padding-left: 3px; color: #009900; font-weight: bold; }
@@ -281,7 +280,7 @@
                         @elseif ($msg->type === 'quest_item')
                             <span class="msg-quest_item-icon">✦</span> {!! $msg->content !!}
 
-                        @elseif ($msg->type === 'loot' || $msg->type === 'rand')
+                        @elseif ($msg->type === 'loot')
                             {!! $msg->content !!}
 
                         @elseif ($msg->type === 'news')
@@ -575,7 +574,7 @@
             html += msg.content;
         } else if (msg.type === 'quest_item') {
             html += '<span class="msg-quest_item-icon">✦</span> ' + msg.content;
-        } else if (msg.type === 'loot' || msg.type === 'rand') {
+        } else if (msg.type === 'loot') {
             html += msg.content;
         } else if (msg.type === 'news') {
             html += msg.content;

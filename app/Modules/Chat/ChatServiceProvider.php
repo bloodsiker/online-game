@@ -10,6 +10,7 @@ use App\Modules\Chat\Application\Listeners\SendClanBossRewardMessage;
 use App\Modules\Chat\Application\Listeners\SendClanBossRunExpiredMessage;
 use App\Modules\Chat\Application\Listeners\SendClanBossRunStartedMessage;
 use App\Modules\Chat\Application\Listeners\SendClanMemberOnlineMessage;
+use App\Modules\Chat\Application\Listeners\SendDetentionSystemMessage;
 use App\Modules\Chat\Application\Listeners\SendLevelUpSystemMessage;
 use App\Modules\Chat\Application\Listeners\SendMapInfluenceAwardedMessage;
 use App\Modules\Chat\Application\Listeners\SendMedalEarnedSystemMessage;
@@ -34,6 +35,7 @@ use App\Modules\Player\Domain\Events\PlayerInjured;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
 use App\Modules\Quest\Domain\Events\QuestItemDropped;
 use App\Modules\Reputation\Domain\Events\ReputationMedalEarned;
+use App\Modules\Structure\Prison\Domain\Events\PlayerDetained;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -53,6 +55,7 @@ class ChatServiceProvider extends ServiceProvider
     {
         Event::listen(PlayerLeveledUp::class, SendLevelUpSystemMessage::class);
         Event::listen(ChatMuteImposed::class, SendChatMuteSystemMessage::class);
+        Event::listen(PlayerDetained::class, SendDetentionSystemMessage::class);
         Event::listen(PlayerInjured::class, SendPlayerInjuryMessage::class);
         Event::listen(QuestItemDropped::class, SendQuestItemDropMessage::class);
         Event::listen(ReputationMedalEarned::class, SendMedalEarnedSystemMessage::class);

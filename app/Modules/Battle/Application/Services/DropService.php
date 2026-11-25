@@ -19,6 +19,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\Premium\Application\Services\PremiumBonusService;
 use App\Modules\Premium\Domain\Enums\PremiumBonus;
+use App\Modules\SecretKnowledge\Application\Services\SecretKnowledgeService;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -33,6 +34,7 @@ class DropService
         private readonly ChatService $chatService,
         private readonly InstantItemRewardService $instantRewardService,
         private readonly GameSettingsService $gameSettingsService,
+        private readonly SecretKnowledgeService $secretKnowledge,
         private readonly MonsterLootService $monsterLootService = new MonsterLootService,
         private readonly ?BattlePhraseBook $phraseBook = null,
     ) {}
@@ -105,13 +107,19 @@ class DropService
                 $recipients[$recipient->id]['monsters'][] = $monster->locationMonster;
             }
             foreach ($recipients as $group) {
-                $this->dropMonsterItems($group['monsters'], $location, $group['user'], $dungeonSessionId, $group['party_id'] ?? null);
+                $this->dropMonsterItems($group['monsters'], $location, $group['user'], $dungeonSessionId, $group['party_id'] ?? null, (int) $battle->id);
             }
         }
     }
 
-    private function dropMonsterItems(array $monsters, Location $location, User $dropRecipient, ?int $dungeonSessionId, ?int $lootPartyId = null): void
-    {
+    private function dropMonsterItems(
+        array $monsters,
+        Location $location,
+        User $dropRecipient,
+        ?int $dungeonSessionId,
+        ?int $lootPartyId = null,
+        int $battleId = 0,
+    ): void {
         $droppedItems = [];
         // «Эликсир удачи охотника»: +% к шансу дропа (кроме сундуков и предметов под эффект).
         $recipientPlayerId = $dropRecipient->player?->id;
@@ -133,6 +141,16 @@ class DropService
                 if (random_int(1, 100000) / 1000 <= $chance) {
                     $droppedItems[] = ['item' => $item, 'count' => mt_rand($item->pivot->min_count, $item->pivot->max_count)];
                 }
+            }
+
+            if ($monster->monster->isBoss()) {
+                $this->secretKnowledge->awardBossPart(
+                    battleId: $battleId,
+                    monsterOnLocationId: (int) $monster->id,
+                    monsterId: (int) $monster->monster_id,
+                    lootOwner: $dropRecipient,
+                    lootPartyId: $lootPartyId,
+                );
             }
         }
 

@@ -17,5 +17,8 @@ final readonly class WhoUserDTO
         public ?int $clanId,
         public ?string $chatMuteTitle,
         public ?string $chatMuteExpiresAt,
+        public bool $isDetained = false,
+        public ?string $detentionReleaseAt = null,
+        public ?string $injuryExpiresAt = null,
     ) {}
 }

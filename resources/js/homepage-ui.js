@@ -81,7 +81,33 @@ export function elapsedTime(start, now) {
     return [Math.floor(seconds / 86400), Math.floor(seconds / 3600) % 24, Math.floor(seconds / 60) % 60, seconds % 60];
 }
 
+function initializePromo(promo) {
+    const video = promo.querySelector('video');
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    video.addEventListener('playing', () => {
+        promo.classList.add('has-video');
+    });
+    video.addEventListener('error', () => {
+        promo.classList.remove('has-video');
+    });
+    function syncMotionPreference() {
+        if (motionPreference.matches) {
+            video.pause();
+            promo.classList.remove('has-video');
+        } else {
+            video.play().catch(() => {});
+        }
+    }
+
+    motionPreference.addEventListener('change', syncMotionPreference);
+    syncMotionPreference();
+}
+
 export function initializeHomepage(root) {
+    const promo = root.querySelector('[data-homepage-promo]');
+    if (promo) initializePromo(promo);
+
     const gallery = root.querySelector('[data-homepage-gallery]');
     if (gallery) initializeGallery(gallery, root.querySelector('#homepage-lightbox'));
 

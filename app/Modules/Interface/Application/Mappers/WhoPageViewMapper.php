@@ -19,7 +19,7 @@ class WhoPageViewMapper
         )->all();
 
         $mappedOnlineUsers = $onlineUsers->map(
-            fn ($user) => $this->mapUser($user, $threshold)
+            fn ($user) => $this->mapUser($user, $threshold, includeStatuses: true)
         )->all();
 
         $countOnlineLocation = collect($mappedLocationUsers)->where('isOnline', true)->count();
@@ -33,9 +33,11 @@ class WhoPageViewMapper
         );
     }
 
-    private function mapUser(mixed $user, Carbon $threshold): WhoUserDTO
+    private function mapUser(mixed $user, Carbon $threshold, bool $includeStatuses = false): WhoUserDTO
     {
         $clan = $user->clanMembership?->clan;
+        $mute = $user->activeChatMute;
+        $detention = $includeStatuses ? $user->activeDetention : null;
 
         return new WhoUserDTO(
             id: $user->id,
@@ -46,8 +48,11 @@ class WhoPageViewMapper
             clanName: $clan?->name,
             clanIcon: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
             clanId: $clan?->id,
-            chatMuteTitle: $user->activeChatMute?->tooltip(),
-            chatMuteExpiresAt: $user->activeChatMute?->expires_at?->toIso8601String(),
+            chatMuteTitle: $mute?->isActive() ? $mute->tooltip() : null,
+            chatMuteExpiresAt: $mute?->expires_at?->toIso8601String(),
+            isDetained: $detention?->isActive() === true,
+            detentionReleaseAt: $detention?->release_at?->toIso8601String(),
+            injuryExpiresAt: $includeStatuses ? $user->player?->latestActiveInjury?->expires_at?->toIso8601String() : null,
         );
     }
 }

@@ -29,8 +29,7 @@ final readonly class AdminPlayerTeleportService
 
             $hasActiveDetention = PlayerDetention::query()
                 ->where('user_id', $lockedUser->id)
-                ->whereNull('released_at')
-                ->where('release_at', '>', now())
+                ->active()
                 ->exists();
             if ($hasActiveDetention) {
                 throw ValidationException::withMessages([

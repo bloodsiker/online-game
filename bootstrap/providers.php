@@ -32,6 +32,7 @@ use App\Modules\Race\RaceServiceProvider;
 use App\Modules\Rating\RatingServiceProvider;
 use App\Modules\Referral\ReferralServiceProvider;
 use App\Modules\Reputation\ReputationServiceProvider;
+use App\Modules\SecretKnowledge\SecretKnowledgeServiceProvider;
 use App\Modules\Share\ShareServiceProvider;
 use App\Modules\Structure\StructureServiceProvider;
 use App\Modules\Telegram\TelegramServiceProvider;
@@ -70,6 +71,7 @@ return [
     RatingServiceProvider::class,
     ReputationServiceProvider::class,
     ShareServiceProvider::class,
+    SecretKnowledgeServiceProvider::class,
     UserServiceProvider::class,
     ReferralServiceProvider::class,
     StructureServiceProvider::class,

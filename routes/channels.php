@@ -21,8 +21,9 @@ Broadcast::channel('player-trade.{uuid}', function ($user, $uuid) {
 });
 
 Broadcast::channel('online', function ($user) {
-    $user->loadMissing(['player', 'clanMembership.clan', 'activeChatMute']);
+    $user->loadMissing(['player.latestActiveInjury', 'clanMembership.clan', 'activeChatMute', 'activeDetention']);
     $clan = $user->clanMembership?->clan;
+    $detention = $user->activeDetention;
 
     return [
         'id' => (int) $user->id,
@@ -36,6 +37,9 @@ Broadcast::channel('online', function ($user) {
         'clan_icon' => $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
         'chat_mute_title' => $user->activeChatMute?->tooltip(),
         'chat_mute_expires_at' => $user->activeChatMute?->expires_at?->toIso8601String(),
+        'is_detained' => $detention !== null,
+        'detention_release_at' => $detention?->release_at?->toIso8601String(),
+        'injury_expires_at' => $user->player?->latestActiveInjury?->expires_at?->toIso8601String(),
         'info_url' => url('/info/u/'.$user->id),
     ];
 });

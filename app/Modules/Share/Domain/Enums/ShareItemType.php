@@ -39,6 +39,7 @@ enum ShareItemType: string
     case ARTIFACT = 'artifact';
     case RECIPE = 'recipe';
     case BOOK = 'book';
+    case BOSS_MANUAL = 'boss_manual';
     case CHEST = 'chest';
     case SCROLL = 'scroll';
     case TREASURE_MAP = 'treasure_map';
@@ -162,6 +163,7 @@ enum ShareItemType: string
             self::ARTIFACT => __('Артефакт'),
             self::RECIPE => __('Рецепт'),
             self::BOOK => __('Книга заклинаний'),
+            self::BOSS_MANUAL => __('secret_knowledge.boss_manual_type'),
             self::CHEST => __('Сундук'),
             self::EAT => __('Еда'),
             self::GIFT => __('Подарок'),
@@ -196,6 +198,7 @@ enum ShareItemType: string
                 self::WOOD,
                 self::RECIPE,
                 self::BOOK,
+                self::BOSS_MANUAL,
                 self::CHEST,
                 self::LOCKPICK,
                 self::TRADE_GOODS,

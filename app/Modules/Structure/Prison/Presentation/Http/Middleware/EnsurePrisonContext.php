@@ -35,7 +35,7 @@ class EnsurePrisonContext
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'ok' => false,
-                'message' => 'Вы находитесь в Темнице до '.$detention->release_at->format('d.m.Y H:i').'.',
+                'message' => $detention->isIndefinite() ? 'Вы находитесь в Темнице бессрочно.' : 'Вы находитесь в Темнице до '.$detention->releaseLabel().'.',
                 'redirect_url' => $url,
             ], 423);
         }

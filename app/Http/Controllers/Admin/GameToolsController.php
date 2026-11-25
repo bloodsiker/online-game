@@ -71,7 +71,8 @@ final class GameToolsController extends Controller
         $validated = $request->validate([
             'user_id' => ['required', 'integer', Rule::exists('users', 'id')],
             'prison_structure_id' => ['required', 'integer', Rule::exists('structures', 'id')->where('type', Structure::TYPE_PRISON)->whereNotNull('location_id')],
-            'duration_minutes' => ['required', 'integer', 'min:1', 'max:525600'],
+            'indefinite' => ['nullable', 'boolean'],
+            'duration_minutes' => ['exclude_if:indefinite,1,true', 'required', 'integer', 'min:1', 'max:525600'],
             'reason' => ['required', 'string', 'max:1000'],
             'fine_money' => ['nullable', 'integer', 'min:0', 'max:1000000000000'],
             'fine_diamond' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:1000000000'],
@@ -83,7 +84,7 @@ final class GameToolsController extends Controller
             $user,
             $prison,
             $request->user(),
-            (int) $validated['duration_minutes'],
+            $request->boolean('indefinite') ? null : (int) $validated['duration_minutes'],
             $validated['reason'],
             (int) ($validated['fine_money'] ?? 0),
             (float) ($validated['fine_diamond'] ?? 0),
@@ -92,11 +93,44 @@ final class GameToolsController extends Controller
         return response()->json([
             'ok' => true,
             'user_id' => (int) $user->id,
-            'message' => sprintf(
-                '%s помещён в Темницу до %s.',
-                $user->name,
-                $detention->release_at->format('d.m.Y H:i'),
-            ),
+            'message' => $detention->isIndefinite()
+                ? sprintf('%s помещён в Темницу бессрочно.', $user->name)
+                : sprintf('%s помещён в Темницу до %s.', $user->name, $detention->releaseLabel()),
+        ]);
+    }
+
+    /** Снять наказание: выпустить из Темницы или снять молчание в чате/на форуме. */
+    public function pardon(Request $request, DetentionService $detentionService, CommunicationMuteService $muteService): JsonResponse
+    {
+        $validated = $request->validate([
+            'user_id' => ['required', 'integer', Rule::exists('users', 'id')],
+            'kind' => ['required', Rule::in(['detention', CommunicationScope::Chat->value, CommunicationScope::Forum->value])],
+        ]);
+
+        $user = User::query()->findOrFail((int) $validated['user_id']);
+
+        if ($validated['kind'] === 'detention') {
+            $released = $detentionService->releaseByAdmin($user);
+
+            return response()->json([
+                'ok' => $released,
+                'message' => $released
+                    ? sprintf('%s освобождён из Темницы.', $user->name)
+                    : sprintf('%s не находится в Темнице.', $user->name),
+            ]);
+        }
+
+        $scope = CommunicationScope::from($validated['kind']);
+        $mute = $muteService->activeMute($user, $scope);
+        if ($mute !== null) {
+            $muteService->revoke($mute, $request->user());
+        }
+
+        return response()->json([
+            'ok' => $mute !== null,
+            'message' => $mute !== null
+                ? sprintf('%s: молчание «%s» снято.', $user->name, $scope->label())
+                : sprintf('%s: активного молчания «%s» нет.', $user->name, $scope->label()),
         ]);
     }
 }

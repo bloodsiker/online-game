@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Chat\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Chat\Application\Services\ChatSpamGuard;
 use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Application\UseCases\ManageIgnore;
 use App\Modules\Chat\Application\UseCases\SendMessage;
@@ -143,6 +144,9 @@ class ChatController extends Controller
         } catch (\RuntimeException $e) {
             return response()->json(['ok' => false, 'error' => $e->getMessage()]);
         }
+
+        // Антиспам: за флуд или повтор одного текста — молчание на 30 минут (объявление уходит в системный чат).
+        app(ChatSpamGuard::class)->inspect(auth()->user());
 
         return response()->json(['ok' => true]);
     }

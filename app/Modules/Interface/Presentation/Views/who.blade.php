@@ -138,9 +138,7 @@
         .info-icon-link {
             margin-left: 3px;
         }
-        .chat-mute-icon {
-            width: 10px;
-            height: 10px;
+        .player-status-icon {
             margin-left: 3px;
             vertical-align: middle;
         }
@@ -182,7 +180,7 @@
                            title="{{ __('Информация о персонаже') }}"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
                         <a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                         @if($user->chatMuteTitle)
-                            <img class="chat-mute-icon" src="{{ asset('main/images/gag.gif') }}" title="{{ $user->chatMuteTitle }}" alt="{{ __('Молчание') }}" data-mute-expires-at="{{ $user->chatMuteExpiresAt }}">
+                            <img class="player-status-icon" src="{{ asset('img/icon/gag.gif') }}" width="10" height="10" title="{{ $user->chatMuteTitle }}" alt="{{ __('Молчание') }}" data-status-expires-at="{{ $user->chatMuteExpiresAt }}">
                         @endif
                     </span>
                 </div>
@@ -199,6 +197,9 @@
                     <span class="time">{{ $user->time }}</span>
                     <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="{{ __('Написать в приват') }}"
                          onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="{{ __('Приватное сообщение') }}">
+                    @if($user->isDetained)
+                        <img class="player-status-icon" src="{{ asset('img/icon/punishment.gif') }}" width="13" height="13" title="{{ __('Персонаж находится в темнице') }}" alt="{{ __('Персонаж находится в темнице') }}" @if($user->detentionReleaseAt) data-status-expires-at="{{ $user->detentionReleaseAt }}" @endif>
+                    @endif
                     @if($user->clanName)
                         @if($user->clanIcon && $user->clanId)
                             <a href="{{ route('clan.public', ['clan' => $user->clanId]) }}" title="{{ __('Информация о клане') }}" onclick="whoOpenClanInfo(this.href); return false;"><img class="clan-icon" src="{{ $user->clanIcon }}" title="{{ $user->clanName }}" alt="{{ $user->clanName }}"></a>
@@ -209,10 +210,13 @@
                     <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
                        class="pnick" data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
                        title="{{ __('Информация о персонаже') }}"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
-                    <a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
-                    @if($user->chatMuteTitle)
-                        <img class="chat-mute-icon" src="{{ asset('main/images/gag.gif') }}" title="{{ $user->chatMuteTitle }}" alt="{{ __('Молчание') }}" data-mute-expires-at="{{ $user->chatMuteExpiresAt }}">
+                    @if($user->injuryExpiresAt)
+                        <img class="player-status-icon" src="{{ asset('img/icon/injury.gif') }}" width="10" height="10" title="{{ __('У персонажа есть травма') }}" alt="{{ __('У персонажа есть травма') }}" data-status-expires-at="{{ $user->injuryExpiresAt }}">
                     @endif
+                    @if($user->chatMuteTitle)
+                        <img class="player-status-icon" src="{{ asset('img/icon/gag.gif') }}" width="10" height="10" title="{{ $user->chatMuteTitle }}" alt="{{ __('Молчание') }}" data-status-expires-at="{{ $user->chatMuteExpiresAt }}">
+                    @endif
+                    <a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                     </div>
                 @endforeach
             </div>
@@ -246,7 +250,9 @@
     var prvArrowSrc = '{{ asset('img/icon/users-arrow.gif') }}';
     var infoUrlBase = '{{ url('/info/user') }}/';
     var playerInfoIconSrc = '{{ asset('main/images/player_info.gif') }}';
-    var chatMuteIconSrc = '{{ asset('main/images/gag.gif') }}';
+    var chatMuteIconSrc = @js(asset('img/icon/gag.gif'));
+    var detentionIconSrc = @js(asset('img/icon/punishment.gif'));
+    var injuryIconSrc = @js(asset('img/icon/injury.gif'));
     var lastLocationUsers = [];
     var lastOnlineUsers = [];
 
@@ -288,10 +294,32 @@
 
         var title = gameTranslate('Проклятие молчания. Осталось:') + ' ' + parts.slice(0, 2).join(' ');
 
-        return '<img class="chat-mute-icon" src="' + chatMuteIconSrc + '" title="' + escapeHtml(title) + '" alt="{{ __('Молчание') }}" data-mute-expires-at="' + escapeHtml(user.chat_mute_expires_at) + '">';
+        return playerStatusIcon(chatMuteIconSrc, gameTranslate('Молчание'), 10, title);
     }
 
-    function buildUserHtml(u) {
+    function playerStatusIcon(src, label, size, title = label) {
+        return '<img class="player-status-icon" src="' + escapeHtml(src) + '" width="' + size
+            + '" height="' + size + '" title="' + escapeHtml(title) + '" alt="' + escapeHtml(label) + '">';
+    }
+
+    function detentionIcon(user) {
+        var releaseAt = user.detention_release_at;
+        if (user.is_detained && (!releaseAt || Date.parse(releaseAt) > Date.now())) {
+            return playerStatusIcon(detentionIconSrc, gameTranslate('Персонаж находится в темнице'), 13) + ' ';
+        }
+
+        return '';
+    }
+
+    function injuryIcon(user) {
+        if (Date.parse(user.injury_expires_at || '') > Date.now()) {
+            return playerStatusIcon(injuryIconSrc, gameTranslate('У персонажа есть травма'), 10);
+        }
+
+        return '';
+    }
+
+    function buildUserHtml(u, showOnlineStatuses) {
         var name = String(u.name || '');
         var safeName = escapeHtml(name);
         var safeClanName = escapeHtml(u.clan_name || '');
@@ -300,6 +328,7 @@
         var privateArgument = escapeHtml(JSON.stringify(name));
         var offCls = u.is_online ? '' : ' user_offline';
         var opacity = u.is_online ? '' : 'opacity:.6;';
+        var mute = chatMuteIcon(u);
 
         var clan = '';
         if (u.clan_icon && u.clan_id) {
@@ -313,10 +342,12 @@
             +   '<span class="' + offCls.trim() + '">'
             +     '<span class="time">' + safeTime + '</span> '
             +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="{{ __('Написать в приват') }}" onclick="sendPrivate(' + privateArgument + ')" alt="Приват"> '
+            +     (showOnlineStatuses ? detentionIcon(u) : '')
             +     clan
             +     '<a href="' + safeInfoUrl + '" target="_blank" class="pnick' + offCls + '" data-uid="' + Number(u.id) + '" data-name="' + safeName + '" title="{{ __('Информация о персонаже') }}"><b>' + safeName + ' [' + Number(u.lvl || 0) + ']</b></a>'
+            +     (showOnlineStatuses ? injuryIcon(u) + mute : '')
             +     '<a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo(' + Number(u.id) + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
-            +     chatMuteIcon(u)
+            +     (showOnlineStatuses ? '' : mute)
             +   '</span>'
             + '</div>';
     }
@@ -374,7 +405,7 @@
             // При переходе игрок заново входит в presence-канал и получает новое время —
             // оставляем время уже показанной строки, чтобы переход не перерисовывал её.
             if (el && el.dataset.whoTime !== undefined) u = Object.assign({}, u, { time: el.dataset.whoTime });
-            var html = buildUserHtml(u);
+            var html = buildUserHtml(u, container.id === 'online-users');
 
             if (!el || el.dataset.whoHtml !== html) {
                 tpl.innerHTML = html;
@@ -450,6 +481,11 @@
     setInterval(function () {
         var locationContainer = document.getElementById('location-users');
         var onlineContainer = document.getElementById('online-users');
+        var now = Date.now();
+
+        document.querySelectorAll('[data-status-expires-at]').forEach(function (icon) {
+            if (Date.parse(icon.dataset.statusExpiresAt) <= now) icon.remove();
+        });
 
         if (locationContainer && lastLocationUsers.length) {
             syncUsers(locationContainer, lastLocationUsers);

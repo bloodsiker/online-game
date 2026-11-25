@@ -1658,6 +1658,9 @@
             clan_icon: user.clan_icon || null,
             chat_mute_title: user.chat_mute_title || null,
             chat_mute_expires_at: user.chat_mute_expires_at || null,
+            is_detained: user.is_detained === true,
+            detention_release_at: user.detention_release_at || null,
+            injury_expires_at: user.injury_expires_at || null,
             info_url: user.info_url || ('{{ url('/info/u') }}/' + Number(user.id)),
         };
     }
@@ -1746,6 +1749,20 @@
                 onlineUser.chat_mute_title = event.chat_mute_title || null;
                 onlineUser.chat_mute_expires_at = event.chat_mute_expires_at || null;
                 onlinePresenceUsers.set(Number(event.user_id), onlineUser);
+                sendOnlinePresenceSnapshot();
+            })
+            .listen('.online.player.status.changed', function (event) {
+                const onlineUser = onlinePresenceUsers.get(Number(event.user_id));
+                if (!onlineUser) return;
+
+                if (typeof event.is_detained === 'boolean') {
+                    onlineUser.is_detained = event.is_detained;
+                    onlineUser.detention_release_at = event.detention_release_at || null;
+                }
+                if (event.injury_expires_at && (!onlineUser.injury_expires_at
+                    || Date.parse(event.injury_expires_at) > Date.parse(onlineUser.injury_expires_at))) {
+                    onlineUser.injury_expires_at = event.injury_expires_at;
+                }
                 sendOnlinePresenceSnapshot();
             });
     }
@@ -2103,6 +2120,7 @@
                             <b class="butt1 pointer"><b><input value="{{ __('Телепорт') }}" type="button" onclick="showAdminToolsPanel('teleport')"></b></b>
                             <b class="butt1 pointer"><b><input value="{{ __('Наложить молчание') }}" type="button" onclick="showAdminToolsPanel('mute')"></b></b>
                             <b class="butt1 pointer"><b><input value="{{ __('Темница') }}" type="button" onclick="showAdminToolsPanel('detain')"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('Снять наказание') }}" type="button" onclick="showAdminToolsPanel('pardon')"></b></b>
                         </div>
 
                         <form id="admin-tools-teleport" class="admin-tools-form" style="display:none;" onsubmit="submitAdminTeleport(event)">
@@ -2128,8 +2146,9 @@
                             <div class="admin-tools-field">
                                 <label for="admin-detain-user">{{ __('Игрок') }}</label>
                                 <select id="admin-detain-user" name="user_id" required>
+                                    <option value="" selected disabled>{{ __('— выберите игрока —') }}</option>
                                     @foreach($adminToolUsers as $adminToolUser)
-                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — {{ __('вы') }}@endif</option>
+                                        <option value="{{ $adminToolUser->id }}">{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — {{ __('вы') }}@endif</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -2144,6 +2163,7 @@
                             <div class="admin-tools-field">
                                 <label for="admin-detain-duration">{{ __('Продолжительность, минут') }}</label>
                                 <input id="admin-detain-duration" name="duration_minutes" type="number" min="1" max="525600" value="60" required>
+                                <label><input type="checkbox" name="indefinite" value="1" onchange="var d=document.getElementById('admin-detain-duration');d.disabled=this.checked;d.required=!this.checked;"> {{ __('Бессрочно') }}</label>
                             </div>
                             <div class="admin-tools-field">
                                 <label for="admin-detain-fine-money">{{ __('Штраф за весь срок, монет') }}</label>
@@ -2167,8 +2187,9 @@
                             <div class="admin-tools-field">
                                 <label for="admin-mute-user">{{ __('Игрок') }}</label>
                                 <select id="admin-mute-user" name="user_id" required>
+                                    <option value="" selected disabled>{{ __('— выберите игрока —') }}</option>
                                     @foreach($adminToolUsers as $adminToolUser)
-                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — {{ __('вы') }}@endif</option>
+                                        <option value="{{ $adminToolUser->id }}">{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — {{ __('вы') }}@endif</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -2189,6 +2210,30 @@
                             </div>
                             <div class="admin-tools-actions">
                                 <b class="butt1 pointer"><b><input value="{{ __('Наложить') }}" type="submit"></b></b>
+                                <b class="butt1 pointer"><b><input value="{{ __('Назад') }}" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
+                            </div>
+                        </form>
+
+                        <form id="admin-tools-pardon" class="admin-tools-form" style="display:none;" onsubmit="submitAdminPardon(event)">
+                            <div class="admin-tools-field">
+                                <label for="admin-pardon-user">{{ __('Игрок') }}</label>
+                                <select id="admin-pardon-user" name="user_id" required>
+                                    <option value="" selected disabled>{{ __('— выберите игрока —') }}</option>
+                                    @foreach($adminToolUsers as $adminToolUser)
+                                        <option value="{{ $adminToolUser->id }}">{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — {{ __('вы') }}@endif</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-pardon-kind">{{ __('Что снять') }}</label>
+                                <select id="admin-pardon-kind" name="kind" required>
+                                    <option value="detention">{{ __('Выпустить из Темницы') }}</option>
+                                    <option value="chat">{{ __('Снять молчание в чате') }}</option>
+                                    <option value="forum">{{ __('Снять молчание на форуме') }}</option>
+                                </select>
+                            </div>
+                            <div class="admin-tools-actions">
+                                <b class="butt1 pointer"><b><input value="{{ __('Снять') }}" type="submit"></b></b>
                                 <b class="butt1 pointer"><b><input value="{{ __('Назад') }}" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
                             </div>
                         </form>
@@ -2225,10 +2270,12 @@
             document.getElementById('admin-tools-teleport').style.display = panel === 'teleport' ? 'grid' : 'none';
             document.getElementById('admin-tools-mute').style.display = panel === 'mute' ? 'grid' : 'none';
             document.getElementById('admin-tools-detain').style.display = panel === 'detain' ? 'grid' : 'none';
+            document.getElementById('admin-tools-pardon').style.display = panel === 'pardon' ? 'grid' : 'none';
             document.getElementById('admin-tools-title').textContent = panel === 'teleport'
                 ? gameTranslate('Телепорт')
                 : panel === 'mute' ? gameTranslate('Наложить молчание')
-                    : panel === 'detain' ? gameTranslate('Поместить в Темницу') : gameTranslate('Админ');
+                    : panel === 'detain' ? gameTranslate('Поместить в Темницу')
+                        : panel === 'pardon' ? gameTranslate('Снять наказание') : gameTranslate('Админ');
             const message = document.getElementById('admin-tools-message');
             message.style.display = 'none';
             message.classList.remove('is-error');
@@ -2288,6 +2335,11 @@
         async function submitAdminMute(event) {
             event.preventDefault();
             await submitAdminToolsForm(event.currentTarget, @json(route('admin.game_tools.mute')));
+        }
+
+        async function submitAdminPardon(event) {
+            event.preventDefault();
+            await submitAdminToolsForm(event.currentTarget, @json(route('admin.game_tools.pardon')));
         }
 
         async function submitAdminDetain(event) {

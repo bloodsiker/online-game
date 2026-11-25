@@ -38,8 +38,7 @@ class EloquentInterfaceReadRepository implements InterfaceReadRepository
                 ->whereNotIn('id', PlayerDetention::query()
                     ->select('user_id')
                     ->whereNotNull('user_id')
-                    ->whereNull('released_at')
-                    ->where('release_at', '>', now()))
+                    ->active())
                 ->orderByDesc('last_online_at')
                 ->get(),
         );
@@ -56,7 +55,7 @@ class EloquentInterfaceReadRepository implements InterfaceReadRepository
                 ->where('last_online_at', '>=', $threshold)
                 ->orderByDesc('last_online_at')
                 ->get(),
-        );
+        )->load(['activeDetention', 'player.latestActiveInjury']);
     }
 
     public function getPlayerActiveEffects(int $playerId): Collection
