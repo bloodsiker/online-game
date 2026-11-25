@@ -10,7 +10,7 @@
         'treasure_maps' => ['title' => __('treasure.maps'), 'types' => ['treasure_map', 'treasure_map_fragment']],
         'recipes' => ['title' => __('Рецепты'), 'types' => ['recipe']],
         'books' => ['title' => __('Книги заклинаний'), 'types' => ['book']],
-        'chests' => ['title' => __('Шкатулки'), 'types' => ['chest']],
+        'chests' => ['title' => __('Шкатулки'), 'types' => ['chest', 'lockpick']],
         'gems' => ['title' => __('Камни'), 'types' => ['gem', 'mount']],
         'runes' => ['title' => __('Руны'), 'types' => ['rune', 'rune_key']],
         'trade_goods' => ['title' => __('Торговые товары'), 'types' => ['trade_goods']],

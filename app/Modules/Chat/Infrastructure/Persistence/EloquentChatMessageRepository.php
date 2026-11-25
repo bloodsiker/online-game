@@ -60,7 +60,12 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
         ?int $afterId,
         int $limit,
     ): array {
-        $query = ChatMessage::query()->with('sender.clanMembership.clan', 'sender.player', 'target');
+        $query = ChatMessage::query()->with(
+            'sender.clanMembership.clan',
+            'sender.player',
+            'target.clanMembership.clan',
+            'target.player',
+        );
         $this->applyChannelFilter($query, $user, $channel);
 
         if ($afterId) {

@@ -82,6 +82,7 @@ class GetMessages
         }
 
         $clan = $msg->sender?->clanMembership?->clan;
+        $targetClan = $msg->target?->clanMembership?->clan;
 
         return new ChatMessageDTO(
             id: $msg->id,
@@ -99,6 +100,9 @@ class GetMessages
             sender_clan_icon: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
             sender_clan_id: $clan?->id,
             expires_at: $this->expirationTime($msg, $viewChannel),
+            target_level: $msg->target?->player?->lvl,
+            target_clan_icon: $targetClan?->icon ? Storage::disk('public')->url($targetClan->icon) : null,
+            target_clan_id: $targetClan?->id,
         );
     }
 

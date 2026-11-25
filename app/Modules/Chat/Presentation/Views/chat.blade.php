@@ -293,7 +293,7 @@
                             @endif
                             <a href="#" class="player-link n prv-name" data-uid="{{ $msg->sender_id }}" data-name="{{ $msg->sender_name }}" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">{{ $msg->sender_name }}</a>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
                             <a href="#" title="{{ __('Информация о персонаже') }}" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
-                            <span class="chat-private-recipient">» @if($msg->target_user_id && $msg->target_name)<a href="#" class="player-link n prv-name" data-uid="{{ $msg->target_user_id }}" data-name="{{ $msg->target_name }}" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">{{ $msg->target_name }}</a>@else<span class="prv-name">{{ $msg->target_name ?? '?' }}</span>@endif</span> {!! $msg->content !!}
+                            <span class="chat-private-recipient">» @if ($msg->target_clan_icon && $msg->target_clan_id)<a href="{{ route('clan.public', ['clan' => $msg->target_clan_id]) }}" title="{{ __('Информация о клане') }}" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->target_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>@endif @if($msg->target_user_id && $msg->target_name)<a href="#" class="player-link n prv-name" data-uid="{{ $msg->target_user_id }}" data-name="{{ $msg->target_name }}" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">{{ $msg->target_name }}</a>@else<span class="prv-name">{{ $msg->target_name ?? '?' }}</span>@endif @if ($msg->target_level) <small class="chat-level">[{{ $msg->target_level }}]</small>@endif @if ($msg->target_user_id)<a href="#" title="{{ __('Информация о персонаже') }}" onclick="chatOpenUserInfo({{ $msg->target_user_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>@endif</span> {!! $msg->content !!}
 
                         @else
                             @if ($msg->sender_clan_icon && $msg->sender_clan_id)
@@ -516,6 +516,13 @@
              + '<img src="' + safeAttr(msg.sender_clan_icon) + '" class="chat-clan-icon" width="13" height="13" alt=""></a>';
     }
 
+    function targetClanIconHtml(msg) {
+        if (!msg.target_clan_icon || !msg.target_clan_id) return '';
+        var clanUrl = '{{ url('/clan-info') }}/' + parseInt(msg.target_clan_id, 10);
+        return '<a href="' + clanUrl + '" title="{{ __('Информация о клане') }}" onclick="chatOpenClanInfo(this.href); return false;">'
+             + '<img src="' + safeAttr(msg.target_clan_icon) + '" class="chat-clan-icon" width="13" height="13" alt=""></a> ';
+    }
+
     function levelHtml(msg) {
         if (!msg.sender_level) return '';
         return ' <small class="chat-level">[' + parseInt(msg.sender_level, 10) + ']</small>';
@@ -578,9 +585,12 @@
                   + levelHtml(msg)
                   + ' ' + playerInfoIconHtml(msg.sender_id)
                   + '<span class="chat-private-recipient">» '
+                  + targetClanIconHtml(msg)
                   + (msg.target_user_id && msg.target_name
                       ? '<a href="#" class="player-link n prv-name" data-uid="' + Number(msg.target_user_id) + '" data-name="' + safeAttr(msg.target_name) + '" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">' + escapeHtml(msg.target_name) + '</a>'
                       : '<span class="prv-name">' + escapeHtml(msg.target_name || '?') + '</span>')
+                  + (msg.target_level ? ' <small class="chat-level">[' + parseInt(msg.target_level, 10) + ']</small>' : '')
+                  + (msg.target_user_id ? ' ' + playerInfoIconHtml(msg.target_user_id) : '')
                   + '</span>'
                   + '&nbsp;' +msg.content;
         } else {
