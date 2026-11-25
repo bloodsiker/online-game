@@ -16,5 +16,6 @@ final readonly class WarehousePageDTO
         public int $countInWarehouse,
         public int $warehouseCapacity,
         public array $items,
+        public string $itemTooltipScript,
     ) {}
 }

@@ -7,6 +7,7 @@ use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipPriceFormatter;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 
 class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
 {
@@ -19,6 +20,10 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
             'item.itemInfo.effects',
             'item.itemInfo.useLimit',
             'item.itemInfo.lockpickConfig',
+            'item.itemInfo.requirements.skill',
+            'item.treasureHunt.targetMap',
+            'item.gems.gemInfo',
+            'item.runes.runeInfo',
         ]);
 
         foreach ($warehouseItems as $warehouseItem) {
@@ -28,6 +33,9 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
             $title = $upgradeLvl > 0
                 ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
                 : $itemInfo->name;
+            if ($itemInfo->type === ShareItemType::TREASURE_MAP) {
+                $title = $item->getNameWithTreasureTerritory();
+            }
 
             $collector->add(new ItemTooltipDto(
                 id: $item->id,
@@ -39,14 +47,17 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
                 diamond: '',
                 lev: ['title' => __(' Уровень '), 'value' => '1'],
                 skills: [],
-                desc: $itemInfo->description ?? '',
+                desc: $item->getDescription(),
                 store: false,
                 nogive: ! $itemInfo->is_sell,
                 noweight: ! $itemInfo->is_weight,
                 nosell: ! $itemInfo->is_sell,
                 stats: ItemTooltipStatsBuilder::buildForTooltip($itemInfo, $upgradeLvl),
+                requirements: ItemTooltipStatsBuilder::buildRequirements($itemInfo),
+                gems: ItemTooltipStatsBuilder::buildGems($item),
+                runes: ItemTooltipStatsBuilder::buildRunes($item),
                 remainingUses: $item->remainingUses(),
-                specialInfo: ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo),
+                specialInfo: array_merge(ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo), $item->expiryTooltipInfo()),
             ));
         }
     }

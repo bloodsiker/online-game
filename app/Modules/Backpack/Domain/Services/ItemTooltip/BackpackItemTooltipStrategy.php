@@ -23,6 +23,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
             'item.itemInfo.effects',
             'item.itemInfo.useLimit',
             'item.itemInfo.requirements.skill',
+            'item.treasureHunt.targetMap',
             'item.gems.gemInfo',
             'item.runes.runeInfo',
         ]);
@@ -35,7 +36,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
                 ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
                 : $itemInfo->name;
             if ($itemInfo->type === ShareItemType::TREASURE_MAP) {
-                $title = $item->getName();
+                $title = $item->getNameWithTreasureTerritory();
             }
 
             $collector->add(new ItemTooltipDto(

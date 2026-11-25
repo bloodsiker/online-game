@@ -111,7 +111,7 @@
                                 </div>
                             </td>
                             <td align="left">
-                                <a href="{{ route('items.info', ['id' => $item->item->id]) }}" style="color:#666666" class="b">{{ $item->item->itemInfo->name }}</a>
+                                <a href="{{ route('items.info', ['id' => $item->item->id]) }}" style="color:#666666" class="b">{{ $item->item->getNameWithTreasureTerritory() }}</a>
                                 <br>
                                 <span title="{{ __('Тип предмета') }}">
                                     <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->item->itemInfo->getTypeName() }}

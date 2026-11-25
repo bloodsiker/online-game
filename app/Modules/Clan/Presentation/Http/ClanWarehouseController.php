@@ -71,7 +71,7 @@ class ClanWarehouseController extends Controller
             }
 
             $items = Backpack::select('backpacks.*')
-                ->with(['item', 'item.itemInfo'])
+                ->with(['item', 'item.itemInfo', 'item.treasureHunt.targetMap'])
                 ->join('items', 'backpacks.item_id', '=', 'items.id')
                 ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
                 ->where('backpacks.user_id', $user->id)
@@ -172,7 +172,7 @@ class ClanWarehouseController extends Controller
         }
 
         $backpackItems = Backpack::select('backpacks.*')
-            ->with(['item', 'item.itemInfo'])
+            ->with(['item', 'item.itemInfo', 'item.treasureHunt.targetMap'])
             ->join('items', 'backpacks.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
@@ -233,7 +233,7 @@ class ClanWarehouseController extends Controller
                 return redirect()->back();
             }
 
-            $items = ClanWarehouse::with(['item', 'item.itemInfo'])
+            $items = ClanWarehouse::with(['item', 'item.itemInfo', 'item.treasureHunt.targetMap'])
                 ->where('clan_id', $clan->id)
                 ->where('structure_id', $clanWarehouse->id)
                 ->whereIn('id', array_keys($takeItems))
@@ -307,7 +307,7 @@ class ClanWarehouseController extends Controller
             }
         }
 
-        $warehouseItems = ClanWarehouse::with(['item', 'item.itemInfo', 'depositor'])
+        $warehouseItems = ClanWarehouse::with(['item', 'item.itemInfo', 'item.treasureHunt.targetMap', 'depositor'])
             ->join('items', 'clan_warehouses.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('clan_id', $clan->id)

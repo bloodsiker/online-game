@@ -44,6 +44,6 @@ class RespecStatsStrategy implements ItemEffectStrategyInterface
         $player->free_stats += $refund;
         $player->save();
 
-        event(new PlayerChangeStat($player));
+        event(new PlayerChangeStat($player, restoreResources: false));
     }
 }

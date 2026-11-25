@@ -41,7 +41,7 @@ class AllocateStats
         $player->free_stats -= $sumChange;
 
         $this->playerRepository->save($player);
-        event(new PlayerChangeStat($player));
+        event(new PlayerChangeStat($player, restoreResources: false));
         $player->refresh();
 
         return new AllocateStatsResultDTO(

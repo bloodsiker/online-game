@@ -74,6 +74,21 @@ class Item extends Model
         return $this->itemInfo->name;
     }
 
+    public function getNameWithTreasureTerritory(): string
+    {
+        $name = $this->getName();
+
+        if ($this->itemInfo->type !== ShareItemType::TREASURE_MAP) {
+            return $name;
+        }
+
+        $territoryName = $this->treasureHunt?->targetMap?->name;
+
+        return is_string($territoryName) && $territoryName !== ''
+            ? $name.' — '.$territoryName
+            : $name;
+    }
+
     public function remainingUses(): ?int
     {
         $configuredUses = max(0, (int) $this->itemInfo->count_use);

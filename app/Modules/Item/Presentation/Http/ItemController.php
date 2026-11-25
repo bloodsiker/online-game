@@ -532,7 +532,7 @@ class ItemController extends Controller
             $player->free_stats += $raceChangeRefund;
             $player->save();
 
-            event(new PlayerChangeStat($player));
+            event(new PlayerChangeStat($player, restoreResources: false));
         }
 
         if ($newAvatar !== null) {

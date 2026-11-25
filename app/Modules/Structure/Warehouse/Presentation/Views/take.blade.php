@@ -235,14 +235,19 @@
                                 </div>
                             </td>
                             <td class="brd2-top brd2" style="padding: 0" width="60" height="60">
-                                <img src="{{ $item->image }}" style="width: 60px; height: 60px" alt="">
+                                <div style="position: relative; width: 60px; height: 60px">
+                                    <img src="{{ $item->image }}" style="width: 60px; height: 60px" alt="">
+                                    <table width="60" height="60" border="0" cellspacing="0" cellpadding="0" style="position: absolute; inset: 0; z-index: 2">
+                                        <tr><td data-id="{{ $item->itemId }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">&nbsp;</td></tr>
+                                    </table>
+                                </div>
                             </td>
                             <td align="left" >
                                 <a href="{{ $item->infoUrl }}"
                                    style="color:#666666" class="b">{{ $item->name }}</a>
                                 <br>
                                 <span title="Тип предмета">
-                                <img src="https://fun-dwar.com/images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle"> {{ $item->typeName }}
+                                    <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->typeName }}
                             </span>
                             </td>
                         </tr>
@@ -269,6 +274,8 @@
     </tbody>
 </table>
 
+{!! $page->itemTooltipScript !!}
+<script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 <script>
 
 

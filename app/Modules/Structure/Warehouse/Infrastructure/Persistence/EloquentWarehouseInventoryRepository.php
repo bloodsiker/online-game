@@ -14,7 +14,7 @@ class EloquentWarehouseInventoryRepository implements WarehouseInventoryReposito
     public function getBackpackItems(int $userId): Collection
     {
         return Backpack::select('backpacks.*')
-            ->with(['item', 'item.itemInfo'])
+            ->with(['item.itemInfo', 'item.treasureHunt.targetMap'])
             ->join('items', 'backpacks.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $userId)
@@ -38,7 +38,7 @@ class EloquentWarehouseInventoryRepository implements WarehouseInventoryReposito
     public function getWarehouseItems(int $userId, int $structureId): Collection
     {
         return Warehouse::select('warehouses.*')
-            ->with(['item', 'item.itemInfo'])
+            ->with(['item.itemInfo', 'item.treasureHunt.targetMap'])
             ->join('items', 'warehouses.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('user_id', $userId)

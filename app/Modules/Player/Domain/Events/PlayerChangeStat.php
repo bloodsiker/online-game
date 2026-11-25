@@ -13,8 +13,12 @@ class PlayerChangeStat
 
     public Player $player;
 
-    public function __construct(Player $player)
+    /** true — полностью восстановить HP/MP (повышение уровня); false — оставить текущие, обрезав по новому максимуму. */
+    public bool $restoreResources;
+
+    public function __construct(Player $player, bool $restoreResources = true)
     {
         $this->player = $player;
+        $this->restoreResources = $restoreResources;
     }
 }
