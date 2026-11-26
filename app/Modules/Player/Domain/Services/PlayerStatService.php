@@ -129,7 +129,10 @@ class PlayerStatService
             'hp_max' => (float) (PlayerStatFormulas::DEFAULT_HP
                 + PlayerStatFormulas::HP_PER_LEVEL * (max(1, (int) $player->lvl) - 1)
                 + PlayerStatFormulas::HP_PER_ENDURANCE * max(0, $primary['endurance'] - 1)),
-            'mp_max' => (float) $player->mp_max,
+            // Как и HP от выносливости — мана от итоговой мудрости (шмот/артефакты/баффы), а не от «сырого» mp_max:
+            // иначе +мудрость с предмета не давала бы ману (росла только магическая защита).
+            'mp_max' => (float) (PlayerStatFormulas::DEFAULT_MP
+                + PlayerStatFormulas::MP_PER_MUD * max(0, $primary['wisdom'] - 1)),
             'left_min_dmg' => (float) $player->min_dmg,
             'left_max_dmg' => (float) $player->max_dmg,
             'right_min_dmg' => (float) $player->min_dmg,

@@ -46,6 +46,8 @@
         .common-inset-r { background: url({{ asset('main/images/common-inset-r.png') }}) repeat-y; }
         .common-inset-bg { background: #ffffd6; }
         .active-quest, .quest-card { padding: 2px 4px; line-height: 1.5; }
+        /* Кнопка из main.css считает высоту в строках: line-height 1.5 родителя сдвигал центральную часть относительно краёв */
+        .active-quest span.butt1, .active-quest span.butt1 span, .active-quest span.butt1 input { line-height: normal; vertical-align: top; }
         .active-quest .quest-title {
             margin: 0 0 8px;
             padding: 0 0 7px;

@@ -480,7 +480,7 @@
                                             </span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">{{ __('Броня') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Снижает получаемый физический урон. Каждое следующее очко даёт чуть меньше, чем предыдущее. Растёт от Силы и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Броня')]) }}">?</button></span></span>
+                                            <span class="char-stat-label">{{ __('Броня') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Снижает получаемый физический урон. Цифра в скобках — примерное снижение урона от монстра вашего уровня; от более сильных монстров оно меньше, от более слабых — больше. Каждое следующее очко даёт чуть меньше, чем предыдущее. Растёт от Силы и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Броня')]) }}">?</button></span></span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getArmor() }}
                                                 @php $armorCut = (int) round(\App\Modules\Battle\Application\Services\Combat\HitCalculator::armorMitigation((float) $character->stats->getArmor(), (int) $character->level, (int) $character->level) * 100); @endphp
