@@ -145,8 +145,54 @@ class StatSheet implements FightHitInterface
         return $this->combatClass;
     }
 
+    /** Сила магической ветки — среднее Интеллекта и Мудрости; сравнивается с самой большой физической характеристикой. */
+    private function magicStat(): float
+    {
+        return ($this->intelligence + $this->wisdom) / 2;
+    }
+
+    private function topPhysicalStat(): float
+    {
+        return (float) max($this->baseStrength, $this->baseAgility, $this->baseIntuition);
+    }
+
+    /** Маг, если магическая ветка превосходит любую физическую характеристику (только отображение архетипа). */
+    private function isMageArchetype(): bool
+    {
+        return $this->magicStat() > $this->topPhysicalStat();
+    }
+
+    /** Подтип мага: 'destroyer' (Интеллект), 'keeper' (Мудрость), 'universal' (примерно поровну, разница ≤ 15%). */
+    private function mageSubtype(): string
+    {
+        $intel = (float) $this->intelligence;
+        $wisdom = (float) $this->wisdom;
+        $max = max($intel, $wisdom, 1.0);
+
+        return match (true) {
+            abs($intel - $wisdom) / $max <= 0.15 => 'universal',
+            $intel > $wisdom => 'destroyer',
+            default => 'keeper',
+        };
+    }
+
     public function getDisplayCombatClassLabel(): string
     {
+        if ($this->isMageArchetype()) {
+            if ($this->topPhysicalStat() >= 0.85 * $this->magicStat()) {
+                $shares = $this->combatClassShares();
+                $top = CombatClass::from((string) array_search(max($shares), $shares, true));
+
+                return 'Гибрид: Маг/'.$top->getLabel();
+            }
+
+            return match ($this->mageSubtype()) {
+                'destroyer' => 'Маг-разрушитель',
+                'keeper' => 'Маг-хранитель',
+                default => 'Маг-универсал',
+            };
+        }
+
         $shares = $this->combatClassShares();
         $maxShare = max($shares);
         $minShare = min($shares);
@@ -169,6 +215,14 @@ class StatSheet implements FightHitInterface
 
     public function getDisplayCombatClassColor(): string
     {
+        if ($this->isMageArchetype()) {
+            return match ($this->mageSubtype()) {
+                'destroyer' => '#a03a3a',
+                'keeper' => '#3a6aa0',
+                default => '#5a3a8a',
+            };
+        }
+
         $shares = $this->combatClassShares();
         $maxShare = max($shares);
         $minShare = min($shares);
