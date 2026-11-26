@@ -6,7 +6,7 @@
 
 ## Простуда (weather_cold) — красный фон
 ```
-Fantasy game status-effect icon. Background: a full-bleed textured aged-paper background in deep warm crimson red, softly darkened with a vignette toward the four edges — no transparency, no border, no frame. Centered: an old glass thermometer with bright red liquid rising high, wrapped in a knitted woolen scarf covered in frost, a few icy-blue raindrops and tiny snowflakes falling around it, a small dark storm cloud above with a thin pale lightning streak. Square composition, the symbol filling most of the frame, --ar 1:1. Bold clear shapes, painterly game-art rendering, strong contrast against the red background — must read clearly as a small icon. No people, no faces, no text.
+Fantasy game status-effect icon. Background: a full-bleed textured aged-paper background in deep warm crimson red, softly darkened with a vignette toward the four edges — no transparency, no border, no frame. Centered: a heavy dark-grey storm cloud with cold, icy-blue edges, pouring slanted streaks of freezing rain mixed with large white snowflakes, a few icy raindrops and snowflakes swirling in the chilly wind below the cloud, a faint frosty breath of cold air around it. Square composition, the symbol filling most of the frame, --ar 1:1. Bold clear shapes, painterly game-art rendering, strong contrast against the red background — must read clearly as a small icon. No people, no faces, no text.
 ```
 
 ## Радуга (weather_rainbow) — зелёный фон

@@ -13,6 +13,11 @@ final readonly class ApplyWeatherOnArrival
 
     public function handle(UserLocationChanged $event): void
     {
-        $this->weather->applyOnArrival($event->userId);
+        // Погода — приятное дополнение: её сбой не должен ломать переход между локациями.
+        try {
+            $this->weather->applyOnArrival($event->userId);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

@@ -36,7 +36,11 @@ class LocationController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        app(WeatherService::class)->applyOnView((int) $user->id);
+        try {
+            app(WeatherService::class)->applyOnView((int) $user->id);
+        } catch (\Throwable $e) {
+            report($e);
+        }
         $result = $this->getLocationPage->execute($user);
 
         if ($result->fight !== null) {

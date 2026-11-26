@@ -10,6 +10,7 @@ use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\PlayerTrade\Domain\Events\PlayerTradeChanged;
 use App\Modules\PlayerTrade\Infrastructure\Persistence\Models\PlayerTradeSession;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Domain\Services\WalletBalanceLimits;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -382,6 +383,23 @@ class PlayerTradeService
         }
 
         foreach ($transferRows as [$row, $receiverId, $count, $originalCount]) {
+            // Стакающийся предмет сливаем с такой же стопкой получателя, а не кладём второй ячейкой.
+            $existing = $this->findMergeTarget($row, $receiverId);
+            if ($existing !== null) {
+                $existing->increment('count', $count);
+                if ($count === $originalCount) {
+                    $item = $row->item;
+                    $row->delete();
+                    if ($item !== null && ! Backpack::query()->where('item_id', $item->id)->exists()) {
+                        $item->delete();
+                    }
+                } else {
+                    $row->decrement('count', $count);
+                }
+
+                continue;
+            }
+
             if ($count === $originalCount) {
                 $row->update(['user_id' => $receiverId]);
 
@@ -404,6 +422,31 @@ class PlayerTradeService
         }
 
         $trade->update(['status' => PlayerTradeSession::COMPLETED, 'completed_at' => now()]);
+    }
+
+    /** Такая же не надетая стопка получателя (тот же предмет и срок годности), если предмет стакается. */
+    private function findMergeTarget(Backpack $row, int $receiverId): ?Backpack
+    {
+        $info = $row->item?->itemInfo;
+        if ($info === null || ! $info->is_stackable || $info->type === ShareItemType::TREASURE_MAP) {
+            return null;
+        }
+
+        return Backpack::query()
+            ->where('user_id', $receiverId)
+            ->where('equipped', false)
+            ->where('id', '!=', $row->id)
+            ->whereHas('item', function ($query) use ($row): void {
+                $query->where('share_item_id', $row->item->share_item_id)
+                    ->when(
+                        $row->item->expires_at === null,
+                        fn ($q) => $q->whereNull('expires_at'),
+                        fn ($q) => $q->where('expires_at', $row->item->expires_at),
+                    );
+            })
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->first();
     }
 
     private function statePayload(PlayerTradeSession $trade, int $viewerId): array
