@@ -33,6 +33,7 @@ use App\Modules\Rating\RatingServiceProvider;
 use App\Modules\Referral\ReferralServiceProvider;
 use App\Modules\Reputation\ReputationServiceProvider;
 use App\Modules\SecretKnowledge\SecretKnowledgeServiceProvider;
+use App\Modules\ItemSpawn\ItemSpawnServiceProvider;
 use App\Modules\Weather\WeatherServiceProvider;
 use App\Modules\Share\ShareServiceProvider;
 use App\Modules\Structure\StructureServiceProvider;
@@ -74,6 +75,7 @@ return [
     ShareServiceProvider::class,
     SecretKnowledgeServiceProvider::class,
     WeatherServiceProvider::class,
+    ItemSpawnServiceProvider::class,
     UserServiceProvider::class,
     ReferralServiceProvider::class,
     StructureServiceProvider::class,

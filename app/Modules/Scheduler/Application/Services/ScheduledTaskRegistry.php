@@ -11,6 +11,7 @@ use App\Modules\Dungeon\Application\UseCases\ProcessExpiredClanBossRuns;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
 use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
+use App\Modules\ItemSpawn\Application\Services\MapItemSpawner;
 use App\Modules\Monster\Application\Services\MonsterMovementService;
 use App\Modules\Npc\Application\Services\NpcMovementService;
 use App\Modules\Payments\Infrastructure\Nbu\NbuExchangeRate;
@@ -53,6 +54,8 @@ class ScheduledTaskRegistry
 
     public const RESPAWN_BOSSES = 'monsters.respawn_bosses';
 
+    public const SPAWN_MAP_ITEMS = 'locations.spawn_items';
+
     public function __construct(
         private readonly ConsoleKernel $console,
         private readonly PruneExpiredPlayerInjuries $pruneExpiredPlayerInjuries,
@@ -67,6 +70,7 @@ class ScheduledTaskRegistry
         private readonly NbuExchangeRate $nbuExchangeRate,
         private readonly WeatherService $weatherService,
         private readonly BossRespawnService $bossRespawnService,
+        private readonly MapItemSpawner $mapItemSpawner,
     ) {}
 
     /** @return array<string, ScheduledTaskDefinition> */
@@ -84,6 +88,13 @@ class ScheduledTaskRegistry
                 key: self::RESPAWN_BOSSES,
                 name: 'Возрождение мировых боссов',
                 description: 'Возвращает мировых боссов на их локации, как только наступило время респавна (не дожидаясь захода игрока).',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
+                allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
+            ),
+            self::SPAWN_MAP_ITEMS => new ScheduledTaskDefinition(
+                key: self::SPAWN_MAP_ITEMS,
+                name: 'Появление предметов на картах',
+                description: 'Раскладывает на локациях карт предметы по правилам (грибы и т.п.): интервал, лимит карты и срок жизни задаются в правиле.',
                 defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
                 allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
             ),
@@ -218,6 +229,7 @@ class ScheduledTaskRegistry
             self::MOVE_NPCS => sprintf('Перемещено NPC: %d.', $this->npcMovementService->moveDue(now())),
             self::MOVE_MONSTERS => sprintf('Перемещено боссов: %d.', $this->monsterMovementService->moveDue(now())),
             self::RESPAWN_BOSSES => sprintf('Возрождено боссов: %d.', $this->bossRespawnService->respawnDueWorldBosses()),
+            self::SPAWN_MAP_ITEMS => sprintf('Появилось предметов на картах: %d.', $this->mapItemSpawner->tick()),
             self::WEATHER_TICK => sprintf('Погода сменилась на картах: %d.', $this->weatherService->tick()),
             self::DELETE_EXPIRED_LOCATION_ITEMS => $this->deleteExpiredLocationItems(),
             self::PRUNE_EXPIRED_INJURIES => sprintf(
