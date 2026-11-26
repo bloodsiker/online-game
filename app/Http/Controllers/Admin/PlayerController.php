@@ -66,6 +66,40 @@ class PlayerController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
+        return view('admin.player.info', $this->pageData($player));
+    }
+
+    public function skills(Player $player): mixed
+    {
+        return view('admin.player.skills', $this->pageData($player));
+    }
+
+    public function reputations(Player $player): mixed
+    {
+        return view('admin.player.reputations', $this->pageData($player));
+    }
+
+    public function mutes(Player $player): mixed
+    {
+        return view('admin.player.mutes', $this->pageData($player));
+    }
+
+    public function logins(Player $player): mixed
+    {
+        return view('admin.player.logins', $this->pageData($player));
+    }
+
+    public function detention(Player $player): mixed
+    {
+        return view('admin.player.detention', $this->pageData($player));
+    }
+
+    /** @return array<string, mixed> */
+    private function pageData(Player $player): array
+    {
+        $reputationService = app(ReputationService::class);
+        $levelUpService = app(PlayerLevelUpService::class);
+
         $player->load(['user.currentLocation.map', 'race', 'skills.skill', 'reputations.reputation.tiers']);
         $maxPlayerLevel = $levelUpService->maxLevel();
 
@@ -81,11 +115,7 @@ class PlayerController extends Controller
             ])
             ->values();
 
-        $backpack = Backpack::with(['item.itemInfo', 'item.treasureHunt'])
-            ->where('user_id', $player->user_id)
-            ->orderBy('equipped', 'desc')
-            ->orderBy('id')
-            ->get();
+        $backpackCount = Backpack::query()->where('user_id', $player->user_id)->count();
 
         $communicationMutes = UserCommunicationMute::query()
             ->where('user_id', $player->user_id)
@@ -117,10 +147,36 @@ class PlayerController extends Controller
             ->limit(20)
             ->get();
 
-        return view('admin.player.info', compact(
+        $secretKnowledgePoints = (int) \DB::table('player_secret_knowledge')->where('player_id', $player->id)->value('points');
+        $studiedManuals = \DB::table('player_studied_boss_manuals as s')
+            ->join('boss_knowledge_manuals as m', 'm.id', '=', 's.boss_knowledge_manual_id')
+            ->join('monsters as mo', 'mo.id', '=', 'm.monster_id')
+            ->where('s.player_id', $player->id)
+            ->orderBy('m.required_knowledge')
+            ->get(['mo.name as boss_name', 'm.required_knowledge', 's.studied_at'])
+            ->map(function (object $row): object {
+                $names = json_decode((string) $row->boss_name, true);
+                $row->boss_name = is_array($names) ? ($names['ru'] ?? reset($names)) : (string) $row->boss_name;
+
+                return $row;
+            });
+
+        $nav = [
+            'backpack' => $backpackCount,
+            'skills' => $player->skills->count(),
+            'reputations' => $playerReputations->count(),
+            'quests' => \DB::table('quest_players')->where('player_id', $player->id)->where('status', 'in_progress')->count(),
+            'mutes' => $activeCommunicationMutes->count(),
+            'logins' => $loginHistory->count(),
+            'detention' => $activeDetention !== null,
+        ];
+
+        return compact(
+            'secretKnowledgePoints',
+            'studiedManuals',
             'loginHistory',
             'player',
-            'backpack',
+            'backpackCount',
             'playerReputations',
             'maxPlayerLevel',
             'communicationMutes',
@@ -128,7 +184,61 @@ class PlayerController extends Controller
             'prisons',
             'detentionHistory',
             'activeDetention',
-        ));
+            'nav',
+        );
+    }
+
+    public function backpack(Player $player): mixed
+    {
+        $backpack = Backpack::with(['item.itemInfo', 'item.treasureHunt'])
+            ->where('user_id', $player->user_id)
+            ->orderBy('equipped', 'desc')
+            ->orderBy('id')
+            ->get();
+
+        return view('admin.player.backpack', ['player' => $player, 'backpack' => $backpack, 'nav' => $this->pageData($player)['nav']]);
+    }
+
+    public function quests(Player $player): mixed
+    {
+        $ru = static function (mixed $value): string {
+            $decoded = is_string($value) ? json_decode($value, true) : $value;
+
+            return is_array($decoded) ? (string) ($decoded['ru'] ?? reset($decoded) ?: '') : (string) $value;
+        };
+
+        $active = \DB::table('quest_players as qp')
+            ->join('quests as q', 'q.id', '=', 'qp.quest_id')
+            ->leftJoin('quest_stages as st', 'st.id', '=', 'qp.current_stage_id')
+            ->where('qp.player_id', $player->id)
+            ->where('qp.status', 'in_progress')
+            ->orderByDesc('qp.updated_at')
+            ->get(['qp.id', 'qp.quest_id', 'qp.current_stage_id', 'qp.current_stage_started_at', 'qp.created_at', 'q.title as quest_title', 'q.type', 'st.title as stage_title', 'st.order as stage_order']);
+
+        $progress = \DB::table('quest_player_objectives')
+            ->whereIn('quest_player_id', $active->pluck('id'))
+            ->pluck('amount', \DB::raw("CONCAT(quest_player_id, '-', quest_objective_id)"));
+
+        $quests = $active->map(function (object $row) use ($ru, $progress): object {
+            $row->quest_title = $ru($row->quest_title);
+            $row->stage_title = $ru($row->stage_title);
+            $row->objectives = \DB::table('quest_objectives')
+                ->where('quest_id', $row->quest_id)
+                ->where('stage_id', $row->current_stage_id)
+                ->get()
+                ->map(function (object $objective) use ($ru, $progress, $row): object {
+                    $objective->text = $ru($objective->description);
+                    $objective->current = (int) ($progress[$row->id.'-'.$objective->id] ?? 0);
+
+                    return $objective;
+                });
+
+            return $row;
+        });
+
+        $completedCount = \DB::table('quest_players')->where('player_id', $player->id)->where('status', 'completed')->count();
+
+        return view('admin.player.quests', ['player' => $player, 'quests' => $quests, 'completedCount' => $completedCount, 'nav' => $this->pageData($player)['nav']]);
     }
 
     public function levelUp(Request $request, Player $player, PlayerLevelUpService $levelUpService): RedirectResponse

@@ -52,9 +52,9 @@
         .tbl-usi-hdr.mbg { background-position: center -50px; background-repeat: repeat-x; color: #FCF5B7; font-size: 11px; font-weight: bold; height: 16px; padding: 1px 10px 5px 10px; line-height: 16px; vertical-align: middle; }
 
         /* ── Кнопка «{{ __("Поиск") }}» ── */
-        b.butt1 { height: 36px; font-size: 26px; cursor: pointer; background: url({{ asset('main/images/tbl-btn2_c-left.png') }}) left top no-repeat; display: inline-block; }
-        b.butt1 b { height: 36px; font-size: 26px; cursor: pointer; background: url({{ asset('main/images/tbl-btn2_c-right.png') }}) right top no-repeat; display: inline-block; }
-        b.butt1 input { height: 36px; border: 0; color: #f8dea4 !important; cursor: pointer; font-family: Tahoma; font-size: 11px !important; font-weight: bold; text-decoration: none; margin: 0 33px; background: transparent url({{ asset('main/images/tbl-btn2_center.png') }}) center top repeat-x; padding-bottom: 2px; outline: none; }
+        b.butt1 { height: 38px; font-size: 26px; cursor: pointer; background: url({{ asset('img/bg/btn/tbl-btn2_c-left.png') }}) left 4px no-repeat; display: inline-block; }
+        b.butt1 b { height: 38px; font-size: 26px; cursor: pointer; background: url({{ asset('img/bg/btn/tbl-btn2_c-right.png') }}) right 4px no-repeat; display: inline-block; }
+        b.butt1 input { height: 38px; border: 0; color: #f8dea4 !important; cursor: pointer; font-family: Tahoma; font-size: 11px !important; font-weight: bold; text-decoration: none; margin: 0 33px; background: transparent url({{ asset('img/bg/btn/tbl-btn2_center.png') }}) center top repeat-x; padding-bottom: 4px; outline: none; }
 
         /* Поля формы */
         input[type=text], select { border: 1px solid #C49485; background-color: #FFE7C5; color: #BA0000; font-family: Tahoma; font-size: 10px; font-weight: bold; padding: 1px 2px; }
@@ -91,7 +91,7 @@
             @foreach($tabs as $tabKey => $tabLabel)
                 @php $isActive = $page->mode === $tabKey; @endphp
                 <td width="19"><img src="{{ asset($isActive ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                <td align="center" nowrap style="background: url({{ asset($isActive ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                <td align="center" nowrap style="background: url({{ asset($isActive ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 5px;">
                     <a href="{{ route('fights', ['mode' => $tabKey]) }}" class="{{ $isActive ? 'btn_2' : 'btn_1' }}">{{ $tabLabel }}</a>
                 </td>
                 <td width="19"><img src="{{ asset($isActive ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
@@ -100,7 +100,7 @@
             <td width="100%"></td>
 
             <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-            <td align="center" nowrap style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <td align="center" nowrap style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 5px;">
                 <a href="#" class="btn_1" onclick="window.parent.sendDataToGame('{{ route('location') }}'); return false;">{{ __("Вернуться") }}</a>
             </td>
             <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>

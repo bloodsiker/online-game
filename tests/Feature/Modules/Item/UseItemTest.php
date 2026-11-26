@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
+use PDOException;
 use Tests\TestCase;
 
 class UseItemTest extends TestCase
@@ -340,7 +341,7 @@ class UseItemTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => 1, 'location_id' => 11]);
     }
 
-    public function test_item_applies_all_configured_buffs_and_is_consumed(): void
+    public function test_item_retries_after_effect_insert_deadlock_without_duplicating_buffs(): void
     {
         $this->giveKey(450, 104);
         DB::table('effects')->insert([
@@ -351,6 +352,12 @@ class UseItemTest extends TestCase
             ['share_item_id' => 450, 'effect_id' => 1, 'duration_seconds' => 60],
             ['share_item_id' => 450, 'effect_id' => 2, 'duration_seconds' => 120],
         ]);
+        $effectInserts = 0;
+        DB::beforeExecuting(static function (string $query) use (&$effectInserts): void {
+            if (str_starts_with($query, 'insert into "player_active_effects"') && ++$effectInserts === 2) {
+                throw new PDOException('Deadlock found when trying to get lock; try restarting transaction', 40001);
+            }
+        });
 
         $response = $this->postJson(route('items.use', 104));
 
@@ -359,7 +366,9 @@ class UseItemTest extends TestCase
             ->assertJsonCount(2, 'blessings')
             ->assertJsonPath('blessings.0.name', 'Сила медведя')
             ->assertJsonPath('blessings.1.name', 'Каменная кожа');
+        $this->assertSame(4, $effectInserts);
         $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 104]);
+        $this->assertDatabaseCount('player_active_effects', 2);
         $this->assertDatabaseHas('player_active_effects', ['player_id' => 1, 'effect_id' => 1]);
         $this->assertDatabaseHas('player_active_effects', ['player_id' => 1, 'effect_id' => 2]);
     }
@@ -815,6 +824,7 @@ class UseItemTest extends TestCase
             $table->id();
             $table->string('interaction_type')->default('pickup');
             $table->unsignedBigInteger('loot_owner_id')->nullable();
+            $table->unsignedBigInteger('loot_party_id')->nullable();
             $table->timestamp('loot_reserved_until')->nullable();
             $table->unsignedBigInteger('item_id');
             $table->unsignedBigInteger('location_id');

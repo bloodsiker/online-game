@@ -304,6 +304,13 @@ Route::get('/bank/stock/{stock}/duplicate', [BankStockController::class, 'duplic
 
 Route::get('/players', [PlayerController::class, 'index'])->name('players');
 Route::match(['GET', 'POST'], '/player/{player}', [PlayerController::class, 'info'])->name('player.info');
+Route::get('/player/{player}/skills', [PlayerController::class, 'skills'])->name('player.skills');
+Route::get('/player/{player}/reputations', [PlayerController::class, 'reputations'])->name('player.reputations');
+Route::get('/player/{player}/mutes', [PlayerController::class, 'mutes'])->name('player.mutes');
+Route::get('/player/{player}/logins', [PlayerController::class, 'logins'])->name('player.logins');
+Route::get('/player/{player}/detention', [PlayerController::class, 'detention'])->name('player.detention');
+Route::get('/player/{player}/backpack', [PlayerController::class, 'backpack'])->name('player.backpack');
+Route::get('/player/{player}/quests', [PlayerController::class, 'quests'])->name('player.quests');
 Route::post('/player/{player}/level-up', [PlayerController::class, 'levelUp'])->name('player.level_up');
 Route::post('/player/{player}/backpack/add', [PlayerController::class, 'backpackAdd'])->name('player.backpack.add');
 Route::get('/player/{player}/backpack/{backpack}/delete', [PlayerController::class, 'backpackDelete'])->name('player.backpack.delete');

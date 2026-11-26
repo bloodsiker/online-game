@@ -73,6 +73,18 @@ class BattleTransactionsTest extends TestCase
         $this->assertDatabaseCount('battles', 0);
     }
 
+    public function test_attacking_unavailable_monster_returns_to_location(): void
+    {
+        $this->withoutMiddleware();
+        DB::table('monster_on_locations')->where('id', 1)->update(['active' => 0]);
+
+        $this->get(route('fight.attack.monster', ['id' => 1]))
+            ->assertRedirect(route('location'))
+            ->assertSessionHas('message', __('Этот противник больше недоступен.'));
+
+        $this->assertDatabaseCount('battles', 0);
+    }
+
     public function test_failed_escape_has_unique_round_and_does_not_move_or_remove_player(): void
     {
         $id = $this->enter();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BlacksmithActionResultDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BreakItemDTO;
@@ -50,11 +51,7 @@ class BreakItem
                 $newItem->share_item_id = $crystal->id;
                 $newItem->save();
 
-                $backpack = new Backpack;
-                $backpack->user_id = $data->user->id;
-                $backpack->item_id = $newItem->id;
-                $backpack->count = $countCrystal;
-                $backpack->save();
+                Backpack::createForItem(userId: (int) $data->user->id, item: $newItem, count: $countCrystal);
             }
 
             $item->delete();

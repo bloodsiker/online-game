@@ -104,8 +104,8 @@ class LockpickingService
     public function start(User $user, int $itemId, ?int $lockpickShareItemId = null): LockpickingActionResultDTO
     {
         return DB::transaction(function () use ($user, $itemId, $lockpickShareItemId): LockpickingActionResultDTO {
-            $player = Player::query()->whereKey($user->player_id)->lockForUpdate()->firstOrFail();
-            $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $lockedUser = User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $player = Player::query()->whereKey($lockedUser->player_id)->lockForUpdate()->firstOrFail();
             $lockedUser->setRelation('player', $player);
             $lockedUser->load('currentLocation');
 
@@ -183,14 +183,14 @@ class LockpickingService
                 'lockpick_share_item_id' => $lockpickInfo->id,
                 'competitors' => $this->competitorCount($lockedItem->id, $user->player_id),
             ]);
-        });
+        }, attempts: 3);
     }
 
     public function complete(User $user, int $itemId): LockpickingActionResultDTO
     {
         return DB::transaction(function () use ($user, $itemId): LockpickingActionResultDTO {
-            $player = Player::query()->whereKey($user->player_id)->lockForUpdate()->firstOrFail();
-            $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $lockedUser = User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $player = Player::query()->whereKey($lockedUser->player_id)->lockForUpdate()->firstOrFail();
             $lockedUser->setRelation('player', $player);
             $lockedUser->load('currentLocation');
             $attempt = LockpickingAttempt::query()
@@ -322,7 +322,7 @@ class LockpickingService
                         'map_influence' => $eventCollection->mapInfluence,
                     ],
                 ]);
-        });
+        }, attempts: 3);
     }
 
     public function cancel(User $user, int $itemId): LockpickingActionResultDTO

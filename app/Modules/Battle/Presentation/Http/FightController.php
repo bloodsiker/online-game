@@ -210,7 +210,7 @@ class FightController extends Controller
         return view('battle::attack', compact('battle', 'round', 'randomAttackedMonster', 'player', 'playerDecorator', 'fightDTO', 'hitsLeft'));
     }
 
-    public function attackMonster($id)
+    public function attackMonster($id): View|RedirectResponse
     {
         $user = Auth::user();
         if (! Cache::add('cd:fight:'.$user->id, 1, 1)) {
@@ -221,11 +221,13 @@ class FightController extends Controller
             return redirect()->route('location')->with('message', $sleepMessage);
         }
 
-        //        $battle = $this->battleOrchestrator->handlePlayerAttack($user->currentLocation, $id);
         $battle = $this->battleService->attackMonster($user->currentLocation, $id);
+        if ($battle === null) {
+            return redirect()->route('location')->with('message', __('Этот противник больше недоступен.'));
+        }
 
         $randomAttackedMonster = BattleDetail::with(['locationMonster.monster'])
-            ->where(['location_monster_id' => $id])
+            ->where(['battle_id' => $battle->id, 'location_monster_id' => $id])
             ->where('status', 1)
             ->first();
 

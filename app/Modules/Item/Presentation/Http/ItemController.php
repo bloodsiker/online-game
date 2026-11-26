@@ -231,7 +231,7 @@ class ItemController extends Controller
         $user = Auth::user();
 
         try {
-            return DB::transaction(fn (): JsonResponse => $this->performUseItem($request, $id, $user));
+            return DB::transaction(fn (): JsonResponse => $this->performUseItem($request, $id, $user), attempts: 3);
         } catch (ItemUseBlockedException $exception) {
             $remainingSeconds = $exception->availableAt !== null
                 ? max(0, (int) ceil(now()->diffInSeconds($exception->availableAt, false)))
@@ -249,9 +249,11 @@ class ItemController extends Controller
 
     private function performUseItem(Request $request, int $id, User $user): JsonResponse
     {
+        $user = User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
         // Одна стабильная блокировка на игрока сериализует параллельные попытки
         // использования любых его предметов, включая создание первой строки лимита.
         $player = Player::query()->whereKey($user->player_id)->lockForUpdate()->firstOrFail();
+        $user->setRelation('player', $player);
 
         $backpack = Backpack::with(['item.itemInfo.effects.targetItem', 'item.itemInfo.buffs.effect', 'item.itemInfo.debuffs.effect'])
             ->where('user_id', $user->id)
