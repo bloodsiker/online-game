@@ -19,6 +19,7 @@ use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Blacksmith\Domain\Services\ArtifactUpgradeRules;
+use App\Modules\Weather\Application\Services\WeatherService;
 
 class PlayerStatService
 {
@@ -119,7 +120,7 @@ class PlayerStatService
         $primary = $this->applyModifiers($primaryBase, $modifiers);
 
         // ── Проход 2: производные от итоговых первичных ─────────────────────
-        $derivedBase = [
+        $makeDerived = fn (array $primary): array => [
             'dodge' => (float) max(0, ($primary['agility'] - 1) * PlayerStatFormulas::DODGE_PER_AGILITY),
             'critical' => (float) max(0, ($primary['intuition'] - 1) * PlayerStatFormulas::CRITICAL_PER_INT),
             'armor' => (float) max(0, ($primary['strength'] - 1) * PlayerStatFormulas::ARMOR_PER_STR),
@@ -153,6 +154,7 @@ class PlayerStatService
             'block_flat' => 0.0,
             'block_percent' => 0.0,
         ];
+        $derivedBase = $makeDerived($primary);
 
         // Сила усиливает урон оружия процентом — от итоговой силы, с мягким потолком
         $strengthDmgPct = PlayerStatFormulas::strengthDamagePercent(
@@ -171,7 +173,7 @@ class PlayerStatService
         // (resources/views/player/index.blade.php, карточки характеристик).
         $positiveOnlyModifiers = array_values(array_filter($modifiers, fn (StatModifier $m) => $m->value >= 0));
         $primaryWithoutDebuffs = $this->applyModifiers($primaryBase, $positiveOnlyModifiers);
-        $computedWithoutDebuffs = $primaryWithoutDebuffs + $this->applyModifiers($derivedBase, $positiveOnlyModifiers);
+        $computedWithoutDebuffs = $primaryWithoutDebuffs + $this->applyModifiers($makeDerived($primaryWithoutDebuffs), $positiveOnlyModifiers);
 
         $debuffReduction = [];
         foreach ($computedWithoutDebuffs as $stat => $valueWithoutDebuffs) {
@@ -220,7 +222,7 @@ class PlayerStatService
         $sheet->level = max(1, (int) $player->lvl);
         $sheet->combatClass = $this->determineCombatClass($player);
         $sheet->weatherChanceFactor = $player->user_id !== null
-            ? app(\App\Modules\Weather\Application\Services\WeatherService::class)->combatChanceFactor((int) $player->user_id)
+            ? app(WeatherService::class)->combatChanceFactor((int) $player->user_id)
             : 1.0;
 
         return $sheet;

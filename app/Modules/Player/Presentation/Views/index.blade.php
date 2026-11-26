@@ -418,14 +418,17 @@
                                     <div class="char-card-body">
                                         {{-- Подсказки соответствуют PlayerStatFormulas / PlayerStatService --}}
                                         @foreach([
-                                            [__('Сила'),       $character->baseStrength,       $character->stats->getStrength(),     __('Каждое очко даёт +1 к броне и увеличивает урон оружия в процентах. Основная характеристика класса «Танк».')],
-                                            [__('Интуиция'),   $character->baseIntuition,      $character->stats->getInt(),          __('Каждое очко даёт +1 к шансу критического удара и увеличивает силу крит. удара. Основная характеристика класса «Крит».')],
-                                            [__('Ловкость'),   $character->baseAgility,        $character->stats->getAgility(),      __('Каждое очко даёт +1 к увороту — шансу избежать удара. Основная характеристика класса «Уворот».')],
-                                            [__('Интеллект'),  $character->baseIntelligence,   $character->stats->getIntelligence(), __('Увеличивает силу заклинаний: урон и лечение магией.')],
-                                            [__('Мудрость'),   $character->baseWisdom,         $character->stats->getMud(),          __('Каждое очко даёт +3 к запасу маны и +1 к сопротивлению магии.')],
-                                            [__('Выносливость'), $character->baseEndurance,    $character->stats->getEndurance(),    __('Каждое очко даёт +3 к максимальному здоровью.')],
-                                        ] as [$label, $base, $total, $hint])
-                                            @php $bonus = $total - $base; @endphp
+                                            [__('Сила'),       $character->baseStrength,       $character->stats->getStrength(),     __('Каждое очко даёт +1 к броне и увеличивает урон оружия в процентах. Основная характеристика класса «Танк».'), 'strength'],
+                                            [__('Интуиция'),   $character->baseIntuition,      $character->stats->getInt(),          __('Каждое очко даёт +1 к шансу критического удара и увеличивает силу крит. удара. Основная характеристика класса «Крит».'), 'intuition'],
+                                            [__('Ловкость'),   $character->baseAgility,        $character->stats->getAgility(),      __('Каждое очко даёт +1 к увороту — шансу избежать удара. Основная характеристика класса «Уворот».'), 'agility'],
+                                            [__('Интеллект'),  $character->baseIntelligence,   $character->stats->getIntelligence(), __('Увеличивает силу заклинаний: урон и лечение магией.'), 'intelligence'],
+                                            [__('Мудрость'),   $character->baseWisdom,         $character->stats->getMud(),          __('Каждое очко даёт +3 к запасу маны и +1 к сопротивлению магии.'), 'wisdom'],
+                                            [__('Выносливость'), $character->baseEndurance,    $character->stats->getEndurance(),    __('Каждое очко даёт +3 к максимальному здоровью.'), 'endurance'],
+                                        ] as [$label, $base, $total, $hint, $statKey])
+                                            @php
+                                                $statDebuff = $character->stats->getDebuffReduction($statKey);
+                                                $bonus = $total + $statDebuff - $base;
+                                            @endphp
                                             <div class="char-stat-row">
                                                 <span class="char-stat-label">
                                                     {{ $label }}
@@ -437,6 +440,9 @@
                                                         <span style="color:#5e7654;font-size:11px">(+{{ $bonus }})</span>
                                                     @elseif($bonus < 0)
                                                         <span style="color:#8a5550;font-size:11px">({{ $bonus }})</span>
+                                                    @endif
+                                                    @if($statDebuff > 0)
+                                                        <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $statDebuff }})</span>
                                                     @endif
                                                 </span>
                                             </div>
@@ -458,6 +464,9 @@
                                             {{ __('Здоровье:') }}
                                             <b style="color:#8d4f49">{{ $character->hpNow }}</b>
                                             / <b style="color:#59483d">{{ $character->stats->getHpMax() }}</b>
+                                            @if($character->stats->getDebuffReduction('hp_max') > 0)
+                                                <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('hp_max') }})</span>
+                                            @endif
                                         </div>
                                         @php $hpPct = $character->stats->getHpMax() > 0 ? min(round($character->hpNow * 100 / $character->stats->getHpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
@@ -501,7 +510,12 @@
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">{{ __('Сила крит. удара') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Во сколько процентов от обычного урона наносится физический критический удар. Растёт от Интуиции и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Сила крит. удара')]) }}">?</button></span></span>
-                                            <span class="char-stat-val">{{ $character->stats->getCritDamage() }}%</span>
+                                            <span class="char-stat-val">
+                                                {{ $character->stats->getCritDamage() }}%
+                                                @if($character->stats->getDebuffReduction('crit_damage') > 0)
+                                                    <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('crit_damage') }}%)</span>
+                                                @endif
+                                            </span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">{{ __('Уворот') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Шанс полностью избежать удара. Сравнивается с уворотом противника: чем больше перевес, тем выше шанс. Растёт от Ловкости и экипировки.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Уворот')]) }}">?</button></span></span>
@@ -535,6 +549,9 @@
                                             {{ __('Мана:') }}
                                             <b style="color:#526f8d">{{ $character->mpNow }}</b>
                                             / <b style="color:#59483d">{{ $character->stats->getMpMax() }}</b>
+                                            @if($character->stats->getDebuffReduction('mp_max') > 0)
+                                                <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('mp_max') }})</span>
+                                            @endif
                                         </div>
                                         @php $mpPct = $character->stats->getMpMax() > 0 ? min(round($character->mpNow * 100 / $character->stats->getMpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
