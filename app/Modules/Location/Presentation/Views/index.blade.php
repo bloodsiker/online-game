@@ -182,7 +182,7 @@
     <tr>
         <td style="vertical-align: top">
             <div class="center">
-                <b><a href="" class="location-name">{{ $page->name }}</a></b> <span>({{ $page->locationId }})</span>
+                <b><a href="" class="location-name">{{ $page->name }}</a></b> @include('weather::label', ['locationId' => $page->locationId]) <span>({{ $page->locationId }})</span>
             </div>
 
             <div id="boss-notice" role="status" aria-live="polite"></div>
@@ -461,7 +461,7 @@
 
         parent.queueAction(() => {
             if (parent.goTo(direction) !== false) {
-                parent.startCooldown();
+                parent.startCooldown(parent.moveCooldownDuration || null);
             }
         });
     }

@@ -13,6 +13,7 @@ use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Domain\Services\PlayerTimedEffectService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Modules\Weather\Application\Services\WeatherService;
 use Illuminate\Support\Facades\DB;
 
 final readonly class HeartbeatPlayer
@@ -44,7 +45,11 @@ final readonly class HeartbeatPlayer
 
             $sheet = $this->statService->resolve($player);
             if ((int) $player->hp_now > 0) {
-                $player->regenerate($sheet->getHpMax(), $sheet->getMpMax());
+                $player->regenerate(
+                    $sheet->getHpMax(),
+                    $sheet->getMpMax(),
+                    app(WeatherService::class)->regenSpeed((int) $user->id),
+                );
             }
 
             $hpBeforeEffects = (int) $player->hp_now;

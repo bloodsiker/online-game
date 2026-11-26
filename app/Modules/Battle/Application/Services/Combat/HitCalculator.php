@@ -192,8 +192,14 @@ readonly class HitCalculator
         $chance = $this->statChance($defender->getDodge(), $attacker->getDodge(), $this->levelScale($attacker, $defender));
 
         $reduction = self::DODGE_COUNTER * $this->classShareAboveBaseline($attacker, CombatClass::DODGE->beatenBy());
+        $chance *= 1 - $reduction;
 
-        return $this->random->chance($chance * (1 - $reduction));
+        // Туман: противник уворачивается от ударов игрока чаще (свой уворот и крит игроку снижает дебафф «Туман»)
+        if ($attacker instanceof StatSheet && $attacker->weatherChanceFactor < 1.0) {
+            $chance *= 2 - $attacker->weatherChanceFactor;
+        }
+
+        return $this->random->chance($chance);
     }
 
     /**
@@ -204,8 +210,9 @@ readonly class HitCalculator
         $chance = $this->statChance($attacker->getCritical(), $defender->getCritical(), $this->levelScale($attacker, $defender));
 
         $reduction = self::CRIT_COUNTER * $this->classShareAboveBaseline($defender, CombatClass::CRIT->beatenBy());
+        $chance *= 1 - $reduction;
 
-        return $this->random->chance($chance * (1 - $reduction));
+        return $this->random->chance($chance);
     }
 
     /**

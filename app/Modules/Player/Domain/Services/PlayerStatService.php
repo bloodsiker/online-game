@@ -219,6 +219,9 @@ class PlayerStatService
         $sheet->blockPercent = $computed['block_percent'];
         $sheet->level = max(1, (int) $player->lvl);
         $sheet->combatClass = $this->determineCombatClass($player);
+        $sheet->weatherChanceFactor = $player->user_id !== null
+            ? app(\App\Modules\Weather\Application\Services\WeatherService::class)->combatChanceFactor((int) $player->user_id)
+            : 1.0;
 
         return $sheet;
     }

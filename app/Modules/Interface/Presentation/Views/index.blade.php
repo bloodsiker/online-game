@@ -1405,7 +1405,9 @@
 
             // Серверный cooldown — 1 секунда. Запас учитывает доставку
             // запроса, поэтому повторный клик не превращается в HTTP 429.
-            parent.actionRequestLockedUntil = now + 1200;
+            // Переход в погоду (метель/попутный ветер) блокируется на свою длительность.
+            const isMove = /\/location\/move\b/.test(url);
+            parent.actionRequestLockedUntil = now + (isMove && parent.moveCooldownDuration > 0 ? parent.moveCooldownDuration : 1200);
         }
 
         const gameFrame = document.getElementById('game-frame');
@@ -1924,7 +1926,8 @@
                 if (!isMoveAvailable(direction)) return;
 
                 if (parent.goTo(direction) !== false) {
-                    parent.startCooldown();
+                    // Погода (метель/попутный ветер) меняет длительность только перехода, не атаки
+                    parent.startCooldown(parent.moveCooldownDuration || null);
                 }
             });
         });
@@ -1955,7 +1958,8 @@
         });
     }
 
-    function startCooldown() {
+    function startCooldown(durationMs = null) {
+        const duration = durationMs > 0 ? durationMs : parent.cooldownDuration;
         const heroFrame = document.getElementById('character-frame');
         if (!heroFrame) return console.error('Iframe #character-frame не знайдено');
 
@@ -1975,7 +1979,7 @@
         cooldownBar.style.width = '0%';
 
         setTimeout(() => {
-            cooldownBar.style.transition = `width ${parent.cooldownDuration}ms linear`;
+            cooldownBar.style.transition = `width ${duration}ms linear`;
             cooldownBar.classList.add('filling');
             cooldownBar.style.width = '100%';
 
@@ -1988,7 +1992,7 @@
                     parent.pendingAction = null;
                     action();
                 }
-            }, parent.cooldownDuration);
+            }, duration);
         }, 50);
 
         return parent.isCooldown;

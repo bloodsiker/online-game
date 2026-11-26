@@ -33,6 +33,7 @@ use App\Modules\ItemAssembly\Presentation\Http\Admin\ItemAssemblyController;
 use App\Modules\Payments\Presentation\Http\Admin\PaymentOrderController;
 use App\Modules\Premium\Presentation\Http\Admin\PremiumController;
 use App\Modules\SecretKnowledge\Presentation\Http\Admin\SecretKnowledgeAdminController;
+use App\Modules\Weather\Presentation\Http\Admin\WeatherAdminController;
 use App\Modules\TreasureHunt\Presentation\Http\Admin\TreasureMapController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +52,9 @@ Route::post('/payment-settings', [PaymentOrderController::class, 'settings'])->n
 Route::post('/payment-settings/sync-rate', [PaymentOrderController::class, 'syncRate'])->middleware('throttle:6,1')->name('payment_orders.sync_rate');
 Route::post('/premium', [PremiumController::class, 'save'])->name('premium.save');
 Route::get('/secret-knowledge', [SecretKnowledgeAdminController::class, 'index'])->name('secret_knowledge');
+Route::get('/weather', [WeatherAdminController::class, 'index'])->name('weather.index');
+Route::post('/weather/{map}/force', [WeatherAdminController::class, 'force'])->whereNumber('map')->name('weather.force');
+Route::post('/weather/{map}/weights', [WeatherAdminController::class, 'saveWeights'])->whereNumber('map')->name('weather.weights');
 Route::post('/secret-knowledge/settings', [SecretKnowledgeAdminController::class, 'saveSettings'])->name('secret_knowledge.settings');
 Route::post('/secret-knowledge/manuals', [SecretKnowledgeAdminController::class, 'saveManual'])->name('secret_knowledge.manuals.store');
 Route::post('/secret-knowledge/manuals/{manual}', [SecretKnowledgeAdminController::class, 'saveManual'])->name('secret_knowledge.manuals.update');

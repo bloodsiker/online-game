@@ -301,7 +301,10 @@ class Player extends Model
         $this->save();
     }
 
-    public function regenerate(?int $hpMax = null, ?int $mpMax = null): void
+    /**
+     * @param  float  $speed  множитель скорости регенерации (погода «Зной» — 0.5); 1.0 — обычная
+     */
+    public function regenerate(?int $hpMax = null, ?int $mpMax = null, float $speed = 1.0): void
     {
         $hpMax = $hpMax ?? $this->hp_max;
         $mpMax = $mpMax ?? $this->mp_max;
@@ -327,11 +330,23 @@ class Player extends Model
             $baselineInitialized = true;
         }
 
+        $speed = max(0.05, $speed);
+        $hpFullTime = self::FULL_REGEN_TIME / $speed;
+        $mpFullTime = self::MP_FULL_REGEN_TIME / $speed;
         $elapsedSeconds = max(0, (int) $this->last_regen_at->diffInSeconds($now, false));
-        $regenerationSeconds = min(self::FULL_REGEN_TIME, $elapsedSeconds);
-        $mpRegenerationSeconds = min(self::MP_FULL_REGEN_TIME, $elapsedSeconds);
-        $hpNow = min($hpMax, (int) $this->regen_hp_start + (int) floor($hpMax * $regenerationSeconds / self::FULL_REGEN_TIME));
-        $mpNow = min($mpMax, (int) $this->regen_mp_start + (int) floor($mpMax * $mpRegenerationSeconds / self::MP_FULL_REGEN_TIME));
+        $regenerationSeconds = min($hpFullTime, $elapsedSeconds);
+        $mpRegenerationSeconds = min($mpFullTime, $elapsedSeconds);
+        $hpNow = min($hpMax, (int) $this->regen_hp_start + (int) floor($hpMax * $regenerationSeconds / $hpFullTime));
+        $mpNow = min($mpMax, (int) $this->regen_mp_start + (int) floor($mpMax * $mpRegenerationSeconds / $mpFullTime));
+
+        // Скорость сменилась посреди отсчёта (начался зной): пересчёт от старой точки дал бы меньше,
+        // чем уже восстановлено. Не отнимаем HP/MP, а начинаем новый отсчёт с текущих значений.
+        if ($hpNow < (int) $this->hp_now || $mpNow < (int) $this->mp_now) {
+            $this->restartRegenerationBaseline($now);
+            $this->saveRegenerationProgress();
+
+            return;
+        }
 
         if (! $baselineInitialized && $hpNow === (int) $this->hp_now && $mpNow === (int) $this->mp_now) {
             return;

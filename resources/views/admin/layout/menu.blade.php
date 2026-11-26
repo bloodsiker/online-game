@@ -18,6 +18,9 @@
                     <li class="{{ request()->routeIs('admin.trade.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.trade.index') }}"><i class="bx bx-transfer"></i><span>Вольный торг</span></a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.weather.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.weather.index') }}"><i class="bx bx-cloud-lightning"></i><span>Погода</span></a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.secret_knowledge*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.secret_knowledge') }}"><i class="bx bx-book-open"></i><span>Тайные знания</span></a>
                     </li>

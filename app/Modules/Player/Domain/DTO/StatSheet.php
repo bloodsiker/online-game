@@ -42,6 +42,9 @@ class StatSheet implements FightHitInterface
     /** Доля брони цели, которую игнорируют физические удары игрока (пассивка «Пробивание брони»), 0..1 */
     public float $armorPierce = 0.0;
 
+    /** Погода (туман): множитель шансов крита/уворота игрока и обратный — уворота противника, 1.0 — без влияния */
+    public float $weatherChanceFactor = 1.0;
+
     public int $hpMax = 0;
 
     public int $mpMax = 0;

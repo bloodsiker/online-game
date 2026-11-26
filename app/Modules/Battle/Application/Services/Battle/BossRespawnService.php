@@ -26,7 +26,32 @@ readonly class BossRespawnService
         private MonsterOnLocationRepository $monsterRepo,
     ) {}
 
-    public function respawnIfDue(Location $location, ?int $dungeonSessionId): void
+    /**
+     * Крон: возрождает мировых боссов, у которых наступил respawn_at, не дожидаясь,
+     * пока кто-то зайдёт на их локацию. Боссы данжей (локации с dungeon_id) возрождаются
+     * по-прежнему в рамках сессии данжа. Возвращает число созданных боссов.
+     */
+    public function respawnDueWorldBosses(): int
+    {
+        $locationIds = DB::table('location_has_monsters as lhm')
+            ->join('monsters as m', 'm.id', '=', 'lhm.monster_id')
+            ->join('locations as l', 'l.id', '=', 'lhm.location_id')
+            ->where('m.is_boss', true)
+            ->whereNotNull('m.respawn_at')
+            ->where('m.respawn_at', '<=', now())
+            ->whereNull('l.dungeon_id')
+            ->distinct()
+            ->pluck('lhm.location_id');
+
+        $created = 0;
+        foreach (Location::query()->whereIn('id', $locationIds)->get() as $location) {
+            $created += $this->respawnIfDue($location, null);
+        }
+
+        return $created;
+    }
+
+    public function respawnIfDue(Location $location, ?int $dungeonSessionId): int
     {
         $bosses = $location->monsters()
             ->where('is_boss', true)
@@ -34,13 +59,13 @@ readonly class BossRespawnService
             ->filter(static fn ($boss): bool => $boss->canRespawnNow());
 
         if ($bosses->isEmpty()) {
-            return;
+            return 0;
         }
 
         // Блокируем строки боссов и перепроверяем respawn_at под блокировкой: два игрока,
         // одновременно вошедшие на локацию, раньше оба видели «босса нет» и создавали
         // по копии (две копии на локации → два объявления об убийстве).
-        DB::transaction(function () use ($bosses, $location, $dungeonSessionId): void {
+        return DB::transaction(function () use ($bosses, $location, $dungeonSessionId): int {
             $lockedBosses = Monster::query()
                 ->whereIn('id', $bosses->pluck('id'))
                 ->orderBy('id')
@@ -49,7 +74,7 @@ readonly class BossRespawnService
                 ->filter(static fn (Monster $boss): bool => $boss->canRespawnNow());
 
             if ($lockedBosses->isEmpty()) {
-                return;
+                return 0;
             }
 
             $aliveBossIds = MonsterOnLocation::query()
@@ -61,13 +86,17 @@ readonly class BossRespawnService
                 ->pluck('monster_id')
                 ->mapWithKeys(static fn (mixed $monsterId): array => [(int) $monsterId => true]);
 
+            $created = 0;
             foreach ($lockedBosses as $boss) {
                 if (! $aliveBossIds->has((int) $boss->id)) {
                     $this->monsterRepo->createMonsterOnLocation($boss, $location, $dungeonSessionId);
                     $aliveBossIds->put((int) $boss->id, true);
+                    $created++;
                 }
                 $boss->clearRespawn();
             }
+
+            return $created;
         });
     }
 }

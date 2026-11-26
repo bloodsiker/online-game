@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Modules\Scheduler\Application\Services;
 
+use App\Modules\Auth\Infrastructure\GeoIp\GeoIpDatabaseUpdater;
+use App\Modules\Battle\Application\Services\Battle\BossRespawnService;
 use App\Modules\Clan\Application\UseCases\ProcessExpiredClanTaxes;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredClanBossRuns;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
-use App\Modules\Auth\Infrastructure\GeoIp\GeoIpDatabaseUpdater;
 use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
-use App\Modules\Npc\Application\Services\NpcMovementService;
 use App\Modules\Monster\Application\Services\MonsterMovementService;
+use App\Modules\Npc\Application\Services\NpcMovementService;
 use App\Modules\Payments\Infrastructure\Nbu\NbuExchangeRate;
 use App\Modules\Player\Application\UseCases\PruneExpiredPlayerInjuries;
 use App\Modules\Scheduler\Domain\DTOs\ScheduledTaskDefinition;
 use App\Modules\Scheduler\Domain\Enums\ScheduledTaskFrequency;
+use App\Modules\Weather\Application\Services\WeatherService;
 use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
 use InvalidArgumentException;
 use RuntimeException;
@@ -47,6 +49,10 @@ class ScheduledTaskRegistry
 
     public const UPDATE_GEOIP = 'geoip.update';
 
+    public const WEATHER_TICK = 'weather.tick';
+
+    public const RESPAWN_BOSSES = 'monsters.respawn_bosses';
+
     public function __construct(
         private readonly ConsoleKernel $console,
         private readonly PruneExpiredPlayerInjuries $pruneExpiredPlayerInjuries,
@@ -59,6 +65,8 @@ class ScheduledTaskRegistry
         private readonly NpcMovementService $npcMovementService,
         private readonly MonsterMovementService $monsterMovementService,
         private readonly NbuExchangeRate $nbuExchangeRate,
+        private readonly WeatherService $weatherService,
+        private readonly BossRespawnService $bossRespawnService,
     ) {}
 
     /** @return array<string, ScheduledTaskDefinition> */
@@ -69,6 +77,20 @@ class ScheduledTaskRegistry
                 key: self::MOVE_NPCS,
                 name: 'Автоматическое перемещение NPC',
                 description: 'Перемещает активных NPC по выбранной карте или списку локаций с индивидуальным интервалом.',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
+                allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
+            ),
+            self::RESPAWN_BOSSES => new ScheduledTaskDefinition(
+                key: self::RESPAWN_BOSSES,
+                name: 'Возрождение мировых боссов',
+                description: 'Возвращает мировых боссов на их локации, как только наступило время респавна (не дожидаясь захода игрока).',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
+                allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
+            ),
+            self::WEATHER_TICK => new ScheduledTaskDefinition(
+                key: self::WEATHER_TICK,
+                name: 'Смена погоды',
+                description: 'Меняет погоду на картах, где закончилось текущее явление или ясная пауза (веса — map_weather_weights).',
                 defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
                 allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
             ),
@@ -195,6 +217,8 @@ class ScheduledTaskRegistry
         return match ($key) {
             self::MOVE_NPCS => sprintf('Перемещено NPC: %d.', $this->npcMovementService->moveDue(now())),
             self::MOVE_MONSTERS => sprintf('Перемещено боссов: %d.', $this->monsterMovementService->moveDue(now())),
+            self::RESPAWN_BOSSES => sprintf('Возрождено боссов: %d.', $this->bossRespawnService->respawnDueWorldBosses()),
+            self::WEATHER_TICK => sprintf('Погода сменилась на картах: %d.', $this->weatherService->tick()),
             self::DELETE_EXPIRED_LOCATION_ITEMS => $this->deleteExpiredLocationItems(),
             self::PRUNE_EXPIRED_INJURIES => sprintf(
                 'Удалено истёкших травм: %d.',

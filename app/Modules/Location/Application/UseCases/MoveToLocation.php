@@ -14,6 +14,7 @@ use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Location\Domain\Services\PlayerMovementService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Modules\Weather\Application\Services\WeatherService;
 
 class MoveToLocation
 {
@@ -25,6 +26,7 @@ class MoveToLocation
         private readonly GetActiveDungeonSession $getActiveDungeonSession,
         private readonly LocationPageViewMapper $mapper,
         private readonly ExpireDungeonSession $expireDungeonSession,
+        private readonly WeatherService $weather,
     ) {}
 
     public function execute(User $user, string $direction): LocationPageDTO
@@ -40,6 +42,8 @@ class MoveToLocation
 
         if (! $result->success) {
             session()->flash('message', $result->message);
+        } elseif (($knockback = $this->weather->hurricaneKnockback($user)) !== null) {
+            session()->flash('message', $knockback);
         }
 
         $location = $this->readRepository->findLocationOrFail($user->location_id);

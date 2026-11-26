@@ -14,6 +14,7 @@ use App\Modules\Location\Application\UseCases\MoveToLocation;
 use App\Modules\Location\Application\UseCases\PassThroughGate;
 use App\Modules\Location\Domain\Services\GatheringService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Modules\Weather\Application\Services\WeatherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -35,6 +36,7 @@ class LocationController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        app(WeatherService::class)->applyOnView((int) $user->id);
         $result = $this->getLocationPage->execute($user);
 
         if ($result->fight !== null) {
