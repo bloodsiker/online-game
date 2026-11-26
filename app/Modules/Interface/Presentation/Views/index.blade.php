@@ -24,6 +24,14 @@
             font-size: 14px;
         }
 
+        #pts-modal > .popup_global_container {
+            width: 400px;
+        }
+
+        #pts-modal[data-mode="points"] > .popup_global_container {
+            width: min(440px, calc(100dvw - 24px));
+        }
+
         .tbl-main_top-bg {
             background-image: url({{ asset('img/bg/tbl-main_top-bg.gif') }});
             background-repeat: repeat-x;
@@ -2815,8 +2823,8 @@
 
 {{-- Модальное окно распределения очков (открывается из character-frame) --}}
 <div id="pts-overlay" class="error_div" style="display:none;z-index:1002;"></div>
-<div id="pts-modal" style="display:none;position:fixed;z-index:1003;left:50%;top:50%;transform:translate(-50%,-50%);">
-    <div class="popup_global_container" style="width:400px;">
+<div id="pts-modal" data-mode="points" style="display:none;position:fixed;z-index:1003;left:50%;top:50%;transform:translate(-50%,-50%);">
+    <div class="popup_global_container">
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
@@ -2880,11 +2888,12 @@
 
 <script>
     let _ptsData = {};
-    let _ptsModalMode = 'points';
+    let _ptsAmounts = {};
+    const ptsModal = document.getElementById('pts-modal');
 
     function openPtsModal(data) {
         _ptsData = data;
-        _ptsModalMode = 'points';
+        ptsModal.dataset.mode = 'points';
         document.getElementById('pts-modal-title').textContent = gameTranslate('Распределение очков');
         document.getElementById('pts-modal-points-content').style.display = '';
         document.getElementById('pts-modal-map-monsters-content').style.display = 'none';
@@ -2893,6 +2902,7 @@
         document.getElementById('pts-msg').style.display = 'none';
 
         const labels = { strength: gameTranslate('Сила'), intuition: gameTranslate('Интуиция'), agility: gameTranslate('Ловкость'), intelligence: gameTranslate('Интеллект'), wisdom: gameTranslate('Мудрость'), endurance: gameTranslate('Выносливость') };
+        _ptsAmounts = Object.fromEntries(Object.keys(labels).map(key => [key, 0]));
         const rows   = document.getElementById('pts-rows');
         const btnStyle = 'width:24px;height:24px;border:1px solid #a07040;background:url(/img/bg/table-header.jpg) repeat-x top left #c8924a;color:#461c0b;font-weight:bold;font-size:15px;cursor:pointer;border-radius:3px;padding:0;line-height:1;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);';
         const inpStyle = 'width:34px;text-align:center;border:1px solid #CEBBAA;border-radius:3px;padding:3px 0;font-family:Tahoma;font-size:12px;color:#461c0b;font-weight:bold;background:#fffaf3;';
@@ -2904,26 +2914,32 @@
                 ? `<span style="color:#2a7a2a;font-size:11px">(+${bonus})</span>`
                 : (bonus < 0 ? `<span style="color:#8b2020;font-size:11px">(${bonus})</span>` : '');
             return `
-            <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #e8d4c0;">
-                <span style="width:82px;flex-shrink:0;font-weight:bold;color:#2a1a0e;">${labels[k]}</span>
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #e8d4c0;">
+                <label for="ptsi-${k}" style="width:82px;flex-shrink:0;font-weight:bold;color:#2a1a0e;">${labels[k]}</label>
                 <span style="width:56px;flex-shrink:0;font-size:12px;">
                     <b style="color:#8b2000;" id="ptsr-${k}">${base}</b> ${bonusHtml}
                 </span>
                 <div style="display:flex;align-items:center;gap:5px;">
-                    <button type="button" onclick="ptsDec('${k}')" style="${btnStyle}">−</button>
-                    <input type="text" id="ptsi-${k}" value="0" style="${inpStyle}" readonly>
-                    <button type="button" onclick="ptsInc('${k}')" style="${btnStyle}">+</button>
+                    <button type="button" onclick="ptsAdjust('${k}', -1)" style="${btnStyle}">−</button>
+                    <input type="text" inputmode="numeric" id="ptsi-${k}" value="0" style="${inpStyle}">
+                    <button type="button" onclick="ptsAdjust('${k}', 1)" style="${btnStyle}">+</button>
                 </div>
                 <span style="margin-left:4px;font-size:12px;color:#555;">= <b id="ptsf-${k}" style="color:#2a1a0e;">${data.full[k]}</b></span>
             </div>`;
         }).join('');
+
+        for (const key of Object.keys(labels)) {
+            const input = document.getElementById('ptsi-' + key);
+            input.addEventListener('input', () => ptsSetAmount(key, input.value, false));
+            input.addEventListener('blur', () => ptsSetAmount(key, input.value));
+        }
 
         document.getElementById('pts-overlay').style.display = 'block';
         document.getElementById('pts-modal').style.display   = 'block';
     }
 
     function closePtsModal() {
-        if (_ptsModalMode === 'map-monsters' || _ptsModalMode === 'map-resources') {
+        if (ptsModal.dataset.mode === 'map-monsters' || ptsModal.dataset.mode === 'map-resources') {
             closeMapCatalogModal();
             return;
         }
@@ -2981,7 +2997,7 @@
         const pointsContent = document.getElementById('pts-modal-points-content');
         const monstersContent = document.getElementById('pts-modal-map-monsters-content');
 
-        _ptsModalMode = 'map-monsters';
+        ptsModal.dataset.mode = 'map-monsters';
         title.textContent = gameTranslate('Монстры:') + ' ' + data.map;
         pointsContent.style.display = 'none';
         monstersContent.style.display = '';
@@ -3056,7 +3072,7 @@
     }
 
     function closeMapCatalogModal() {
-        _ptsModalMode = 'points';
+        ptsModal.dataset.mode = 'points';
         document.getElementById('pts-overlay').style.display = 'none';
         document.getElementById('pts-modal').style.display = 'none';
         document.getElementById('pts-modal-title').textContent = gameTranslate('Распределение очков');
@@ -3069,7 +3085,7 @@
         const pointsContent = document.getElementById('pts-modal-points-content');
         const resourcesContent = document.getElementById('pts-modal-map-monsters-content');
 
-        _ptsModalMode = 'map-resources';
+        ptsModal.dataset.mode = 'map-resources';
         title.textContent = gameTranslate('Ресурсы:') + ' ' + data.map;
         pointsContent.style.display = 'none';
         resourcesContent.style.display = '';
@@ -3247,38 +3263,29 @@
         });
     @endif
 
-    function _ptsAdded() {
-        return ['strength','intuition','agility','intelligence','wisdom','endurance'].reduce((s, k) => s + (parseInt(document.getElementById('ptsi-' + k)?.value) || 0), 0);
+    function ptsSetAmount(key, value, commit = true) {
+        const allocated = Object.values(_ptsAmounts).reduce((sum, amount) => sum + amount, 0);
+        const available = _ptsData.free - allocated + _ptsAmounts[key];
+        const text = String(value).trim();
+        const entered = /^\d+$/.test(text) ? Number(text) : 0;
+        const added = Math.min(entered, available);
+        _ptsAmounts[key] = added;
+
+        if (commit || entered > available) {
+            document.getElementById('ptsi-' + key).value = added;
+        }
+        document.getElementById('ptsr-' + key).textContent = _ptsData.bases[key] + added;
+        document.getElementById('ptsf-' + key).textContent = _ptsData.full[key] + added;
+        document.getElementById('pts-modal-free').textContent = available - added;
     }
 
-    function ptsInc(key) {
-        if (_ptsData.free - _ptsAdded() <= 0) return;
-        const inp   = document.getElementById('ptsi-' + key);
-        inp.value   = parseInt(inp.value) + 1;
-        const added = parseInt(inp.value);
-        document.getElementById('ptsr-' + key).textContent = _ptsData.bases[key] + added;
-        document.getElementById('ptsf-' + key).textContent = _ptsData.full[key]  + added;
-        document.getElementById('pts-modal-free').textContent = _ptsData.free - _ptsAdded();
-    }
-
-    function ptsDec(key) {
-        const inp = document.getElementById('ptsi-' + key);
-        if (parseInt(inp.value) <= 0) return;
-        inp.value   = parseInt(inp.value) - 1;
-        const added = parseInt(inp.value);
-        document.getElementById('ptsr-' + key).textContent = _ptsData.bases[key] + added;
-        document.getElementById('ptsf-' + key).textContent = _ptsData.full[key]  + added;
-        document.getElementById('pts-modal-free').textContent = _ptsData.free - _ptsAdded();
+    function ptsAdjust(key, delta) {
+        ptsSetAmount(key, _ptsAmounts[key] + delta);
     }
 
     function ptsSave() {
         const body = {
-            strength:     parseInt(document.getElementById('ptsi-strength').value)     || 0,
-            intuition:    parseInt(document.getElementById('ptsi-intuition').value)    || 0,
-            agility:      parseInt(document.getElementById('ptsi-agility').value)      || 0,
-            intelligence: parseInt(document.getElementById('ptsi-intelligence').value) || 0,
-            wisdom:       parseInt(document.getElementById('ptsi-wisdom').value)       || 0,
-            endurance:    parseInt(document.getElementById('ptsi-endurance').value)    || 0,
+            ..._ptsAmounts,
             ostrength:     _ptsData.bases.strength,
             ointuition:    _ptsData.bases.intuition,
             oagility:      _ptsData.bases.agility,
