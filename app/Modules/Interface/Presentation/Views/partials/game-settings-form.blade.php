@@ -17,6 +17,7 @@
         'map_side' => __('ui.map_side_hint'),
         'show_item_tooltips' => __('ui.show_item_tooltips_hint'),
         'auto_loot_enabled' => __('ui.auto_loot_hint'),
+        'weather_effects' => __('ui.weather_effects_hint'),
         'hidden_players_maps' => __('ui.hidden_players_maps_hint'),
     ];
     foreach ($settingHints as $key => &$hint) {
@@ -107,6 +108,8 @@
             @include('interface::partials.settings-select', ['name' => 'map_side', 'label' => __('ui.map_side'), 'options' => ['right' => __('ui.map_right'), 'left' => __('ui.map_left')], 'selected' => old('map_side', $gameSettings['map_side'] ?? 'right')])
             <input type="hidden" name="show_item_tooltips" value="0">
             @include('interface::partials.settings-checkbox', ['name' => 'show_item_tooltips', 'label' => __('ui.show_item_tooltips'), 'checked' => (bool) old('show_item_tooltips', $gameSettings['show_item_tooltips'] ?? true)])
+            <input type="hidden" name="weather_effects" value="0">
+            @include('interface::partials.settings-checkbox', ['name' => 'weather_effects', 'label' => __('ui.weather_effects'), 'checked' => (bool) old('weather_effects', $gameSettings['weather_effects'] ?? true)])
         </div>
     </section>
     @if(!empty($visibilityMaps))

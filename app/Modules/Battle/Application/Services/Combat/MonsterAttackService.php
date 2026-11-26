@@ -98,9 +98,7 @@ readonly class MonsterAttackService
                 $this->phrases()->monsterHit($monster->attack_style, $hit->isCritical()),
                 BattleLogTranslator::contentName($monster),
                 $hit->getDamage(),
-                $hit->getArmorAbsorbed() > 0
-                    ? sprintf(' <span style="color:#7a8696">(%s)</span>', __('броня поглотила :n', ['n' => $hit->getArmorAbsorbed()]))
-                    : '',
+                $this->armorAbsorbedText($hit),
             );
 
         $result->log($msg);
@@ -391,7 +389,7 @@ readonly class MonsterAttackService
                 $this->phrases()->monsterHit($monster->attack_style, $hit->isCritical()),
                 '<b class="color-boss">'.BattleLogTranslator::contentName($monster).'</b>',
                 $hit->getDamage(),
-                $modifierText,
+                $this->armorAbsorbedText($hit).$modifierText,
             );
 
         $result->log($msg);
@@ -478,20 +476,22 @@ readonly class MonsterAttackService
             )
             : ($hit->isCritical()
             ? BattleLogTranslator::format(
-                '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <b class="color-red">⚡ Критический удар!</b> <br>Повреждения: <b class="color-damage">%s</b> (x%.1f)</p>',
+                '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <b class="color-red">⚡ Критический удар!</b> <br>Повреждения: <b class="color-damage">%s</b> (x%.1f)%s</p>',
                 BattleLogTranslator::contentName($monster),
                 $skillEmoji,
                 $skill->skill_name ?? $randomSkill,
                 $hit->getDamage(),
-                $damageMultiplier
+                $damageMultiplier,
+                $this->armorAbsorbedText($hit),
             )
             : BattleLogTranslator::format(
-                '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <br>Повреждения: <b>%s</b> (x%.1f)</p>',
+                '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <br>Повреждения: <b>%s</b> (x%.1f)%s</p>',
                 BattleLogTranslator::contentName($monster),
                 $skillEmoji,
                 $skill->skill_name ?? $randomSkill,
                 $hit->getDamage(),
-                $damageMultiplier
+                $damageMultiplier,
+                $this->armorAbsorbedText($hit),
             ));
 
         $result->log($msg);
@@ -507,6 +507,14 @@ readonly class MonsterAttackService
         if (isset($skill->parameters['effects'])) {
             $this->applySkillEffects($player, $battle, $skill->parameters['effects'], BattleLogTranslator::contentName($monster), $result);
         }
+    }
+
+    /** Серая пометка «(броня поглотила N)» для лога удара; пусто, если броня ничего не поглотила. */
+    private function armorAbsorbedText(FightHitDTO $hit): string
+    {
+        return $hit->getArmorAbsorbed() > 0
+            ? sprintf(' <span style="color:#7a8696">(%s)</span>', __('броня поглотила :n', ['n' => $hit->getArmorAbsorbed()]))
+            : '';
     }
 
     /** «Благословение стражи»: −% входящего урона от монстров по рангу репутации «Городская стража». */
