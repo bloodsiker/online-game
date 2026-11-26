@@ -45,10 +45,6 @@ class PlayerController extends Controller
             $player->lvl = (int) $request->input('lvl', 1);
             $player->exp = (int) $request->input('exp', 0);
             $player->experience_multiplier = (float) $validated['experience_multiplier'];
-            $player->hp_now = (int) $request->input('hp_now');
-            $player->hp_max = (int) $request->input('hp_max');
-            $player->mp_now = (int) $request->input('mp_now');
-            $player->mp_max = (int) $request->input('mp_max');
             $player->strength = (float) $request->input('strength');
             $player->agility = (float) $request->input('agility');
             $player->intuition = (float) $request->input('intuition');

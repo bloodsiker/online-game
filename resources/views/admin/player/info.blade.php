@@ -79,22 +79,22 @@
                         </div>
 
                         <div class="col-lg-3">
-                            <h6 class="text-muted mb-3">HP / MP</h6>
+                            <h6 class="text-muted mb-3">HP / MP <small>(только просмотр)</small></h6>
                             <div class="form-group">
                                 <label class="col-form-label">HP сейчас</label>
-                                <input type="number" class="form-control" name="hp_now" value="{{ $player->hp_now }}">
+                                <input type="number" class="form-control" name="hp_now" value="{{ $player->hp_now }}" readonly disabled>
                             </div>
                             <div class="form-group">
                                 <label class="col-form-label">HP макс</label>
-                                <input type="number" class="form-control" name="hp_max" value="{{ $player->hp_max }}">
+                                <input type="number" class="form-control" name="hp_max" value="{{ $player->hp_max }}" readonly disabled>
                             </div>
                             <div class="form-group">
                                 <label class="col-form-label">MP сейчас</label>
-                                <input type="number" class="form-control" name="mp_now" value="{{ $player->mp_now }}">
+                                <input type="number" class="form-control" name="mp_now" value="{{ $player->mp_now }}" readonly disabled>
                             </div>
                             <div class="form-group">
                                 <label class="col-form-label">MP макс</label>
-                                <input type="number" class="form-control" name="mp_max" value="{{ $player->mp_max }}">
+                                <input type="number" class="form-control" name="mp_max" value="{{ $player->mp_max }}" readonly disabled>
                             </div>
                             <div class="form-group">
                                 <label class="col-form-label">Мин урон</label>
