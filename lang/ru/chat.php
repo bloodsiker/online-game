@@ -48,7 +48,7 @@ return [
     'monster_auto_loot' => 'Автосбор: вы получили [[share_item_:item_id]] ×:count.',
     'monster_money_share' => 'Вы получили :amount монет за убийство «:monster» (:percent% нанесённого урона).',
     'monster_auto_loot_money' => 'Автосбор: вы получили :amount монет.',
-    'secret_knowledge_found' => 'Мудрый Финко нашёл в записях тайное знание! Тайные знания: +:gained (всего :points).',
+    'secret_knowledge_found' => '<b>Мудрый Финко</b> нашёл в записях тайное знание! <b>Тайные знания: +:gained</b> (всего :points).',
     'secret_knowledge_boss_part' => 'Изученные тайные знания помогли найти часть босса: [[share_item_:item_id]].',
     'gathering_resource' => '<b>:name</b> :count шт. (в рюкзаке :backpack_count шт.)',
     'gathering_bonus' => ' Дополнительно: :resources',

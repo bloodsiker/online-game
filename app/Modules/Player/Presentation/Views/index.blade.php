@@ -538,6 +538,12 @@
                                             <span class="char-stat-label">{{ __('Блок щитом') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Процент урона, который блок поглощает и отражает атакующему.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Блок щитом')]) }}">?</button></span></span>
                                             <span class="char-stat-val">{{ $character->stats->getBlockPercent() }}%</span>
                                         </div>
+                                        @if($character->stats->getManaBarrier() > 0)
+                                            <div class="char-stat-row">
+                                                <span class="char-stat-label">{{ __('Магический барьер') }} <span class="char-stat-help-wrap" data-setting-hint="{{ __('Доля входящего физического урона, которую поглощает мана вместо здоровья (1 урона = 0,5 маны). Когда мана кончается, барьер перестаёт работать.') }}"><button type="button" class="char-stat-help" aria-label="{{ __('Что даёт: :stat', ['stat' => __('Магический барьер')]) }}">?</button></span></span>
+                                                <span class="char-stat-val">{{ min(60, $character->stats->getManaBarrier()) }}%</span>
+                                            </div>
+                                        @endif
                                     </div>
                                 </x-game.inset-frame>
 

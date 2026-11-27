@@ -84,7 +84,7 @@
         @foreach($tabs as $tabMode => $tabTitle)
             @php $isActive = $mode === $tabMode && ! $letter; @endphp
             <td width="19"><img src="{{ asset($isActive ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-            <td align="center" nowrap style="background: url({{ asset($isActive ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <td align="center" nowrap style="background: url({{ asset($isActive ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 5px;">
                 <a href="{{ route('post', ['mode' => $tabMode]) }}" class="{{ $isActive ? 'btn_2' : 'btn_1' }}">{{ $tabTitle }}</a>
             </td>
             <td width="19"><img src="{{ asset($isActive ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
@@ -93,7 +93,7 @@
         <td width="100%"></td>
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td align="center" nowrap style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+        <td align="center" nowrap style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 5px;">
             <a href="{{ route('location') }}" class="btn_1">Выход</a>
         </td>
         <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>

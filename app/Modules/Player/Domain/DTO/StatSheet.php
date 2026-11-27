@@ -84,6 +84,9 @@ class StatSheet implements FightHitInterface
     /** Блок щитом: процент урона, поглощаемый+отражаемый при срабатывании */
     public int $blockPercent = 0;
 
+    /** Магический барьер: % входящего физического урона, который поглощает мана (см. MonsterAttackService) */
+    public int $manaBarrier = 0;
+
     public CombatClass $combatClass = CombatClass::TANK;
 
     /** @var StatModifier[] */
@@ -286,6 +289,11 @@ class StatSheet implements FightHitInterface
     public function getBlockChance(): int
     {
         return $this->blockChance;
+    }
+
+    public function getManaBarrier(): int
+    {
+        return $this->manaBarrier;
     }
 
     public function getBlockFlat(): int

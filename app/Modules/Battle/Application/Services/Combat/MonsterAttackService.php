@@ -26,6 +26,12 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 readonly class MonsterAttackService
 {
+    /** Потолок поглощения барьером, % от удара (даже при сумме нескольких предметов) */
+    private const MANA_BARRIER_MAX_PERCENT = 60;
+
+    /** Курс барьера: маны за 1 поглощённый урона */
+    private const MANA_PER_ABSORBED_DAMAGE = 0.5;
+
     public function __construct(
         private HitCalculator $hitCalc,
         private MagicHitCalculator $magicHitCalc,
@@ -90,6 +96,7 @@ readonly class MonsterAttackService
         }
 
         $this->applyGuardBlessing($player, $hit);
+        $barrierText = $isMagic ? '' : $this->applyManaBarrier($player, $sheet, $hit);
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $msg = $isMagic
@@ -98,7 +105,7 @@ readonly class MonsterAttackService
                 $this->phrases()->monsterHit($monster->attack_style, $hit->isCritical()),
                 BattleLogTranslator::contentName($monster),
                 $hit->getDamage(),
-                $this->armorAbsorbedText($hit),
+                $this->armorAbsorbedText($hit).$barrierText,
             );
 
         $result->log($msg);
@@ -372,6 +379,7 @@ readonly class MonsterAttackService
         }
 
         $this->applyGuardBlessing($player, $hit);
+        $barrierText = $isMagic ? '' : $this->applyManaBarrier($player, $sheet, $hit);
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $modifierText = $totalModifier > 0
@@ -389,7 +397,7 @@ readonly class MonsterAttackService
                 $this->phrases()->monsterHit($monster->attack_style, $hit->isCritical()),
                 '<b class="color-boss">'.BattleLogTranslator::contentName($monster).'</b>',
                 $hit->getDamage(),
-                $this->armorAbsorbedText($hit).$modifierText,
+                $this->armorAbsorbedText($hit).$barrierText.$modifierText,
             );
 
         $result->log($msg);
@@ -461,6 +469,7 @@ readonly class MonsterAttackService
         }
 
         $this->applyGuardBlessing($player, $hit);
+        $barrierText = $isMagic ? '' : $this->applyManaBarrier($player, $sheet, $hit);
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $skillEmoji = $this->getSkillEmoji($randomSkill);
@@ -482,7 +491,7 @@ readonly class MonsterAttackService
                 $skill->skill_name ?? $randomSkill,
                 $hit->getDamage(),
                 $damageMultiplier,
-                $this->armorAbsorbedText($hit),
+                $this->armorAbsorbedText($hit).$barrierText,
             )
             : BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <br>Повреждения: <b>%s</b> (x%.1f)%s</p>',
@@ -491,7 +500,7 @@ readonly class MonsterAttackService
                 $skill->skill_name ?? $randomSkill,
                 $hit->getDamage(),
                 $damageMultiplier,
-                $this->armorAbsorbedText($hit),
+                $this->armorAbsorbedText($hit).$barrierText,
             ));
 
         $result->log($msg);
@@ -507,6 +516,38 @@ readonly class MonsterAttackService
         if (isset($skill->parameters['effects'])) {
             $this->applySkillEffects($player, $battle, $skill->parameters['effects'], BattleLogTranslator::contentName($monster), $result);
         }
+    }
+
+    /**
+     * «Магический барьер» (стат mana_barrier щита мага): доля входящего ФИЗИЧЕСКОГО урона (после брони и блока)
+     * уходит в ману вместо HP по курсу MANA_PER_ABSORBED_DAMAGE маны за 1 урона. Когда маны не хватает —
+     * поглощается столько, на сколько её хватило. Магические удары барьер не гасит.
+     * Уменьшает $hit в месте вызова (до списания HP), возвращает пометку для лога.
+     */
+    private function applyManaBarrier(Player $player, StatSheet $sheet, FightHitDTO $hit): string
+    {
+        $percent = min(self::MANA_BARRIER_MAX_PERCENT, $sheet->getManaBarrier());
+        $damage = $hit->getDamage();
+        $mana = (int) $player->mp_now;
+
+        if ($percent <= 0 || $damage <= 1 || $mana <= 0) {
+            return '';
+        }
+
+        $absorbed = min((int) floor($damage * $percent / 100), (int) floor($mana / self::MANA_PER_ABSORBED_DAMAGE));
+
+        if ($absorbed <= 0) {
+            return '';
+        }
+
+        $manaSpent = min($mana, (int) ceil($absorbed * self::MANA_PER_ABSORBED_DAMAGE));
+        $player->mp_now = $mana - $manaSpent;
+        $hit->setDamage($damage - $absorbed);
+
+        return sprintf(
+            ' <span style="color:#6aa7ff">(%s)</span>',
+            __('барьер поглотил :damage урона за :mana маны', ['damage' => $absorbed, 'mana' => $manaSpent]),
+        );
     }
 
     /** Серая пометка «(броня поглотила N)» для лога удара; пусто, если броня ничего не поглотила. */

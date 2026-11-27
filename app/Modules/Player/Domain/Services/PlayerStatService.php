@@ -153,6 +153,8 @@ class PlayerStatService
             'block_chance' => 0.0,
             'block_flat' => 0.0,
             'block_percent' => 0.0,
+            // Магический барьер — целиком от предметов (щит мага): % физического урона, уходящий в ману
+            'mana_barrier' => 0.0,
         ];
         $derivedBase = $makeDerived($primary);
 
@@ -219,6 +221,7 @@ class PlayerStatService
         $sheet->blockChance = $computed['block_chance'];
         $sheet->blockFlat = $computed['block_flat'];
         $sheet->blockPercent = $computed['block_percent'];
+        $sheet->manaBarrier = (int) $computed['mana_barrier'];
         $sheet->level = max(1, (int) $player->lvl);
         $sheet->combatClass = $this->determineCombatClass($player);
         $sheet->weatherChanceFactor = $player->user_id !== null
@@ -462,6 +465,7 @@ class PlayerStatService
             ShareItemStatType::BLOCK_CHANCE => 'block_chance',
             ShareItemStatType::BLOCK_FLAT => 'block_flat',
             ShareItemStatType::BLOCK_PERCENT => 'block_percent',
+            ShareItemStatType::MANA_BARRIER => 'mana_barrier',
             default => null,
         };
     }

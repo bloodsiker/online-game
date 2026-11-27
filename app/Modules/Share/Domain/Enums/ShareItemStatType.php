@@ -27,6 +27,7 @@ enum ShareItemStatType: string
     case BLOCK_CHANCE = 'block_chance';
     case BLOCK_FLAT = 'block_flat';
     case BLOCK_PERCENT = 'block_percent';
+    case MANA_BARRIER = 'mana_barrier';
 
     public function label(): string
     {
@@ -52,6 +53,7 @@ enum ShareItemStatType: string
             self::BLOCK_CHANCE => __('Шанс блока щитом, %'),
             self::BLOCK_FLAT => __('Блок щитом (фикс.)'),
             self::BLOCK_PERCENT => __('Блок щитом, %'),
+            self::MANA_BARRIER => __('Магический барьер, %'),
         };
     }
 }
