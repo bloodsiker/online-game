@@ -267,7 +267,7 @@ final class ItemTooltipStatsBuilder
             if ($effect->effect_type === ItemEffectType::GRANT_PREMIUM) {
                 $stats[] = [
                     'title' => __('Премиум'),
-                    'value' => __(':level уровня на :time', ['level' => (int) $effect->value, 'time' => format_cooldown((int) $effect->duration_seconds)]),
+                    'value' => __(':level уровня на :time', ['level' => (int) $effect->value, 'time' => format_game_duration((int) $effect->duration_seconds)]),
                 ];
 
                 continue;
