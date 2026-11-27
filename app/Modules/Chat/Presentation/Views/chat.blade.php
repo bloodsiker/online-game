@@ -331,6 +331,8 @@
     var realtimeInitialized = false;
     var realtimeCurrentChannelName = null;
     var realtimeCurrentChannel = null;
+    var realtimeExtraChannel = null;
+    var realtimeExtraChannelName_current = null;
     var realtimePersonalChannel = null;
     var realtimeSystemChannel = null;
     var realtimeSyncTimer = null;
@@ -920,6 +922,11 @@
         return null;
     }
 
+    // В основном чате показываются и сообщения клана — слушаем клановый канал рядом с основным.
+    function realtimeExtraChannelName(selectedChannel) {
+        return selectedChannel === 'main' && realtime.clanId ? 'chat.clan.' + realtime.clanId : null;
+    }
+
     function scheduleRealtimeSync(full) {
         realtimeFullSyncPending = realtimeFullSyncPending || full;
         if (realtimeSyncTimer) window.clearTimeout(realtimeSyncTimer);
@@ -980,6 +987,17 @@
         realtimeCurrentChannel = nextName
             ? echo.private(nextName).listen('.chat.message.created', handleRealtimeMessage)
             : null;
+        var extraName = realtimeExtraChannelName(channel);
+        if (extraName !== realtimeExtraChannelName_current) {
+            // Если этот канал теперь основной (вкладка «Клан»), его обработчик не снимаем.
+            if (realtimeExtraChannel && realtimeExtraChannelName_current !== realtimeCurrentChannelName) {
+                realtimeExtraChannel.stopListening('.chat.message.created', handleRealtimeMessage);
+            }
+            realtimeExtraChannelName_current = extraName;
+            realtimeExtraChannel = extraName
+                ? echo.private(extraName).listen('.chat.message.created', handleRealtimeMessage)
+                : null;
+        }
     }
 
     function initializeRealtime() {
@@ -1080,6 +1098,10 @@
             realtimeSystemChannel.stopListening('.chat.message.expired', handleRealtimeExpiration);
             realtimeSystemChannel.stopListening('.world-event.state.changed', handleWorldEventStateChanged);
             if (echo) echo.leave('chat.system');
+        }
+        if (realtimeExtraChannel) {
+            realtimeExtraChannel.stopListening('.chat.message.created', handleRealtimeMessage);
+            if (echo && realtimeExtraChannelName_current) echo.leave(realtimeExtraChannelName_current);
         }
         if (realtimeCurrentChannel) {
             realtimeCurrentChannel.stopListening('.chat.message.created', handleRealtimeMessage);

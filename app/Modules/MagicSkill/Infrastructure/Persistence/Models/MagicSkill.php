@@ -50,7 +50,7 @@ class MagicSkill extends Model
     public function skillEffects(): BelongsToMany
     {
         return $this->belongsToMany(Effect::class, 'magic_skill_effects')
-            ->withPivot(['chance', 'duration_seconds']);
+            ->withPivot(['chance', 'duration_seconds', 'power_percent', 'power_basis']);
     }
 
     public function players(): BelongsToMany

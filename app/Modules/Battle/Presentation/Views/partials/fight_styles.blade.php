@@ -66,6 +66,21 @@
         box-shadow: inset 0 1px 0 rgba(194, 218, 255, .35);
     }
 
+    .fight-key {
+        display: inline-block;
+        min-width: 14px;
+        margin-left: 4px;
+        padding: 0 4px;
+        color: #6c382c !important;
+        font-size: 10px;
+        font-weight: bold;
+        text-align: center;
+        vertical-align: 1px;
+        border: 1px solid #baa276;
+        border-radius: 4px;
+        background: #f9e4ab;
+    }
+
     /* Полосы HP/MP игрока — классы обновляются скриптом, не переименовывать */
     .act-stats { margin-top: 8px; padding-top: 6px; border-top: 1px solid #DB9F73; }
     .act-stat-row { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }

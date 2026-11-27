@@ -30,7 +30,26 @@ final class GameSettingsController
             'telegramAccount' => $telegram->forUser(userId: $request->user()->id),
             'telegramAvailable' => $telegramService->available(),
             'visibilityMaps' => $visibilityMaps->options(),
+            'magicSkills' => $this->activeMagicSkills($request),
         ]);
+    }
+
+    /** @return list<array{id: int, name: string}> изученные боевые заклинания игрока для назначения клавиш */
+    private function activeMagicSkills(Request $request): array
+    {
+        $player = $request->user()->player;
+        if ($player === null) {
+            return [];
+        }
+
+        return $player->magicSkills()
+            ->where('is_passive', false)
+            ->get()
+            // Только боевые заклинания: баффы и исцеление в бою не выводятся (см. страницу магии).
+            ->reject(static fn ($skill): bool => $skill->isBuffSkill())
+            ->map(static fn ($skill): array => ['id' => (int) $skill->id, 'name' => (string) $skill->name])
+            ->values()
+            ->all();
     }
 
     public function update(UpdateGameSettingsRequest $request, GameSettingsService $service): JsonResponse|RedirectResponse

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ItemActionLogController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LocationGateController;
+use App\Http\Controllers\Admin\LocationTrapController;
 use App\Http\Controllers\Admin\LoginHistoryController;
 use App\Http\Controllers\Admin\MagicSkillController;
 use App\Http\Controllers\Admin\MapController;
@@ -30,12 +31,12 @@ use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
 use App\Http\Controllers\Admin\UserController;
 use App\Modules\ItemAssembly\Presentation\Http\Admin\ItemAssemblyController;
+use App\Modules\ItemSpawn\Presentation\Http\Admin\ItemSpawnAdminController;
 use App\Modules\Payments\Presentation\Http\Admin\PaymentOrderController;
 use App\Modules\Premium\Presentation\Http\Admin\PremiumController;
 use App\Modules\SecretKnowledge\Presentation\Http\Admin\SecretKnowledgeAdminController;
-use App\Modules\ItemSpawn\Presentation\Http\Admin\ItemSpawnAdminController;
-use App\Modules\Weather\Presentation\Http\Admin\WeatherAdminController;
 use App\Modules\TreasureHunt\Presentation\Http\Admin\TreasureMapController;
+use App\Modules\Weather\Presentation\Http\Admin\WeatherAdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/premium', [PremiumController::class, 'index'])->name('premium.index');
@@ -223,6 +224,11 @@ Route::get('/location-gates', [LocationGateController::class, 'list'])->name('lo
 Route::match(['GET', 'POST'], '/location-gate/create', [LocationGateController::class, 'create'])->name('location-gate.create');
 Route::match(['GET', 'POST'], '/location-gate/{locationGate}', [LocationGateController::class, 'info'])->name('location-gate.info');
 Route::get('/location-gate/{locationGate}/delete', [LocationGateController::class, 'delete'])->name('location-gate.delete');
+
+Route::get('/location-traps', [LocationTrapController::class, 'list'])->name('location-traps');
+Route::match(['GET', 'POST'], '/location-trap/create', [LocationTrapController::class, 'create'])->name('location-trap.create');
+Route::match(['GET', 'POST'], '/location-trap/{locationTrap}', [LocationTrapController::class, 'info'])->name('location-trap.info');
+Route::get('/location-trap/{locationTrap}/delete', [LocationTrapController::class, 'delete'])->name('location-trap.delete');
 
 Route::match(['GET', 'POST'], '/action/create', [ActionController::class, 'create'])->name('action.create');
 Route::match(['GET', 'POST'], '/action/{action}', [ActionController::class, 'info'])->name('action.info');

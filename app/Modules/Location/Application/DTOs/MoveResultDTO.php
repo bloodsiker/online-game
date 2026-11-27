@@ -8,11 +8,12 @@ final class MoveResultDTO
         public bool $success,
         public ?string $message = null,
         public float $speedModifier = 1.0,
+        public ?string $notice = null,
     ) {}
 
-    public static function success(float $speedModifier): self
+    public static function success(float $speedModifier, ?string $notice = null): self
     {
-        return new self(true, null, $speedModifier);
+        return new self(true, null, $speedModifier, $notice);
     }
 
     public static function blocked(string $message): self

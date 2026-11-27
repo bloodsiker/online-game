@@ -159,7 +159,15 @@ readonly class AttackService
                         $battle,
                         $result,
                         (int) $applied['effect']->pivot->duration_seconds,
-                        $applied['tickValue'],
+                        // Периодический урон — доля удара или макс. HP цели (см. SpellDotCalculator); остальным эффектам остаётся прежнее значение.
+                        app(SpellDotCalculator::class)->tickValue(
+                            $applied['effect'],
+                            $applied['effect']->pivot->power_percent !== null ? (float) $applied['effect']->pivot->power_percent : null,
+                            $applied['effect']->pivot->power_basis,
+                            $damage,
+                            (int) $locMonster->hp_max,
+                            (int) $applied['effect']->pivot->duration_seconds,
+                        ) ?? $applied['tickValue'],
                         sourceUserId: $player->user_id,
                     );
 

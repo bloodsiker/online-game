@@ -42,6 +42,8 @@ class MoveToLocation
 
         if (! $result->success) {
             session()->flash('message', $result->message);
+        } elseif ($result->notice !== null) {
+            session()->flash('message', $result->notice);
         } elseif (($knockback = $this->weather->hurricaneKnockback($user)) !== null) {
             session()->flash('message', $knockback);
         }

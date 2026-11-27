@@ -5,6 +5,7 @@
         request()->routeIs('admin.race', 'admin.race.*') => ['label' => 'Расы', 'route' => 'admin.race'],
         request()->routeIs('admin.maps', 'admin.map.*') => ['label' => 'Карты', 'route' => 'admin.maps'],
         request()->routeIs('admin.location-gates', 'admin.location-gate.*') => ['label' => 'Врата локаций', 'route' => 'admin.location-gates'],
+        request()->routeIs('admin.location-traps', 'admin.location-trap.*') => ['label' => 'Ловушки локаций', 'route' => 'admin.location-traps'],
         request()->routeIs('admin.locations', 'admin.location.*') => ['label' => 'Локации', 'route' => 'admin.locations'],
         request()->routeIs('admin.npc.dialogues', 'admin.npc.dialogue.*') => ['label' => 'Диалоги НПС', 'route' => 'admin.npc.dialogues'],
         request()->routeIs('admin.npc', 'admin.npc.create', 'admin.npc.info') => ['label' => 'НПС', 'route' => 'admin.npc'],

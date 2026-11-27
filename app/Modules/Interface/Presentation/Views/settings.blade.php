@@ -45,7 +45,7 @@
         .profile-actions { padding-top: 10px !important; text-align: center; }
         .profile-actions .butt1 input { width: 170px; }
         .profile-preview-note { margin: 8px 0 0; font-size: 10px; color: #927660; }
-        .game-settings { width: 750px; max-width: 100%; padding: 8px 6px; box-sizing: border-box; color: #795b48; }
+        .game-settings { width: 860px; max-width: 100%; padding: 8px 6px; box-sizing: border-box; color: #795b48; }
         .game-settings-section { margin-bottom: 8px; }
         .game-settings-section h2 { margin: 0 0 7px; padding: 0 10px 3px; border-bottom: 1px solid #cfb899; color: #a4150c; font-size: 11px; }
         .game-settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 20px; padding: 0 10px; }
@@ -67,6 +67,14 @@
         .game-settings-volume::-moz-range-progress { height: 9px; border-radius: 3px; background: #ffe88f; }
         .game-settings-volume::-moz-range-thumb { width: 13px; height: 13px; border: 1px solid #db9f73; border-radius: 3px; background: #fff1c5; }
         .game-settings-volume:focus-visible { outline: 1px solid #9c6c3b; outline-offset: 2px; border-radius: 3px; }
+        .hotkey-row .hotkey-button { flex: 0 0 130px; width: 130px; white-space: nowrap; font: bold 11px Tahoma, Arial, sans-serif; }
+        .hotkey-row .hotkey-button:focus-visible, .hotkey-row .hotkey-reset:focus-visible { outline: 1px solid #9c6c3b; }
+        .hotkey-row .hotkey-reset { flex: 0 0 23px; }
+        .hotkeys-reset-all { padding: 4px 10px 0; text-align: left; }
+        .hotkeys-reset-all .butt1 input { width: 170px; }
+        .hotkeys-reset-all .butt1 { vertical-align: middle; }
+        .hotkeys-reset-note { margin-left: 8px; font-size: 10px; color: #927660; vertical-align: middle; }
+        #hotkeys-message { color: #a4150c; }
         .game-settings-note { margin: 0 0 6px; padding: 0 10px; font-size: 10px; color: #927660; }
         .game-settings-actions { text-align: center; padding-top: 8px; }
         .game-settings-actions .butt1 input { width: 170px; }

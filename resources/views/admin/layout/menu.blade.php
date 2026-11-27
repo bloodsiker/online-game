@@ -63,6 +63,12 @@
                             <span>Врата локаций</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.location-traps', 'admin.location-trap.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.location-traps') }}">
+                            <i class="bx bx-error" aria-hidden="true"></i>
+                            <span>Ловушки локаций</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.npc', 'admin.npc.create', 'admin.npc.info') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.npc') }}">
                             <i class="bx bx-map" aria-hidden="true"></i>

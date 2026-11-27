@@ -334,6 +334,19 @@
                             // Данные слотов, загруженные с сервера
                             let hotbarData = {};
 
+                            // Подпись клавиши слота: назначенная игроком в настройках (по умолчанию 1–9 и 0).
+                            function hotbarKeyLabel(slotNumber) {
+                                if (slotNumber < 1 || slotNumber > 10) return '';
+                                const code = ((window.gameSettings || {}).hotkeys || {})['hotbar_' + slotNumber]
+                                    || (slotNumber === 10 ? 'Digit0' : 'Digit' + slotNumber);
+                                const names = { ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', Space: '␣' };
+                                if (names[code]) return names[code];
+                                if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+                                if (/^Digit[0-9]$/.test(code)) return code.slice(5);
+                                if (/^Numpad/.test(code)) return 'N' + code.slice(6);
+                                return code;
+                            }
+
                             function buildSlotHtml(slot) {
                                 const empty = slot.empty;
                                 const cls = empty ? 'slot empty' : 'slot';
@@ -349,7 +362,7 @@
                                 return `
                                     <div class="${cls}" data-slot="${slot.slot}" data-cooldown="${cooldown}" data-cooldown-until="${cooldownUntil}" data-entity-type="${slot.entity_type ?? ''}" data-entity-id="${slot.entity_id ?? ''}">
                                         ${icon}
-                                        <span class="keybind">${slot.slot === 10 ? '0' : (slot.slot < 10 ? slot.slot : '')}</span>
+                                        <span class="keybind">${hotbarKeyLabel(slot.slot)}</span>
                                         <div class="cooldown"></div>
                                         ${empty ? '' : `<button type="button" class="slot-clear" data-slot="${slot.slot}" title="${gameTranslate('Убрать из панели')}" aria-label="${gameTranslate('Убрать из панели')}"></button>`}
                                         <div class="tooltip">
@@ -1353,6 +1366,8 @@
 <script>
     GameShortcuts.init({
         frameId: 'game-frame',
+        hotkeys: (window.gameSettings || {}).hotkeys,
+        magicHotkeys: (window.gameSettings || {}).magic_hotkeys,
         handleModalKey: function (event) { return handleGameModalKey(event); },
         routes: {
             backpack: '{{ route('backpack') }}',

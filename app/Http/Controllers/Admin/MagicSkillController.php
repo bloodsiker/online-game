@@ -90,6 +90,8 @@ class MagicSkillController extends Controller
         $magic_skill->skillEffects()->attach($data['effect_id'], [
             'chance' => $data['chance'],
             'duration_seconds' => $data['duration_seconds'],
+            'power_percent' => $data['power_percent'] ?? null,
+            'power_basis' => $data['power_basis'] ?? null,
         ]);
 
         return redirect()->back()->with('success', 'Эффект добавлен.');
@@ -102,6 +104,8 @@ class MagicSkillController extends Controller
         $magic_skill->skillEffects()->updateExistingPivot($effect->id, [
             'chance' => $data['chance'],
             'duration_seconds' => $data['duration_seconds'],
+            'power_percent' => $data['power_percent'] ?? null,
+            'power_basis' => $data['power_basis'] ?? null,
         ]);
 
         return redirect()->back()->with('success', 'Параметры эффекта обновлены.');
@@ -154,12 +158,14 @@ class MagicSkillController extends Controller
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** @return array{effect_id?: int, chance: int, duration_seconds: int} */
+    /** @return array{effect_id?: int, chance: int, duration_seconds: int, power_percent?: float|null, power_basis?: string|null} */
     private function validateEffectAssignment(Request $request, bool $includeEffect = true): array
     {
         $rules = [
             'chance' => ['required', 'integer', 'min:0', 'max:100'],
             'duration_seconds' => ['required', 'integer', 'min:0'],
+            'power_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'power_basis' => ['nullable', 'in:hit,target_max_hp'],
         ];
 
         if ($includeEffect) {

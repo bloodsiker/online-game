@@ -7,76 +7,101 @@
                 && target.closest('form, input, textarea, select, button, [role="textbox"], [role="combobox"], [contenteditable]:not([contenteditable="false"])')));
     }
 
+    // Клавиши по умолчанию; игрок переопределяет их в настройках (window.gameSettings.hotkeys).
+    const DEFAULT_HOTKEYS = {
+        move_north: 'ArrowUp', move_south: 'ArrowDown', move_west: 'ArrowLeft', move_east: 'ArrowRight',
+        move_up: 'PageUp', move_down: 'PageDown',
+        take_item: 'KeyF', weapon_attack: 'KeyQ', attack: 'Space',
+        backpack: 'KeyI', magic_skill: 'KeyB', character: 'KeyC', map: 'KeyM',
+        hotbar_1: 'Digit1', hotbar_2: 'Digit2', hotbar_3: 'Digit3', hotbar_4: 'Digit4', hotbar_5: 'Digit5',
+        hotbar_6: 'Digit6', hotbar_7: 'Digit7', hotbar_8: 'Digit8', hotbar_9: 'Digit9', hotbar_10: 'Digit0',
+    };
+
+    const ACTION_ELEMENT_IDS = {
+        move_north: 'move-north',
+        move_south: 'move-south',
+        move_west: 'move-west',
+        move_east: 'move-east',
+        move_up: 'move-up',
+        move_down: 'move-down',
+        take_item: 'take-item',
+        weapon_attack: 'weapon-attack',
+        attack: 'attack',
+    };
+
+    // Запасной вариант для событий без event.code: символ -> код физической клавиши (латиница, кириллица).
+    const CODE_BY_KEY = {
+        i: 'KeyI', 'і': 'KeyI', 'и': 'KeyI', 'ш': 'KeyI',
+        b: 'KeyB', c: 'KeyC', 'с': 'KeyC',
+        m: 'KeyM', 'ь': 'KeyM',
+        f: 'KeyF', 'ф': 'KeyF', 'а': 'KeyF',
+        q: 'KeyQ', 'й': 'KeyQ',
+        ' ': 'Space', spacebar: 'Space',
+    };
+
+    let actionByCode = {};
+
+    function buildBindings(hotkeys, magicHotkeys) {
+        const bindings = {};
+        Object.keys(DEFAULT_HOTKEYS).forEach(function (action) {
+            const code = hotkeys && typeof hotkeys[action] === 'string' && hotkeys[action] ? hotkeys[action] : DEFAULT_HOTKEYS[action];
+            bindings[code] = action;
+        });
+        // Клавиши заклинаний: «magic:<id>». Действия игры приоритетнее при совпадении кода.
+        Object.keys(magicHotkeys || {}).forEach(function (skillId) {
+            const code = magicHotkeys[skillId];
+            if (typeof code === 'string' && code && !bindings[code]) {
+                bindings[code] = 'magic:' + skillId;
+            }
+        });
+
+        return bindings;
+    }
+
+    actionByCode = buildBindings(null, null);
+
     function handleShortcut(event, routes, navigate, actionDocument, openMap, useHotbarSlot) {
         if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || isEditableTarget(event.target)) {
             return;
         }
 
-        const digit = /^Digit([0-9])$/.exec(event.code || '')?.[1]
-            ?? (/^[0-9]$/.test(event.key || '') ? event.key : null);
-        if (digit !== null) {
-            if (event.shiftKey || event.repeat || !useHotbarSlot) return;
-            if (useHotbarSlot(digit === '0' ? 10 : Number(digit)) === false) return;
+        let code = event.code || '';
+        if (!code) {
+            const key = typeof event.key === 'string' ? event.key.toLowerCase() : '';
+            code = /^[0-9]$/.test(key) ? 'Digit' + key : (CODE_BY_KEY[key] || '');
+        }
+        const action = actionByCode[code];
+        if (!action) {
+            return;
+        }
+
+        const magicSkillId = /^magic:(\d+)$/.exec(action)?.[1];
+        if (magicSkillId !== undefined) {
+            // Заклинание срабатывает только в бою, где есть его кнопка; повтор удержанием не нужен.
+            const spellButton = actionDocument?.querySelector('[data-magic-skill-id="' + magicSkillId + '"]');
+            if (!spellButton || event.repeat) return;
+            spellButton.click();
             event.preventDefault();
             event.stopImmediatePropagation();
             return;
         }
 
-        const shortcutByCode = {
-            ArrowUp: 'arrowup',
-            ArrowDown: 'arrowdown',
-            ArrowLeft: 'arrowleft',
-            ArrowRight: 'arrowright',
-            KeyF: 'f',
-            KeyI: 'i',
-            KeyB: 'b',
-            KeyC: 'c',
-            KeyM: 'm',
-            KeyQ: 'q',
-            Space: 'space',
-        }[event.code];
-        const key = typeof event.key === 'string' ? event.key.toLowerCase() : '';
-        const shortcutByKey = {
-            i: 'i',
-            'і': 'i',
-            'и': 'i',
-            'ш': 'i',
-            b: 'b',
-            c: 'c',
-            'с': 'c',
-            m: 'm',
-            'ь': 'm',
-            f: 'f',
-            'ф': 'f',
-            'а': 'f',
-            q: 'q',
-            'й': 'q',
-            ' ': 'space',
-            spacebar: 'space',
-        }[key];
-        const shortcut = shortcutByCode || shortcutByKey;
-
-        if (!shortcut) {
+        const hotbarSlot = /^hotbar_(\d+)$/.exec(action)?.[1];
+        if (hotbarSlot !== undefined) {
+            if (event.shiftKey || event.repeat || !useHotbarSlot) return;
+            if (useHotbarSlot(Number(hotbarSlot)) === false) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
             return;
         }
 
-        const actionElementIds = {
-            arrowup: 'move-north',
-            arrowdown: 'move-south',
-            arrowleft: 'move-west',
-            arrowright: 'move-east',
-            f: 'take-item',
-            q: 'weapon-attack',
-            space: 'attack',
-        };
-
-        if (shortcut === 'm') {
+        if (action === 'map') {
             openMap?.();
-        } else if (actionElementIds[shortcut]) {
-            const actionElement = actionDocument?.getElementById(actionElementIds[shortcut]);
+        } else if (ACTION_ELEMENT_IDS[action]) {
+            const actionElement = actionDocument?.getElementById(ACTION_ELEMENT_IDS[action]);
 
             if (!actionElement) {
-                if (shortcut === 'space') {
+                if (action === 'attack') {
                     navigate(routes.location);
                     event.preventDefault();
                     event.stopImmediatePropagation();
@@ -85,15 +110,15 @@
                 return;
             }
 
-            // Удержание Q повторяет только удары внутри активного боя.
+            // Удержание клавиши атаки оружием повторяет только удары внутри активного боя.
             // На локации и странице добычи повторное событие клавиши игнорируем.
-            if (shortcut === 'q' && event.repeat && actionElement.dataset.qRepeat !== 'true') {
+            if (action === 'weapon_attack' && event.repeat && actionElement.dataset.qRepeat !== 'true') {
                 return;
             }
 
             actionElement.click();
         } else {
-            const url = ({ i: routes.backpack, b: routes.magicSkill, c: routes.character })[shortcut];
+            const url = ({ backpack: routes.backpack, magic_skill: routes.magicSkill, character: routes.character })[action];
 
             if (!url) {
                 return;
@@ -135,6 +160,7 @@
 
     window.GameShortcuts = {
         init: function (options) {
+            actionByCode = buildBindings(options.hotkeys, options.magicHotkeys);
             const gameFrame = document.getElementById(options.frameId);
 
             if (!gameFrame) {

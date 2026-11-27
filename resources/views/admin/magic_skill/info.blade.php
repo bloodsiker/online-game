@@ -138,6 +138,7 @@
                                 <th width="90">Тип</th>
                                 <th width="100">Шанс, %</th>
                                 <th width="120">Длительность</th>
+                                <th width="230">Периодический урон</th>
                                 <th width="145"></th>
                             </tr>
                             </thead>
@@ -160,6 +161,22 @@
                                                class="form-control form-control-sm" name="duration_seconds"
                                                value="{{ $effect->pivot->duration_seconds }}" required>
                                     </td>
+                                    <td>
+                                        @if($effect->resolvedActiveType()?->isDoT())
+                                            <div class="input-group input-group-sm">
+                                                <input form="magic-effect-update-{{ $effect->id }}" type="number" min="0" max="100" step="0.01"
+                                                       class="form-control form-control-sm" name="power_percent" style="max-width:80px"
+                                                       value="{{ $effect->pivot->power_percent }}" placeholder="по умолч.">
+                                                <select form="magic-effect-update-{{ $effect->id }}" name="power_basis" class="form-control form-control-sm">
+                                                    <option value="" @selected(blank($effect->pivot->power_basis))>как у эффекта</option>
+                                                    <option value="hit" @selected($effect->pivot->power_basis === 'hit')>% от удара</option>
+                                                    <option value="target_max_hp" @selected($effect->pivot->power_basis === 'target_max_hp')>% от макс. HP цели</option>
+                                                </select>
+                                            </div>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
                                     <td style="white-space:nowrap;">
                                         <button form="magic-effect-update-{{ $effect->id }}" class="btn btn-xs btn-primary">Сохранить</button>
                                         <a href="{{ route('admin.magic_skill.effect.delete', [$magicSkill->id, $effect->id]) }}"
@@ -168,7 +185,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="5" class="text-center text-muted">Эффекты не привязаны</td></tr>
+                                <tr><td colspan="6" class="text-center text-muted">Эффекты не привязаны</td></tr>
                             @endforelse
                             </tbody>
                         </table>
@@ -199,6 +216,22 @@
                                 <div class="form-group mb-2">
                                     <label class="col-form-label">Длит-ть, сек</label>
                                     <input type="number" min="0" class="form-control" name="duration_seconds" value="5" required>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label" title="Только для ожога, яда, кровотечения: сколько эффект наносит за всю длительность">Сила, %</label>
+                                    <input type="number" min="0" max="100" step="0.01" class="form-control" name="power_percent" placeholder="по умолч.">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">От чего</label>
+                                    <select name="power_basis" class="form-control">
+                                        <option value="">как у эффекта</option>
+                                        <option value="hit">% от удара</option>
+                                        <option value="target_max_hp">% от макс. HP цели</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-2 d-flex align-items-end">

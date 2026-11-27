@@ -26,9 +26,11 @@
 
                 @if($player->hasEquippedMagicSkill())
                     <div class="fight-spell-label">{{ __("Сотворить заклинание:") }}</div>
+                    <?php $magicHotkeys = \App\Modules\User\Domain\Settings\HotkeyActions::normalizeMagic(app(\App\Modules\User\Application\Services\GameSettingsService::class)->get((int) auth()->id())['magic_hotkeys'] ?? []); ?>
                     @foreach($player->activeMagicSkills as $magicSkill)
+                        <?php $magicKey = isset($magicHotkeys[$magicSkill->id]) ? \App\Modules\User\Domain\Settings\HotkeyActions::label($magicHotkeys[$magicSkill->id]) : null; ?>
                         <div class="fight-act">
-                            <b class="butt1 pointer"><b><button type="button" class="butt1" id="s{{ $loop->index }}" onclick="actionAttack('{{ $magicSkill->id }}'); return false;">{{ $magicSkill->name }} <span class="fight-mana">{{ $magicSkill->mana_cost }}</span></button></b></b>
+                            <b class="butt1 pointer"><b><button type="button" class="butt1" id="s{{ $loop->index }}" data-magic-skill-id="{{ $magicSkill->id }}" @if($magicKey !== null) title="{{ $magicSkill->name }} ({{ $magicKey }})" @endif onclick="actionAttack('{{ $magicSkill->id }}'); return false;">{{ $magicSkill->name }} <span class="fight-mana">{{ $magicSkill->mana_cost }}</span>@if($magicKey !== null) <span class="fight-key">{{ $magicKey }}</span>@endif</button></b></b>
                         </div>
                     @endforeach
                 @endif

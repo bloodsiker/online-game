@@ -26,13 +26,20 @@ final class GameSettingsDefinition
         'sound_dungeon' => ['default' => 0, 'type' => 'int', 'rules' => ['sometimes', 'required', 'integer', 'between:0,6']],
         'sound_mail' => ['default' => 0, 'type' => 'int', 'rules' => ['sometimes', 'required', 'integer', 'between:0,6']],
         'sound_gathering' => ['default' => 0, 'type' => 'int', 'rules' => ['sometimes', 'required', 'integer', 'between:0,6']],
+        // Горячие клавиши: действие => KeyboardEvent.code (см. HotkeyActions).
+        'hotkeys' => ['default' => [], 'type' => 'hotkeys', 'rules' => ['sometimes', 'array'], 'item_rules' => ['nullable', 'string', 'regex:/^[A-Za-z0-9]{1,20}$/']],
+        // Клавиши заклинаний: id заклинания => KeyboardEvent.code.
+        'magic_hotkeys' => ['default' => [], 'type' => 'magic_hotkeys', 'rules' => ['sometimes', 'array', 'max:200'], 'item_rules' => ['nullable', 'string', 'regex:/^[A-Za-z0-9]{1,20}$/']],
         // Карты (maps.id), на которых не показываются другие игроки и их перемещение. 0 — пустое значение формы.
         'hidden_players_maps' => ['default' => [], 'type' => 'id_list', 'rules' => ['sometimes', 'array', 'max:200'], 'item_rules' => ['integer', 'min:0']],
     ];
 
     public static function defaults(): array
     {
-        return array_map(fn (array $definition): mixed => $definition['default'], self::DEFINITIONS);
+        $defaults = array_map(fn (array $definition): mixed => $definition['default'], self::DEFINITIONS);
+        $defaults['hotkeys'] = HotkeyActions::defaults();
+
+        return $defaults;
     }
 
     public static function rules(): array
@@ -59,6 +66,8 @@ final class GameSettingsDefinition
                     'language' => in_array($values[$key], ['ru', 'uk'], true) ? $values[$key] : 'ru',
                     'map_side' => in_array($values[$key], ['left', 'right'], true) ? $values[$key] : 'right',
                     'id_list' => self::normalizeIds(value: $values[$key]),
+                    'hotkeys' => HotkeyActions::normalize($values[$key]),
+                    'magic_hotkeys' => HotkeyActions::normalizeMagic($values[$key]),
                 };
             }
         }

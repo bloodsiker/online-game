@@ -8,6 +8,7 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Location\Application\DTOs\MoveResultDTO;
+use App\Modules\Location\Application\Services\TrapService;
 use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
@@ -99,11 +100,22 @@ final readonly class PlayerMovementService
         $capacity = $user->getBagCount();
         $speedModifier = $this->getSpeedModifier($backpackUsed, $capacity);
 
+        $trap = app(TrapService::class)->onLeave($user, (int) $location->id, $direction);
+        if ($trap->died) {
+            // Финализатор смерти уже перенёс игрока на точку возрождения карты — подтягиваем свежую локацию.
+            $oldLocationId = (int) $user->location_id;
+            $user->refresh();
+            Cache::forget('who:users_on_location:'.$oldLocationId);
+            Cache::forget('who:users_on_location:'.$user->location_id);
+
+            return MoveResultDTO::blocked((string) $trap->message());
+        }
+
         if (! $this->applyMove($user, $location->$direction)) {
             return MoveResultDTO::blocked(__('Нельзя покинуть локацию во время боя.'));
         }
 
-        return MoveResultDTO::success(speedModifier: $speedModifier);
+        return MoveResultDTO::success(speedModifier: $speedModifier, notice: $trap->message());
     }
 
     private function checkGate(DungeonGate $gate, User $user): ?string

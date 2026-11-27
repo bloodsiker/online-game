@@ -136,6 +136,17 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
             ->where('type', ChatMessageType::ClanBoss->value)
             ->where('created_at', '>=', Carbon::now()->subMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES));
 
+        // Обычные сообщения клана видны и в основном чате (с цветом клана). Клановые уведомления — отдельно, через $clanNoticeClause.
+        $clanChatClause = function ($q) use ($activeClanId, $ignoredIds) {
+            $q->where('channel', ChatChannel::Clan->value)
+                ->where('clan_id', $activeClanId)
+                ->whereNotNull('clan_id')
+                ->where('type', '!=', ChatMessageType::ClanBoss->value);
+            if ($ignoredIds) {
+                $q->where(fn ($q2) => $q2->whereNull('user_id')->orWhereNotIn('user_id', $ignoredIds));
+            }
+        };
+
         match ($channel) {
             ChatChannel::Main => $query->where(fn ($q) => $q
                 ->where(function ($q2) use ($ignoredIds) {
@@ -160,6 +171,7 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
                     ->where('created_at', '>=', Carbon::now()->subMinutes(ChatMessageLifetime::PERSONAL_MINUTES))
                 )
                 ->orWhere($clanNoticeClause)
+                ->orWhere($clanChatClause)
                 ->orWhere($privateClause)
                 ->orWhere($systemClause)
             ),

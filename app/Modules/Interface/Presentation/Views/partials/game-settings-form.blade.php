@@ -19,6 +19,7 @@
         'auto_loot_enabled' => __('ui.auto_loot_hint'),
         'weather_effects' => __('ui.weather_effects_hint'),
         'hidden_players_maps' => __('ui.hidden_players_maps_hint'),
+        'hotkeys' => __('ui.hotkeys_hint'),
     ];
     foreach ($settingHints as $key => &$hint) {
         if (!array_key_exists($key, \App\Modules\User\Domain\Settings\GameSettingsDefinition::defaults())) {
@@ -112,6 +113,136 @@
             @include('interface::partials.settings-checkbox', ['name' => 'weather_effects', 'label' => __('ui.weather_effects'), 'checked' => (bool) old('weather_effects', $gameSettings['weather_effects'] ?? true)])
         </div>
     </section>
+    <?php
+        $hotkeyDefaults = \App\Modules\User\Domain\Settings\HotkeyActions::defaults();
+        $hotkeyValues = \App\Modules\User\Domain\Settings\HotkeyActions::normalize(old('hotkeys', $gameSettings['hotkeys'] ?? []));
+        $hotkeyLabel = static fn (string $action): string => str_starts_with($action, 'hotbar_')
+            ? __('ui.hotkey_hotbar', ['n' => substr($action, 7)])
+            : __('ui.hotkey_'.$action);
+    ?>
+    <section class="game-settings-section" id="hotkeys-settings" data-defaults='@json($hotkeyDefaults)' data-forbidden='@json(\App\Modules\User\Domain\Settings\HotkeyActions::forbidden())'
+             data-msg-press="{{ __('ui.hotkeys_press_key') }}" data-msg-taken="{{ __('ui.hotkeys_taken') }}">
+        <h2>{{ __('ui.hotkeys') }}</h2>
+        <p class="game-settings-note" data-setting-hint="{{ $settingHints['hotkeys'] }}">{{ __('ui.hotkeys_note') }}</p>
+        <p class="game-settings-note" id="hotkeys-message" role="status" style="min-height:1.2em"></p>
+        <div class="game-settings-grid">
+            @foreach($hotkeyDefaults as $action => $default)
+                <div class="game-settings-control hotkey-row" data-action="{{ $action }}" data-label="{{ $hotkeyLabel($action) }}">
+                    <label for="hotkey-{{ $action }}">{{ $hotkeyLabel($action) }}</label>
+                    <input type="hidden" name="hotkeys[{{ $action }}]" value="{{ $hotkeyValues[$action] }}">
+                    <button type="button" id="hotkey-{{ $action }}" class="settings-sound-preview hotkey-button"></button>
+                    <button type="button" class="settings-sound-preview hotkey-reset" title="{{ __('ui.hotkeys_reset') }}" aria-label="{{ __('ui.hotkeys_reset') }}">&#8634;</button>
+                </div>
+            @endforeach
+        </div>
+        <?php
+            $magicHotkeyValues = \App\Modules\User\Domain\Settings\HotkeyActions::normalizeMagic(old('magic_hotkeys', $gameSettings['magic_hotkeys'] ?? []));
+        ?>
+        <h2 style="margin-top:10px">{{ __('ui.hotkeys_magic') }}</h2>
+        <p class="game-settings-note">{{ __('ui.hotkeys_magic_note') }}</p>
+        @if(empty($magicSkills))
+            <p class="game-settings-note">{{ __('ui.hotkeys_magic_empty') }}</p>
+        @else
+            <div class="game-settings-grid">
+                @foreach($magicSkills as $magicSkill)
+                    <div class="game-settings-control hotkey-row" data-action="magic:{{ $magicSkill['id'] }}" data-label="{{ $magicSkill['name'] }}">
+                        <label for="hotkey-magic-{{ $magicSkill['id'] }}">{{ $magicSkill['name'] }}</label>
+                        <input type="hidden" name="magic_hotkeys[{{ $magicSkill['id'] }}]" value="{{ $magicHotkeyValues[$magicSkill['id']] ?? '' }}">
+                        <button type="button" id="hotkey-magic-{{ $magicSkill['id'] }}" class="settings-sound-preview hotkey-button"></button>
+                        <button type="button" class="settings-sound-preview hotkey-reset" title="{{ __('ui.hotkeys_reset') }}" aria-label="{{ __('ui.hotkeys_reset') }}">&#8634;</button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+        <p class="hotkeys-reset-all"><span class="butt1 pointer"><span><input type="button" id="hotkeys-reset-all" value="{{ __('ui.hotkeys_reset_all') }}"></span></span> <span class="hotkeys-reset-note">{{ __('ui.hotkeys_save_reminder') }}</span></p>
+    </section>
+    <script>
+        (function () {
+            var root = document.getElementById('hotkeys-settings');
+            if (!root) return;
+            var defaults = JSON.parse(root.dataset.defaults);
+            var forbidden = JSON.parse(root.dataset.forbidden);
+            var message = document.getElementById('hotkeys-message');
+            var rows = Array.prototype.slice.call(root.querySelectorAll('.hotkey-row'));
+            var names = { ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', PageUp: 'PgUp', PageDown: 'PgDn', Space: 'Space', Minus: '-', Equal: '=',
+                BracketLeft: '[', BracketRight: ']', Semicolon: ';', Quote: "'", Backquote: '`', Backslash: '\\', Comma: ',', Period: '.', Slash: '/' };
+
+            function codeLabel(code) {
+                if (names[code]) return names[code];
+                if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+                if (/^Digit[0-9]$/.test(code)) return code.slice(5);
+                if (/^Numpad/.test(code)) return 'Num ' + code.slice(6);
+                return code || '—';
+            }
+            function input(row) { return row.querySelector('input[type="hidden"]'); }
+            function button(row) { return row.querySelector('.hotkey-button'); }
+            function render() {
+                rows.forEach(function (row) {
+                    button(row).textContent = codeLabel(input(row).value);
+                });
+            }
+            function ownerOf(code, exceptRow) {
+                if (!code) return undefined;
+                return rows.find(function (row) { return row !== exceptRow && input(row).value === code; });
+            }
+            function say(text) { message.textContent = text || ''; }
+
+            function assign(row, code) {
+                var owner = ownerOf(code, row);
+                if (owner) {
+                    say(root.dataset.msgTaken.replace(':action', owner.dataset.label));
+                    return false;
+                }
+                input(row).value = code;
+                say('');
+                render();
+                return true;
+            }
+
+            rows.forEach(function (row) {
+                var btn = button(row);
+                var recording = false;
+                var swallowSpaceKeyup = false;
+                // Пробел, назначенный клавишей, не должен на keyup «нажать» кнопку и снова запустить запись.
+                btn.addEventListener('keyup', function (event) {
+                    if (event.code === 'Space' && swallowSpaceKeyup) { swallowSpaceKeyup = false; event.preventDefault(); }
+                });
+                function stop() {
+                    recording = false;
+                    btn.removeEventListener('keydown', onKey, true);
+                    render();
+                }
+                function onKey(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (event.code === 'Escape') { say(''); stop(); return; }
+                    if (event.ctrlKey || event.altKey || event.metaKey || forbidden.indexOf(event.code) !== -1 || !event.code) return;
+                    if (event.code === 'Space') swallowSpaceKeyup = true;
+                    if (assign(row, event.code)) stop();
+                }
+                btn.addEventListener('click', function () {
+                    if (recording) { stop(); return; }
+                    recording = true;
+                    say('');
+                    btn.textContent = root.dataset.msgPress;
+                    btn.addEventListener('keydown', onKey, true);
+                });
+                btn.addEventListener('blur', function () { if (recording) stop(); });
+                row.querySelector('.hotkey-reset').addEventListener('click', function () {
+                    var code = defaults[row.dataset.action] || '';
+                    var owner = ownerOf(code, row);
+                    if (owner) { say(root.dataset.msgTaken.replace(':action', owner.dataset.label)); return; }
+                    assign(row, code);
+                });
+            });
+            document.getElementById('hotkeys-reset-all').addEventListener('click', function () {
+                rows.forEach(function (row) { input(row).value = defaults[row.dataset.action] || ''; });
+                say('');
+                render();
+            });
+            render();
+        })();
+    </script>
     @if(!empty($visibilityMaps))
         @php($hiddenPlayersMaps = array_map('intval', (array) old('hidden_players_maps', $gameSettings['hidden_players_maps'] ?? [])))
         <section class="game-settings-section">
