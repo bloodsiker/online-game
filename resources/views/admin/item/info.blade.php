@@ -1013,6 +1013,7 @@
                                 <div class="form-group mb-2">
                                     <label class="col-form-label">Длительность (сек.), для баффов</label>
                                     <input type="number" class="form-control" name="duration_seconds" placeholder="Пусто = мгновенно">
+                                    <small class="text-muted">«Выдача премиума»: значение — уровень (1–5), длительность — секунды (86400 = 1 день).</small>
                                 </div>
                                 <button class="btn btn-primary btn-sm">Добавить эффект</button>
                             </form>

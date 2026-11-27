@@ -1839,6 +1839,12 @@
                 return;
             }
 
+            // Предмет открывает страницу игры (например, статус премиума после «Сферы премиума»).
+            if (data.open_url) {
+                try { window.top.toLocation(data.open_url); } catch(e) { window.location.href = data.open_url; }
+                return;
+            }
+
             // Механизм / свиток улучшения выдали новые предметы — перерисовываем рюкзак.
             if (data.reload_backpack) {
                 window.location.reload();

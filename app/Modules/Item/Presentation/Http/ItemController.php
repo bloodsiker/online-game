@@ -10,6 +10,7 @@ use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Item\Application\ItemEffect\ItemEffectStrategyFactory;
+use App\Modules\Item\Application\ItemEffect\Strategies\GrantPremiumStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\GrantReputationStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\RespecStatsStrategy;
 use App\Modules\Item\Application\Services\LockpickingService;
@@ -474,12 +475,18 @@ class ItemController extends Controller
             ? max(1, min($request->integer('quantity', 1), (int) $backpack->count))
             : 1;
         $reputationGranted = 0;
+        $premiumGrant = null;
 
         foreach ($instantEffects as $effectModel) {
             $effect = $effectModel->toValueObject();
             $strategy = ItemEffectStrategyFactory::make($effect->type);
             if ($strategy instanceof GrantReputationStrategy) {
                 $reputationGranted += $strategy->grant($player, $effect, $bulkQuantity, (string) $backpack->item->itemInfo->name);
+
+                continue;
+            }
+            if ($strategy instanceof GrantPremiumStrategy) {
+                $premiumGrant = $strategy->grant($player, $effect);
 
                 continue;
             }
@@ -585,10 +592,16 @@ class ItemController extends Controller
             'new_race' => $newRace?->name,
             'new_avatar_url' => $newAvatar?->image_url,
             ...($changesInventory ? ['reload_backpack' => true] : []),
+            // «Сфера премиума»: после применения открываем страницу статуса премиума.
+            ...($premiumGrant !== null ? ['open_url' => route('premium.status', absolute: false)] : []),
             'message' => match (true) {
                 $diamondsCredited > 0 => __('На ваш счёт начислено :amount бриллиантов.', ['amount' => $diamondsCredited]),
                 $changesInventory => $this->inventoryChangeMessage($instantEffects),
                 $reputationGranted > 0 => __('Получено репутации: +:points.', ['points' => $reputationGranted]),
+                $premiumGrant !== null => __('Премиум :level уровня активен до :date.', [
+                    'level' => $premiumGrant['level'],
+                    'date' => $premiumGrant['expires_at']->format('d.m.Y H:i'),
+                ]),
                 $newName !== null => sprintf(__('Имя изменено на «%s».'), $newName),
                 $newRace !== null => sprintf(
                     __('Раса изменена на «%s»! Возвращено свободных очков для распределения: %d.'),

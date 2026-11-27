@@ -6,6 +6,7 @@ use App\Modules\Item\Application\ItemEffect\Strategies\BuffAttackStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\BuffDefenseStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\CureDebuffStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\GrantDiamondsStrategy;
+use App\Modules\Item\Application\ItemEffect\Strategies\GrantPremiumStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\GrantReputationStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\HealHpStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\HealMpStrategy;
@@ -32,6 +33,7 @@ class ItemEffectStrategyFactory
         ItemEffectType::CURE_PARALYSIS->value => CureDebuffStrategy::class,
         ItemEffectType::PRODUCE_ITEM->value => ProduceItemStrategy::class,
         ItemEffectType::GRANT_REPUTATION->value => GrantReputationStrategy::class,
+        ItemEffectType::GRANT_PREMIUM->value => GrantPremiumStrategy::class,
     ];
 
     public static function make(ItemEffectType $type): ItemEffectStrategyInterface

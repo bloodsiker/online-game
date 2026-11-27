@@ -263,6 +263,16 @@ final class ItemTooltipStatsBuilder
                 continue;
             }
 
+            // «Сфера премиума»: уровень и срок.
+            if ($effect->effect_type === ItemEffectType::GRANT_PREMIUM) {
+                $stats[] = [
+                    'title' => __('Премиум'),
+                    'value' => __(':level уровня на :time', ['level' => (int) $effect->value, 'time' => format_cooldown((int) $effect->duration_seconds)]),
+                ];
+
+                continue;
+            }
+
             // Нулевое значение эффекта — либо ничего не даёт, либо техническая
             // заглушка (сумма считается динамически в самой стратегии эффекта,
             // см. RestoreLostExpStrategy/RespecStatsStrategy) — строку не показываем.

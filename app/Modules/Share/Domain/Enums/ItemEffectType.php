@@ -31,6 +31,8 @@ enum ItemEffectType: string
     case GRANT_REPUTATION = 'grant_reputation';
     // TELEPORT_LOCATION — переносит игрока на локацию value; предмет многоразовый (частоту задаёт лимит использования).
     case TELEPORT_LOCATION = 'teleport_location';
+    // GRANT_PREMIUM — «Сфера премиума»: value — уровень премиума (1–5), duration_seconds — на какое время.
+    case GRANT_PREMIUM = 'grant_premium';
 
     public function label(): string
     {
@@ -53,6 +55,7 @@ enum ItemEffectType: string
             self::PRODUCE_ITEM => __('Даёт за использование'),
             self::GRANT_REPUTATION => __('Репутация'),
             self::TELEPORT_LOCATION => __('Телепорт'),
+            self::GRANT_PREMIUM => __('Выдача премиума'),
         };
     }
 
@@ -61,7 +64,7 @@ enum ItemEffectType: string
         return match ($this) {
             self::HEAL_HP, self::HEAL_MP, self::DAMAGE_HP, self::RESTORE_LOST_EXP, self::RESPEC_STATS, self::GRANT_DIAMONDS,
             self::CURE_POISON, self::CURE_BLEED, self::CURE_BURN, self::CURE_PARALYSIS,
-            self::PRODUCE_ITEM, self::GRANT_REPUTATION => true,
+            self::PRODUCE_ITEM, self::GRANT_REPUTATION, self::GRANT_PREMIUM => true,
             default => false,
         };
     }
@@ -88,7 +91,7 @@ enum ItemEffectType: string
     public function requiresInventoryUse(): bool
     {
         return match ($this) {
-            self::GRANT_DIAMONDS, self::PRODUCE_ITEM, self::GRANT_REPUTATION, self::TELEPORT_LOCATION => true,
+            self::GRANT_DIAMONDS, self::PRODUCE_ITEM, self::GRANT_REPUTATION, self::TELEPORT_LOCATION, self::GRANT_PREMIUM => true,
             default => false,
         };
     }
