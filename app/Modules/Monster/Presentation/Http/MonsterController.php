@@ -17,18 +17,26 @@ class MonsterController extends Controller
         private readonly ItemTooltipCollector $tooltipCollector,
     ) {}
 
-    public function info(int $id)
+    public function info(string $id)
     {
-        $page = $this->getMonsterInfoPage->execute($id);
+        $page = $this->getMonsterInfoPage->execute($this->parseId($id));
 
         return $this->renderInfo($page);
     }
 
-    public function catalogInfo(int $id)
+    public function catalogInfo(string $id)
     {
-        $page = $this->getMonsterInfoPage->executeByMonsterId($id);
+        $page = $this->getMonsterInfoPage->executeByMonsterId($this->parseId($id));
 
         return $this->renderInfo($page);
+    }
+
+    private function parseId(string $id): int
+    {
+        $value = filter_var(ltrim($id, '0'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        abort_if($value === false, 404);
+
+        return $value;
     }
 
     private function renderInfo(MonsterInfoPageDTO $page)

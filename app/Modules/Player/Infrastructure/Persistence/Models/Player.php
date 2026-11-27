@@ -53,7 +53,7 @@ class Player extends Model
     public const FULL_REGEN_TIME = 900;
 
     /** Секунд на полное восстановление маны (HP — FULL_REGEN_TIME). */
-    public const MP_FULL_REGEN_TIME = 300;
+    public const MP_FULL_REGEN_TIME = 420;
 
     private bool $savingRegenerationProgress = false;
 

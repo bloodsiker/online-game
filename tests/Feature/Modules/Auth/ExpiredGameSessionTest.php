@@ -35,6 +35,17 @@ final class ExpiredGameSessionTest extends TestCase
             ->assertJsonPath('redirect', route('index'));
     }
 
+    public function test_player_pages_require_an_authenticated_session(): void
+    {
+        foreach (['character', 'character.professions', 'character.influence', 'character.point'] as $name) {
+            $this->get(route($name))->assertUnauthorized()->assertHeader('X-Game-Session-Expired', '1');
+        }
+
+        $this->get(route('character.influence.show', 1))->assertUnauthorized();
+        $this->get(route('heal', 1))->assertUnauthorized();
+        $this->postJson(route('character.point_save'))->assertUnauthorized()->assertJsonPath('redirect', route('index'));
+    }
+
     public function test_session_status_is_available_to_guests_and_not_cached(): void
     {
         $response = $this->getJson(route('auth.session.status'));

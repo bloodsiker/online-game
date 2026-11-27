@@ -92,7 +92,7 @@ class MonsterInfoTest extends TestCase
         $response->assertSeeText('Броня');
         $response->assertSeeText('Магическое сопротивление');
         $response->assertSeeText('Эффекты');
-        $response->assertSeeText('Умения');
+        $response->assertSeeText('Фазы боя');
         $response->assertSee('effects/bleed.png', false);
         $response->assertSee('data-tooltip-type="Эффект"', false);
         $response->assertSee('data-tooltip-type="Умение"', false);
@@ -136,6 +136,16 @@ class MonsterInfoTest extends TestCase
         $response->assertOk();
         $response->assertSeeText('Каменный Голем');
         $response->assertSeeText('Гранитный Перевал');
+        $this->get(route('info.monster.catalog', ['id' => '00103']))->assertOk();
+    }
+
+    public function test_invalid_monster_ids_return_not_found(): void
+    {
+        foreach (['info.monster', 'info.monster.catalog'] as $name) {
+            foreach (['invalid', '1e2', PHP_INT_MAX.'0'] as $id) {
+                $this->get(route($name, ['id' => $id]))->assertNotFound();
+            }
+        }
     }
 
     private function createTables(): void
