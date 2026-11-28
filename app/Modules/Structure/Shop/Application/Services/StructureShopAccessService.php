@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\Services;
 
+use App\Modules\Festival\Application\Services\FestivalService;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -20,10 +21,19 @@ class StructureShopAccessService
         return $locationId === null || (int) $locationId === (int) $user->location_id;
     }
 
+    /** Магазин фестиваля доступен только стороне-победителю (см. модуль Festival). */
+    public function festivalError(User $user, Structure $shop): ?string
+    {
+        return app(FestivalService::class)->shopAccessError($user, (int) $shop->id);
+    }
+
     public function purchaseError(User $user, Structure $shop, iterable $lines): ?string
     {
         if (! $this->canVisit($user, $shop)) {
             return __('commerce.shop_requires_npc');
+        }
+        if ($error = $this->festivalError($user, $shop)) {
+            return $error;
         }
         if ($shop->reputation_id === null) {
             return null;

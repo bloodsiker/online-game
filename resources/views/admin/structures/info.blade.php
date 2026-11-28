@@ -63,6 +63,13 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <input type="hidden" name="is_active" value="0">
+                                                <label class="col-form-label">
+                                                    <input type="checkbox" name="is_active" value="1" @checked($structure->is_active)>
+                                                    Активно (неактивное построение скрыто у игроков и недоступно)
+                                                </label>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Репутация магазина (ID, необязательно)</label>
                                                 <input type="number" min="1" name="reputation_id" value="{{ $structure->reputation_id }}" class="form-control">
                                                 @if($structure->reputation)<small><a href="{{ route('admin.reputation.info', $structure->reputation_id) }}">{{ $structure->reputation->name }}</a></small>@endif

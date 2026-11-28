@@ -10,6 +10,7 @@ use App\Modules\Clan\Application\UseCases\ProcessExpiredClanTaxes;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredClanBossRuns;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
 use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
+use App\Modules\Festival\Application\Services\FestivalLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
 use App\Modules\ItemSpawn\Application\Services\MapItemSpawner;
 use App\Modules\Monster\Application\Services\MonsterMovementService;
@@ -56,6 +57,8 @@ class ScheduledTaskRegistry
 
     public const SPAWN_MAP_ITEMS = 'locations.spawn_items';
 
+    public const PROCESS_FESTIVAL = 'festival.process';
+
     public function __construct(
         private readonly ConsoleKernel $console,
         private readonly PruneExpiredPlayerInjuries $pruneExpiredPlayerInjuries,
@@ -71,6 +74,7 @@ class ScheduledTaskRegistry
         private readonly WeatherService $weatherService,
         private readonly BossRespawnService $bossRespawnService,
         private readonly MapItemSpawner $mapItemSpawner,
+        private readonly FestivalLifecycleService $festivalLifecycleService,
     ) {}
 
     /** @return array<string, ScheduledTaskDefinition> */
@@ -90,6 +94,15 @@ class ScheduledTaskRegistry
                 description: 'Возвращает мировых боссов на их локации, как только наступило время респавна (не дожидаясь захода игрока).',
                 defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
                 allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
+            ),
+            self::PROCESS_FESTIVAL => new ScheduledTaskDefinition(
+                key: self::PROCESS_FESTIVAL,
+                name: 'Фестиваль «Равновесие Печатей»',
+                description: 'Запускает фестиваль, переводит его на второй этап с подсчётом победителя, завершает и объявляет каждый этап в чате.',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
+                allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
+                settingsMutable: false,
+                lockSeconds: 60,
             ),
             self::SPAWN_MAP_ITEMS => new ScheduledTaskDefinition(
                 key: self::SPAWN_MAP_ITEMS,
@@ -230,6 +243,7 @@ class ScheduledTaskRegistry
             self::MOVE_MONSTERS => sprintf('Перемещено боссов: %d.', $this->monsterMovementService->moveDue(now())),
             self::RESPAWN_BOSSES => sprintf('Возрождено боссов: %d.', $this->bossRespawnService->respawnDueWorldBosses()),
             self::SPAWN_MAP_ITEMS => sprintf('Появилось предметов на картах: %d.', $this->mapItemSpawner->tick()),
+            self::PROCESS_FESTIVAL => $this->processFestival(),
             self::WEATHER_TICK => sprintf('Погода сменилась на картах: %d.', $this->weatherService->tick()),
             self::DELETE_EXPIRED_LOCATION_ITEMS => $this->deleteExpiredLocationItems(),
             self::PRUNE_EXPIRED_INJURIES => sprintf(
@@ -258,6 +272,13 @@ class ScheduledTaskRegistry
             self::SYNC_NBU_RATE => sprintf('Курс НБУ: %s грн за 1 USD.', number_format($this->nbuExchangeRate->sync(), 4, '.', '')),
             default => throw new InvalidArgumentException('Неизвестная задача планировщика.'),
         };
+    }
+
+    private function processFestival(): string
+    {
+        $stats = $this->festivalLifecycleService->tick(now());
+
+        return sprintf('Запущено: %d; второй этап: %d; завершено: %d.', $stats['started'], $stats['rewards'], $stats['finished']);
     }
 
     private function deleteExpiredLocationItems(): string

@@ -24,6 +24,7 @@
                                 <th>НПС</th>
                                 <th width="80">Товаров</th>
                                 <th width="80">Действий</th>
+                                <th width="90">Статус</th>
                                 <th width="70"></th>
                             </tr>
                             </thead>
@@ -37,12 +38,13 @@
                                     <td>{{ $structure->npc?->name ?? '—' }}</td>
                                     <td>{{ $structure->shop_items_count }}</td>
                                     <td>{{ $structure->actions_count }}</td>
+                                    <td>@if($structure->is_active)<span class="badge badge-success">Активно</span>@else<span class="badge badge-danger">Отключено</span>@endif</td>
                                     <td>
                                         <a href="{{ route('admin.structure.info', $structure->id) }}" class="btn btn-xs btn-primary">Изменить</a>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="8" class="text-center text-muted">Нет построений</td></tr>
+                                <tr><td colspan="9" class="text-center text-muted">Нет построений</td></tr>
                             @endforelse
                             </tbody>
                         </table>

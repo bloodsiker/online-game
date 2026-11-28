@@ -42,6 +42,7 @@ class StructureController extends Controller
             $structure = new Structure;
             $translationEditor->fill($structure, $request, ['name', 'description']);
             $structure->type = $data['type'];
+            $structure->is_active = $request->boolean('is_active', true);
             $structure->location_id = $data['location_id'] ?? null;
             $structure->npc_id = $data['npc_id'] ?? null;
             $structure->reputation_id = $data['reputation_id'] ?? null;
@@ -79,6 +80,7 @@ class StructureController extends Controller
             ]);
             $translationEditor->fill($structure, $request, ['name', 'description']);
             $structure->type = $data['type'];
+            $structure->is_active = $request->boolean('is_active', true);
             $structure->location_id = $data['location_id'] ?? null;
             $structure->npc_id = $data['npc_id'] ?? null;
             $structure->reputation_id = $data['reputation_id'] ?? null;

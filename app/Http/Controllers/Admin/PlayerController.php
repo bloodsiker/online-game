@@ -13,6 +13,7 @@ use App\Modules\Moderation\Domain\Enums\CommunicationScope;
 use App\Modules\Moderation\Domain\Models\UserCommunicationMute;
 use App\Modules\Player\Domain\Services\PlayerLevelUpService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Premium\Application\Services\PremiumBonusService;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
@@ -34,8 +35,7 @@ class PlayerController extends Controller
     public function info(
         Request $request,
         Player $player,
-        ReputationService $reputationService,
-        PlayerLevelUpService $levelUpService,
+        PremiumBonusService $premiumService,
     ): mixed {
         if ($request->isMethod('POST')) {
             $validated = $request->validate([
@@ -62,7 +62,15 @@ class PlayerController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        return view('admin.player.info', $this->pageData($player));
+        $userId = (int) $player->user_id;
+        $premiumLevel = $premiumService->level($userId)?->level;
+        $premiumExpiresAt = $premiumLevel !== null ? $premiumService->period($userId)?->expires_at : null;
+
+        return view('admin.player.info', [
+            ...$this->pageData($player),
+            'premiumLevel' => $premiumLevel,
+            'premiumExpiresAt' => $premiumExpiresAt,
+        ]);
     }
 
     public function skills(Player $player): mixed

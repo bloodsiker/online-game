@@ -8,12 +8,14 @@ use App\Modules\Clan\ClanServiceProvider;
 use App\Modules\Dungeon\DungeonServiceProvider;
 use App\Modules\Effect\EffectServiceProvider;
 use App\Modules\Event\EventServiceProvider;
+use App\Modules\Festival\FestivalServiceProvider;
 use App\Modules\Forum\ForumServiceProvider;
 use App\Modules\Friend\FriendServiceProvider;
 use App\Modules\Gift\GiftServiceProvider;
 use App\Modules\Influence\InfluenceServiceProvider;
 use App\Modules\Interface\InterfaceServiceProvider;
 use App\Modules\Item\ItemServiceProvider;
+use App\Modules\ItemSpawn\ItemSpawnServiceProvider;
 use App\Modules\Library\LibraryServiceProvider;
 use App\Modules\Location\LocationServiceProvider;
 use App\Modules\MagicSkill\MagicSkillServiceProvider;
@@ -33,14 +35,13 @@ use App\Modules\Rating\RatingServiceProvider;
 use App\Modules\Referral\ReferralServiceProvider;
 use App\Modules\Reputation\ReputationServiceProvider;
 use App\Modules\SecretKnowledge\SecretKnowledgeServiceProvider;
-use App\Modules\ItemSpawn\ItemSpawnServiceProvider;
-use App\Modules\Weather\WeatherServiceProvider;
 use App\Modules\Share\ShareServiceProvider;
 use App\Modules\Structure\StructureServiceProvider;
 use App\Modules\Telegram\TelegramServiceProvider;
 use App\Modules\Trade\TradeServiceProvider;
 use App\Modules\TreasureHunt\TreasureHuntServiceProvider;
 use App\Modules\User\UserServiceProvider;
+use App\Modules\Weather\WeatherServiceProvider;
 use App\Providers\AppServiceProvider;
 
 return [
@@ -74,6 +75,7 @@ return [
     ReputationServiceProvider::class,
     ShareServiceProvider::class,
     SecretKnowledgeServiceProvider::class,
+    FestivalServiceProvider::class,
     WeatherServiceProvider::class,
     ItemSpawnServiceProvider::class,
     UserServiceProvider::class,

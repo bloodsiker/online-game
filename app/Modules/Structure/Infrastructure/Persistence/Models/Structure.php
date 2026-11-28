@@ -29,6 +29,8 @@ class Structure extends Model
 
     public $translatable = ['name', 'description'];
 
+    protected $casts = ['is_active' => 'boolean'];
+
     public const TYPE_SHOP = 'shop';
 
     public const TYPE_BARTER_SHOP = 'barter_shop';

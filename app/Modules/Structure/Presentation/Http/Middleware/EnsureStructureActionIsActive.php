@@ -26,9 +26,15 @@ final class EnsureStructureActionIsActive
         'blacksmith.gems' => 'gem_item', 'blacksmith.runes' => 'rune_item', 'blacksmith' => 'kraft_item',
     ];
 
+    /** Маршруты построений, где {id} — это id построения (воркшопы и рецепты сюда не входят). */
+    private const STRUCTURE_ROUTES = [
+        'exchange', 'reputation_exchange', 'clan_boss', 'clan_skill_hall', 'prison', 'bank', 'clan_bank',
+    ];
+
     public function handle(Request $request, Closure $next): Response
     {
         $routeName = $request->route()?->getName() ?? '';
+        $this->ensureStructureIsActive($request, $routeName);
         if ($routeName === 'blacksmith.kraft') {
             // This route receives a recipe instance ID, not a structure ID.
             $structures = Structure::query()->where('location_id', $request->user()?->location_id)
@@ -57,6 +63,25 @@ final class EnsureStructureActionIsActive
         }
 
         return $next($request);
+    }
+
+    /** Отключённое в админке построение недоступно даже по прямой ссылке. */
+    private function ensureStructureIsActive(Request $request, string $routeName): void
+    {
+        $id = $request->route('id');
+        if (! is_numeric($id) || $routeName === 'blacksmith.kraft') {
+            return;
+        }
+        $isStructureRoute = $routeName === 'heal';
+        foreach ([...array_keys(self::ACTIONS), ...self::STRUCTURE_ROUTES] as $prefix) {
+            if ($routeName === $prefix || str_starts_with($routeName, $prefix.'.')) {
+                $isStructureRoute = true;
+                break;
+            }
+        }
+        if ($isStructureRoute && Structure::query()->whereKey((int) $id)->where('is_active', false)->exists()) {
+            abort(403, app()->getLocale() === 'uk' ? 'Будівля тимчасово недоступна.' : 'Построение временно недоступно.');
+        }
     }
 
     private function ensureAllowed(Structure $structure, ?string $alias): void

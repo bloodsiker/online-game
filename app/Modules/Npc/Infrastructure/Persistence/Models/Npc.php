@@ -70,7 +70,7 @@ class Npc extends Model
 
     public function structures(): HasMany
     {
-        return $this->hasMany(Structure::class, 'npc_id')->with(['actions']);
+        return $this->hasMany(Structure::class, 'npc_id')->where('structures.is_active', true)->with(['actions']);
     }
 
     public function dialogueNodes(): HasMany

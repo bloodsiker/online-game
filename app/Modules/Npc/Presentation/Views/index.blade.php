@@ -345,6 +345,18 @@
                                             </tr>
                                         @endif
 
+                                        @if((int) ($festivalNpcId ?? 0) === (int) $npc->id)
+                                            <tr class="bg_l"
+                                                onclick="location.href='{{ route('festival.index', ['npc' => $npc->id]) }}'"
+                                                onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                <td class="brd2-top brd2-bt" width="1%"><img src="{{ asset('img/icon/qst_dlg_m.gif') }}" width="46" height="28" alt=""></td>
+                                                <td class="brd2-top brd2-bt">{{ __('festival.npc_action') }}</td>
+                                                <td class="brd2-top brd2-bt" align="right"><b class="butt2 pointer"><b>
+                                                    <input value="{{ __('festival.npc_button') }}" type="button" onclick="location.href='{{ route('festival.index', ['npc' => $npc->id]) }}';" style="width:80px">
+                                                </b></b></td>
+                                            </tr>
+                                        @endif
+
                                         @foreach($reputationShops ?? [] as $reputationShop)
                                             <tr class="bg_l"
                                                 onclick="location.href='{{ route('reputation.shop', ['id' => $reputationShop->id]) }}'"

@@ -142,6 +142,13 @@
                             <h6 class="text-muted mb-3">Информация</h6>
                             <p><strong>Аккаунт:</strong> {{ $player->user?->name }}</p>
                             <p><strong>Email:</strong> {{ $player->user?->email }}</p>
+                            @if($premiumLevel !== null && $premiumExpiresAt !== null)
+                                <p>
+                                    <strong>Премиум:</strong> уровень {{ $premiumLevel }}<br>
+                                    Осталось {{ format_game_duration((int) now()->diffInSeconds($premiumExpiresAt, false)) }}
+                                    · до <time datetime="{{ $premiumExpiresAt->toIso8601String() }}">{{ $premiumExpiresAt->format('d.m.Y H:i') }}</time>
+                                </p>
+                            @endif
                             <p><strong>Раса:</strong> {{ $player->race?->name }}</p>
                             <p><strong>Победы:</strong> {{ $player->victory }}</p>
                             <p><strong>Смерти:</strong> {{ $player->death }}</p>

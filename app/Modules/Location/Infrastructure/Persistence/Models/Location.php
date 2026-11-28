@@ -108,7 +108,7 @@ class Location extends Model
 
     public function structures(): HasMany
     {
-        return $this->hasMany(Structure::class, 'location_id')->with(['actions', 'influenceShopSections']);
+        return $this->hasMany(Structure::class, 'location_id')->where('structures.is_active', true)->with(['actions', 'influenceShopSections']);
     }
 
     public function actions(): BelongsToMany
