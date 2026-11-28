@@ -15,6 +15,7 @@ use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
 use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
 class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
@@ -31,6 +32,21 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
         $this->scheduleExpirationBroadcast($message);
 
         return $message;
+    }
+
+    public function paginatePlayerMessages(int $perPage): LengthAwarePaginator
+    {
+        return ChatMessage::query()
+            ->with([
+                'sender' => fn ($query) => $query->without('player')->select('id', 'name'),
+                'target' => fn ($query) => $query->without('player')->select('id', 'name'),
+                'clan' => fn ($query) => $query->without('owner')->select('id', 'name'),
+            ])
+            ->whereNotNull('user_id')
+            ->whereIn('channel', [ChatChannel::Main->value, ChatChannel::Clan->value, ChatChannel::Private->value])
+            ->whereIn('type', [ChatMessageType::Message->value, ChatMessageType::Mention->value, ChatMessageType::Private->value])
+            ->orderByDesc('id')
+            ->paginate($perPage);
     }
 
     private function scheduleExpirationBroadcast(ChatMessage $message): void

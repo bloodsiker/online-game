@@ -19,6 +19,7 @@ final class ChatSystemMessageTest extends TestCase
 
         $this->get(route('admin.chat.index'))
             ->assertOk()
+            ->assertSee(route('admin.chat.messages'), false)
             ->assertSee('Отправить системное сообщение')
             ->assertSee('Тип сообщения')
             ->assertSee('Глобальное системное')

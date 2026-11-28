@@ -49,10 +49,7 @@ class GetMessages
     public function mapToDTO(ChatMessage $msg, User $user, ChatChannel $viewChannel, string $locale): ChatMessageDTO
     {
         $senderName = $msg->sender?->name ?? 'Система';
-        $targetName = $msg->target?->name;
-        if ($msg->type === ChatMessageType::Mention && $targetName === null && preg_match('/^to\[([^\]]+)\]/i', $msg->message, $matches)) {
-            $targetName = trim($matches[1]);
-        }
+        $targetName = $msg->targetName();
         $trusted = in_array($msg->type, [
             ChatMessageType::System,
             ChatMessageType::Information,

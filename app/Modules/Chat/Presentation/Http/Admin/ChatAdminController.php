@@ -9,9 +9,11 @@ use App\Modules\Chat\Application\Services\AdminChatMessageFormatter;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Application\Services\SystemMessageCatalog;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
+use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Domain\Services\MessageRenderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -25,6 +27,13 @@ final class ChatAdminController extends Controller
             'sendableMessageTypes' => $catalog->sendableEntries(),
             'smiles' => MessageRenderer::SMILES,
         ]);
+    }
+
+    public function messages(ChatMessageRepositoryInterface $repository): Response
+    {
+        return response()->view('chat::admin.messages', [
+            'messages' => $repository->paginatePlayerMessages(perPage: 50),
+        ])->header('Cache-Control', 'no-store, private');
     }
 
     public function send(

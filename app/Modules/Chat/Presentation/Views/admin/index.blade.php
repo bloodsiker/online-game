@@ -3,6 +3,8 @@
 @section('title', 'Чат')
 
 @section('body')
+    @include('chat::admin.nav')
+
     <style>
         .chat-admin-editor { border: 1px solid #ced4da; border-radius: 4px; background: #fff; }
         .chat-admin-editor__toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px; border-bottom: 1px solid #ddd; background: #f5f5f5; }

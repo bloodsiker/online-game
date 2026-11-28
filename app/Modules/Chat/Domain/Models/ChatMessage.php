@@ -6,6 +6,7 @@ namespace App\Modules\Chat\Domain\Models;
 
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
+use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ChatMessageType $type
  * @property-read User|null $sender
  * @property-read User|null $target
+ * @property-read Clan|null $clan
  */
 class ChatMessage extends Model
 {
@@ -52,5 +54,20 @@ class ChatMessage extends Model
     public function target(): BelongsTo
     {
         return $this->belongsTo(User::class, 'target_user_id');
+    }
+
+    public function targetName(): ?string
+    {
+        $name = $this->target?->name;
+        if ($name === null && $this->type === ChatMessageType::Mention && preg_match('/^to\[([^\]]+)\]/i', $this->message, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return $name;
+    }
+
+    public function clan(): BelongsTo
+    {
+        return $this->belongsTo(Clan::class);
     }
 }
