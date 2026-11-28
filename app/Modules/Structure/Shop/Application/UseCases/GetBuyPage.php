@@ -34,9 +34,6 @@ class GetBuyPage
         $shop = $this->readRepository->findStructureOrFail($shopId);
         abort_unless($shop->type === $expectedType, 404);
         abort_unless($this->access->canVisit($user, $shop), 403, __('commerce.shop_requires_npc'));
-        if ($error = $this->access->festivalError($user, $shop)) {
-            abort(403, $error);
-        }
         $categories = $shop->categories;
 
         $activeCategoryId = $categories->isNotEmpty()
