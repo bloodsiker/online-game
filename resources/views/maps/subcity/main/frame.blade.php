@@ -652,7 +652,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a3" style="">
+            <div class="a1" style="">
                 <div id="u159">
                     <div id="l159" class="s2box bl bt">
                         <s id="z159">0</s>159
@@ -661,7 +661,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a3" style="">
+            <div class="a1" style="">
                 <div id="u158">
                     <div id="l158" class="s2box br bt">
                         <s id="z158">0</s>158
@@ -899,7 +899,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a3" style="">
+            <div class="a1" style="">
                 <div id="u160">
                     <div id="l160" class="s2box bl bb">
                         <s id="z160">0</s>160
@@ -908,7 +908,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a3" style="">
+            <div class="a1" style="">
                 <div id="u157">
                     <div id="l157" class="s2box">
                         <s id="z157">0</s>157
@@ -4395,8 +4395,15 @@
 </script>
 <style>
     /* Цвет области = id карты из таблицы maps: a2 Шепчущий Лес, a3 Опустевшая
-       Долина, a4 Ожившая окраина, a5 Заброшеное кладбище. Классы a1 и a3028
-       удалены — остались от исходной игры, ячеек с ними на карте нет. */
+       Долина, a4 Ожившая окраина, a5 Заброшеное кладбище. Класс a3028
+       удалён — остался от исходной игры, ячеек с ним на карте нет. */
+    /* a1 — жёлтый цвет города Нейрин (city/main), для клеток 157–160 */
+    .a1 {
+        background-color: rgba(255, 247, 205, 0.6);
+        margin: 0px;
+        padding: 0px;
+        border-spacing: 0px;
+    }
     .a2 {
         background-color: rgba(210, 240, 185, 0.6);
         margin: 0px;
